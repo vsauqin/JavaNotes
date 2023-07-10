@@ -2753,6 +2753,52 @@ int size = hs.size();
 
 ## 9.4Map
 
+```java 
+//Map六大遍历方式
+Map map = new HashMap();
+//第一组先取出所有Key，通过Key取出对应的Value
+//1
+Set keyset = map.keySet();
+for(Object key : keyset){
+    System.out.println(key + map.get(key));
+}
+//2
+Iterator iterator = Keyset.iterator();
+while(iterator.hasNext()){
+    Object key = inerator.next();
+    System.out.ptintln(key + map.get(key));
+}
+//把所有value取出
+//1
+Collection values = map.values();
+for(Object value : values){
+    System.out.println(value);
+}
+
+//2
+Iterator iterator = values.iterator();
+while(iterator2.hasNext()){
+    Object value = iterator2.next();
+    System.out.println(value);
+}
+//通过EntrySet获取k-v
+//1
+Set entrySet = map.entrySet();
+for(Object entry : entrySet){
+    Map.Entry m = (Map.Entry)entry:
+    System.out.println(m.getKey() + m.getValue());
+}
+//2
+Iterator iterator3 = entrySe.iterator();
+ while(iterator3.hasNext()){
+     Object entry = iterator3.next();
+     Map.Entry m = (Map.Entry) entry;
+     System.out.println(m.getKey() + m.getValue());
+ }
+```
+
+
+
 ### 9.4.1hashMap
 
 * 接口实现类的特点
@@ -2823,10 +2869,415 @@ int size = hs.size();
   * 任意字母都可以
 * 泛型的实例化
   * 需要在类名后面指定参数类型比如：
-    * list<String> strList = new ArrayList<String>();
+    * list<String> strList = new ArrayList<String>();简写形式为：list<String> strList = new ArrayList<>();
     * Iterator<Customer>iterator = customers.iterator();
+* 泛型使用细节
+  * 给泛型指向数据类型时必须是引用数据类型，不能是基本数据类型
+  * 在给泛型指定具体类型后，可以传入该类型或其子类类型
+  * 不指定泛型默认为Object
 
 ## 10.2 自定义泛型
 
+### 10.2.1自定义泛型类
+
+* 基本语法
+
+class 类名 <T,R....>{
+
+​		成员
+
+}
+
+* 注意细节
+
+  * 普通成员可以使用泛型（属性方法）
+
+  * 使用泛型的数组不能初始化
+
+  * 静态方法中不能使用类的泛型
+
+  * 泛型类的类型，是在创建指定对象时确定的(因为创建对象时，需要制定确定的类型)
+
+  * 如果在创建对象时，没有指定类型，默认为Object
+
+  * ```java
+    //Tiger后面泛型，所以把Tiger称为自定义泛型
+    //T，R，M，泛型标识符，一般是单个大写字母
+    //泛型标识符可以有多个
+    //
+    class Tiger<T,R,M>{
+        String name;
+        R r;//属性使用到泛型
+        T t;
+        M m;
+        T[] ts = new T[];//报错
+    
+        public Tiger(String name, R r, T t, M m) {//构造器使用泛型
+            this.name = name;
+            this.r = r;
+            this.t = t;
+            this.m = m;
+        }
+        public static void m1(M m){//报错，静态方法不能使用泛型，因为静态和类相关，类加载时，对象还没创建
+    
+        }
+    }
+    ```
+
+### 10.2.3 自定义泛型接口
+
+* 基本语法
+
+inteface 接口名<T,R...>{
+
+}
+
+* 注意细节
+  * 接口中静态成员也不能使用泛型
+  * 泛型接口的类型，在**继承接口**或者**实现接口**时确定
+  * 没有指定时依旧默认是Object
+
+### 10.2.4 自定义泛型方法
+
+* 基本语法
+
+修饰符 <T,R...>返回类型 方法名(参数列表){
+
+}
+
+* 注意细节
+  * 泛型方法可以定义在普通类中，也可以定义在泛型类中
+  * 当泛型方法被调用时，类型会确定
+  * publib void eat(E e){},修饰符后没有<T,R...>eat方法不是泛型方法，而是使用了泛型
+
 ## 10.3 泛型继承和通配符
+
+* 泛型的继承和通配符说明
+  * 泛型不具备继承性
+  * <?>支持任意类型泛型
+  * <? extends A>：支持A类和A类的子类，规定了泛型的上限
+  * <? super A>:支持A类和A类的父类，不限于直接父类，规定了泛型的下限
+
+
+
+# 11.线程基础
+
+## 11.1线程相关概念
+
+* 程序：是为完成特定任务，用某种语言编写的一组指令集和
+* 进程：是运行中的程序、
+  * 进程是程序的一次执行过程，是动态过程，有产生存在消亡的过程
+* 线程：是由进程创建的，是线程的一个实体，进程可以拥有多个线程
+  * 单线程：同一个时刻只允许执行一个线程
+  * 多线程：同一时刻可以执行多个线程
+* 其他概念：
+  * 并发：同一时刻多个任务交替执行
+  * 并行：同一个时刻，多个任务同时执行
+
+## 11.2线程的使用
+
+### 11.2.1继承Thread类
+
+* 定义 Thread 类的⼦类，并重写该类的 run() ⽅法，该 run() ⽅法的⽅法体就代表了线程需要完成的任务，因此把 run() ⽅法称为线程执⾏体。
+
+  创建 Thread ⼦类的实例，即创建了线程对象
+
+  调⽤线程对象的 start() ⽅法来启动该线程
+
+* ```java
+  public class Demo01 {
+   public static void main(String[] args) {
+   // 创建⾃定义线程对象
+   MyThread mt = new MyThread("新的线程！");
+   // 开启新线程
+   mt.start();
+   // 在主⽅法中执⾏for循环
+   for (int i = 0; i < 10; i++) {
+   System.out.println("main线程！" + i);
+   		}
+   	} 
+  }
+  public class MyThread extends Thread {
+   // 定义指定线程名称的构造⽅法
+   public MyThread(String name) {
+   // 调⽤⽗类的String参数的构造⽅法，指定线程的名称
+   super(name);
+   }
+   /**
+   * 重写run⽅法，完成该线程执⾏的逻辑
+   */
+   @Override
+   public void run() {
+   for (int i = 0; i < 10; i++) {
+   System.out.println(getName() + "：正在执⾏！" + i);
+   		}
+   	}
+  }
+  ```
+
+  
+
+### 11.2.2 实现Runnable接口
+
+* 定义 Runnable 接⼝的实现类，并重写该接⼝的 run() ⽅法，该 run() ⽅法的⽅法体同样是该线程的线程执⾏体。
+
+  创建 Runnable 实现类的实例，并以此实例作为 Thread 的 target 来创建 Thread 对象，该 Thread 对象才是 真正的线程对象。
+
+  调⽤线程对象的 start() ⽅法来启动线程。
+
+* ```java
+  public class MyRunnable implements Runnable {
+   @Override
+   public void run() {
+   for (int i = 0; i < 20; i++) {
+   System.out.println(Thread.currentThread().getName() + " " + i);
+   		}
+   	} 
+  }
+  public class Demo {
+   public static void main(String[] args) {
+   // 创建⾃定义类对象 线程任务对象
+   MyRunnable mr = new MyRunnable();
+   // 创建线程对象
+   Thread t = new Thread(mr, "⼩强");
+   t.start();
+   for (int i = 0; i < 20; i++) {
+   System.out.println("旺财 " + i);
+   		}
+   	}
+  }
+  ```
+
+  
+
+* Thread和Runnable的区别
+
+  * 适合多个相同的程序代码的线程去共享同⼀个资源。
+
+    可以避免 java 中的单继承的局限性。
+
+    增加程序的健壮性，实现解耦操作，代码可以被多个线程共享，代码和线程独⽴。
+
+    线程池只能放⼊实现 Runable 或 Callable 类线程，不能直接放⼊继承 Thread 的类。
+    
+
+### 11.2.3线程常用方法(一)
+
+* public String getName() ：获取当前线程名称。
+* public void start() ：导致此线程开始执⾏；Java虚拟机调⽤此线程的run⽅法。
+* public void run() ：此线程要执⾏的任务在此处定义代码。
+* public static void sleep(long millis) ：使当前正在执⾏的线程以指定的毫秒数暂停（暂时停⽌执⾏）。
+* public static Thread currentThread() ：返回对当前正在执⾏的线程对象的引⽤。
+* setName():设置线程名称
+* setPriority：更改线程的优先级
+* initerrupt：中断线程
+* getPriority：获取线程的优先级
+
+* yield：线程的礼让，让出CPU，让其他线程执行，但时间不确定不一定礼让成功
+* join：线程插队。插队一旦成功，则肯定先执行完插入的线程所有的任务
+
+ 用户线程和守护线程
+
+* 用户线程：也叫做工作线程，当线程的任务执行完或通知方式结束
+* 守护线程：一般是为工作线程服务的，当所有的用户线程结束时，守护线程自动结束
+* 常见的守护线程有垃圾回收机制
+
+
+
+## 11.3 线程的生命周期
+
+![](C:\Users\86188\Pictures\Screenshots\427c9cba8c5c40868d7ee42ef77f945c.png)
+
+## 11.4 Synchronize
+
+* 线程同步机制
+
+  * 在多线程编程，一些敏感数据不允许被多个线程同时访问，此时就是用同步访问技术，保证数据在任何时刻，最多有一个线程访问，以保证数据的完整性
+  * 可以理解为当有一个线程在对内存进行操作时，其他线程不可以对这个内存地址进行操作，知道该线程完成操作，其他线程才能对该地址内存地址进行操作
+
+* 具体方法
+
+  *  同步代码块。
+
+  ```java
+  synchronized(同步锁) {
+   需要同步操作的代码
+  }
+  ```
+
+  
+
+  * 同步⽅法。
+
+  ```java
+  public synchronized void method() {
+   可能会产⽣线程安全问题的代码
+  }
+  ```
+
+  
+
+  * 锁机制。
+
+## 11.5 锁
+
+### 11.5.1 互斥锁
+
+* 基本介绍
+  * 在Java语言中，引入了对象互斥锁的概念，来保证共享数据的完整性
+  * 每个对象都对应一个可称为“互斥锁 ”的标记，这个标记用来保证任意时刻只能有一个线程访问该对象
+  * 关键字synchronized来与对象的互斥锁联系，某个对象用该关键字修饰时表明该对象在任意时间只能由一个线程访问
+  * 局限性：导致程序执行效率降低
+  * 非静态同步方法的锁可以是this，也可以是其他对象（要求是同一个对象）
+  * 静态的同步方法的锁是当前类的本身
+* 注意事项和细节
+  * 同步方法如果没有使用static修饰：默认锁对象是this
+  * 如果方法使用static修饰，默认对象是：当前类.class
+
+### 11.5.2 死锁
+
+* 基本介绍：多个线程都占用了对方的锁资源
+
+```java
+public class DeadLockDemo {
+    private static Object resource1 = new Object();//资源 1
+    private static Object resource2 = new Object();//资源 2
+
+    public static void main(String[] args) {
+        new Thread(() -> {
+            synchronized (resource1) {
+                System.out.println(Thread.currentThread() + "get resource1");
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                System.out.println(Thread.currentThread() + "waiting get resource2");
+                synchronized (resource2) {
+                    System.out.println(Thread.currentThread() + "get resource2");
+                }
+            }
+        }, "线程 1").start();
+        new Thread(() -> {
+            synchronized (resource2) {
+                System.out.println(Thread.currentThread() + "get resource2");
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                System.out.println(Thread.currentThread() + "waiting get resource1");
+                synchronized (resource1) {
+                    System.out.println(Thread.currentThread() + "get resource1");
+                }
+            }
+        }, "线程 2").start();
+    }
+}
+```
+
+```java
+Thread[线程 1,5,main]get resource1
+Thread[线程 2,5,main]get resource2
+Thread[线程 1,5,main]waiting get resource2
+Thread[线程 2,5,main]waiting get resource1
+```
+
+
+
+### 11.5.3 释放锁
+
+* 释放锁的操作
+  * 当线程的同步方法，同步代码块执行结束
+  * 当线程在同步代码块，同步方法中遇到break，return
+  * 当线程在同步代码块，同步方法中出现了未处理的Error和Exception，导致异常结束
+  * 当线程在同步代码块，同步方法中执行了线程对象的wait（）方法，当前线程暂停，并释放锁
+* 不会释放锁
+  * 调用sleep方法，Thread方法不会释放锁
+  * 执行同步代码块时，其他线程调用了该线程的suspend()方法将该线程挂起
+
+# 12. IO流
+
+流：数据在数据源文件和程序内存之间的路径
+
+## 12.1 文件
+
+* 文件流：文件在程序中是以流的形式来操作的
+
+* 概念：保存数据的地方
+
+* 创建文件常用操作
+
+  * new File(String pathname)//根据路径创建一个File对象
+
+  ```java
+  String filePath = "e:\\news2.txt";
+  File file = new File(filePath);
+  file.creatNewFile();
+  ```
+
+  
+
+  * new File(File patent,String child)//根据父目录文件+子路径构建
+
+  ```java
+  File parentFile = new File("e:\\");
+  String fileName = "news2.txt";
+  File file = new File(parentFile, fileName);
+  file.creatNewFile();
+  ```
+
+  
+
+  * new File(String patent,String child)//根据父目录+子路径构建
+
+  ```java
+  String parentPath = "e:\\";
+  String fileName = "news.txt";
+  File file = new File(parentPath, fileName);
+  file.creatNewFile();
+  
+  ```
+
+* 文件常用方法
+  * 获得文件名：getName（）;
+  * 获得绝对路径：getAbsoulutePath（）；
+  * 获得父级目录：getParent（）；
+  * 获得文件大小(按字节来算)：length（）；
+  * 判断文件是否存在：exists（）；
+  * 是不是一个目录：isDirectory（）；
+  * 是不是一个文件：isFile();
+  * 删除文件：delect();
+  * 创建多级目录：madirs();
+
+## 12.2 IO流原理及流的分类
+
+* 流的分类
+  * 按照流的方向： 输入流和输出流
+  * 按照数据单位不同分为：字节流和字符流
+  * 按照角色不同分为：节点流 ，处理流/包装流
+
+## 12.3 节点流和处理流
+
+## 12.4 输入流
+
+**读取外部数据到程序中**
+
+### 12.4.1inputStream
+
+* FileInputStream：文件输入流
+* BufferedInputStream：缓冲字节输入流
+* ObjectInputStream：对象字节输入流
+
+### 12.4.2 Reader
+
+## 12.5 输出流
+
+**将程序数据输出到磁盘，光盘等存储设备中**
+
+### 12.5.1 OutputStream
+
+### 12.5.2 Writer
+
+## 12.6 properties类
 
