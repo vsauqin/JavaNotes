@@ -3259,6 +3259,25 @@ Thread[线程 2,5,main]waiting get resource1
 
 ## 12.3 节点流和处理流
 
+* 基本介绍：
+  * 节点流可以从一个特定的数据源读写数据，如FileWriter，FileReader； 
+  * 处理流也叫包装流是“连接”在已存在的流之上，**通过所封装的流的功能调用实现数据读写**，如BufferedReader，BufferedWriter
+* 节点流和处理流的区别和联系
+  * 节点流是底层流或者叫低级流，直接跟数据源相接
+  * 处理流包装节点流，既可以消除不同节点流的实现差异，也可以提供更加方便的方法来完成输入输出
+  * 处理流也叫做包装流，对节点进行包装，使用了修饰器设计模式，不会直接与数据源相连
+* 处理流功能主要体现在以下两个方面
+  * 性能的提高：主要以增加缓冲的方式来提高输入输出效率
+  * 操作的便捷：可以一次输入输出大批数据
+
+* **BufferedInputStream**处理流
+
+* **BufferedOutputStream**处理流
+
+
+
+
+
 ## 12.4 输入流
 
 **读取外部数据到程序中**
@@ -3266,10 +3285,61 @@ Thread[线程 2,5,main]waiting get resource1
 ### 12.4.1inputStream
 
 * FileInputStream：文件输入流
+
+```Java
+class DD{
+    public void readFile01(){
+        String filePath = "d:\\new.txt";
+        FileInputStream fileInputStream = null;
+        int read = 0;
+        byte[] as = new byte[8];
+        try {
+            fileInputStream = new FileInputStream(filePath);
+            while ((read = fileInputStream.read(as)) != -1){
+                System.out.print(new String(as, 0, read));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+            try {
+                fileInputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+}
+```
+
+
+
 * BufferedInputStream：缓冲字节输入流
 * ObjectInputStream：对象字节输入流
 
 ### 12.4.2 Reader
+
+FileReader和FileWriter是字符流，即按照字符来操作io
+
+* FileReader相关方法
+  * new FileReader（File/String）
+  * read:每次读取单个字符，返回该字符，如果文件末尾返回-1结束读取
+  * read(char[]):批量读取多个字符到数组，返回读取到的字符数，如果文件末尾返回-1结束读取
+  * new String(char[]):将char[]转换成String
+  * new String(char[],off,len):将char[]的指定部分转换成String
+* **BufferedReader**处理流
+
+```Java
+String filePath = "D:\\Java\\java基本知识点.md";
+        BufferedReader bufferedReader = new BufferedReader(new FileReader(filePath));
+        String line;
+        while((line = bufferedReader.readLine()) != null){
+            System.out.println(line);
+        }
+        bufferedReader.close();
+```
+
+
 
 ## 12.5 输出流
 
@@ -3277,7 +3347,103 @@ Thread[线程 2,5,main]waiting get resource1
 
 ### 12.5.1 OutputStream
 
+* FileOutputStream文件输出流
+
+  * 输入的三种方法
+
+  * ```java
+    public void writeFile(){
+            FileOutputStream fileOutputStream = null;
+            String filePath = "d:\\new.txt";
+            try {
+                fileOutputStream = new FileOutputStream(filePath);
+                fileOutputStream.write('h');
+            } catch (IOException e) {
+                e.printStackTrace();
+            }finally{
+                try {
+                    fileOutputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    ```
+
+  * ```java
+    public void writeFile1(){
+            FileOutputStream fileOutputStream = null;
+            String filePath = "d:\\new.txt";
+            try {
+                fileOutputStream = new FileOutputStream(filePath);
+                String str = "Hello world";
+                fileOutputStream.write(str.getBytes(StandardCharsets.UTF_8));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }finally{
+                try {
+                    fileOutputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    ```
+
+  * ```java
+    public void writeFile2(){
+            FileOutputStream fileOutputStream = null;
+            String filePath = "d:\\new.txt";
+            try {
+                fileOutputStream = new FileOutputStream(filePath，true);//如果想追加而不是覆盖原文件，在创建文件时加一个true即可
+                String str = "wocenima";
+                fileOutputStream.write(str.getBytes(StandardCharsets.UTF_8),0,str.length());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }finally{
+                try {
+                    fileOutputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    ```
+
+    
+
 ### 12.5.2 Writer
+
+使用FileWriter后必须要关闭或者刷新，否则写入不到指定文件
+
+* 常用方法
+  * new FileWriter(File/String):覆盖模式，相当于流的指针在首端
+  * new FileWriter(File/String,true):追加模式，相当于流的指针在末尾
+  * writer(int):写入单个字符
+  * writer(char[]):写入指定数组
+  * writer(char[],off,len):写入指定数组的指定部分
+  * wtiter(string):写入整个字符串
+  * writer(string,off,len):写入字符串的指定部分
+  * toCharArray：将String转换成char[]
+* **BufferedWriter**处理流
+
+```Java
+String filePath = "d:\\new.txt";
+        //String da = "谢钦学java";
+        BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(filePath,true));
+        bufferedWriter.write("谢钦学java");
+        bufferedWriter.write("放假回家");
+        System.out.println("写入成功");
+        bufferedWriter.close();
+```
+
+
 
 ## 12.6 properties类
 
+* 常见方法
+  * load：加载配置文件的键值对到properties对象
+  * list：将数据显示到指定设备
+  * getProperty(key)：根据键获取值
+  * setProperty（key，value）：设置键值对到Properties对象
+  * store：将Properties中的值对存储到配置文件，在idea中，保存信息到配置文件，如果含有中文，会存储unicode码
