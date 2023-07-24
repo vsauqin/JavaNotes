@@ -900,7 +900,7 @@ GRANT SELECT , INSERT ON testdb.news TO 'shunping' @'localhost'
 SET PASSWORD FOR 'shunping'@'localhost' = PASSWORD('ABC');
 -- 回收shunping 用户的所有权限
 REVOKE SELECT , UPDATE , INSERT ON test
--- 权限生效指令
+-- 权限生效指令s's
 FLUSH  PRIVILEGES;
 ```
 

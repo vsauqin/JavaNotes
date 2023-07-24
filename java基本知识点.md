@@ -1305,7 +1305,7 @@ class Girlfriend{
 
 * final和static往往搭配使用效率更高，不会导致类加载，底层编译器做了优化处理
 
-  ```
+  ```java 
   class Demo{
   		public static final int i = 16;
   		static{
