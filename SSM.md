@@ -113,12 +113,11 @@ mvn -v
         file / settings / build / build tool / maven
     2. 选中本地maven软件
 
-        
     3. 测试是否配置成功
-
-        **注意**：如果本地仓库地址不变化，只有一个原因，就是maven/conf/settings.xml配置文件编写错误！仔细检查即可！
-
-        
+    
+    **注意**：如果本地仓库地址不变化，只有一个原因，就是maven/conf/settings.xml配置文件编写错误！仔细检查即可！
+    
+    
 
 # 二、基于IDEA的Maven工程创建
 
@@ -514,7 +513,7 @@ set REPOSITORY_PATH=D:\repository  改成你本地仓库地址即可！
 
     通过在父工程中为整个项目维护依赖信息的组合既保证了整个项目使用规范、准确的 jar 包；又能够将以往的经验沉淀下来，节约时间和精力。
 3. 继承语法
-    
+   
     - 父工程
 
 ```XML
@@ -750,7 +749,6 @@ set REPOSITORY_PATH=D:\repository  改成你本地仓库地址即可！
 2. 通用模块 (common-service)
     1. 创建模块
 
-        
     2. pom.xml配置
 
 ```XML
@@ -787,7 +785,6 @@ set REPOSITORY_PATH=D:\repository  改成你本地仓库地址即可！
 3. 用户模块 (user-service)
     1. 创建模块
 
-        
     2. pom.xml配置
 
 ```XML
@@ -1027,7 +1024,8 @@ Spring 使创建 Java 企业应用程序变得容易。它提供了在企业环�
   3. 方便了配置和管理：Spring IoC容器通过XML文件或者注解，轻松的对组件进行配置和管理，使得组件的切换、替换等操作更加的方便和快捷。
   4. 交给Spring管理的对象（组件），方可享受Spring框架的其他功能（AOP,声明事务管理）等
 
-  ## 3.2 Spring IoC容器和容器实现
+
+## 3.2Spring IoC**容器和容器实现**
 
 ### **3.2.1 普通和复杂容器**
 
@@ -1072,8 +1070,6 @@ Spring 使创建 Java 企业应用程序变得容易。它提供了在企业环�
 
 Spring IoC 容器，负责实例化、配置和组装 bean（组件）。容器通过读取配置元数据来获取有关要实例化、配置和组装组件的指令。配置元数据以 XML、Java 注解或 Java 代码形式表现。它允许表达组成应用程序的组件以及这些组件之间丰富的相互依赖关系。
 
-上图显示了 Spring 容器工作原理的高级视图。应用程序类与配置元数据相结合，您拥有完全配置且可执行的系统或应用程序。
-
 ### 3.2.3 SpringIoC容器具体接口和实现类
 
 **SpringIoc容器接口**： 
@@ -1101,7 +1097,7 @@ Spring IoC 容器，负责实例化、配置和组装 bean（组件）。容器�
 
 ### 3.2.4 SpringIoC容器管理配置方式
 
-Spring IoC 容器使用多种形式的配置元数据。此配置元数据表示您作为应用程序开发人员如何告诉 Spring 容器实例化、配置和组装应用程序中的对象。
+Spring IoC 容器使用多种形式的配置元数据。此配置元数据表示作为应用程序开发人员如何告诉 Spring 容器实例化、配置和组装应用程序中的对象。
 
 
 
@@ -1202,7 +1198,7 @@ List<String> userList = service.getUsernameList();
 
       Spring IoC 容器管理一个或多个 bean。这些 Bean 是使用您提供给容器的配置元数据创建的（例如，以 XML `<bean/>` 定义的形式）。
 
-      我们学习，如何通过定义XML配置文件，声明组件类信息，交给 Spring 的 IoC 容器进行组件管理！
+      
   2. 思路
 
       ![](http://heavy_code_industry.gitee.io/code_heavy_industry/assets/img/img006.c8bae859.png)
@@ -1252,7 +1248,7 @@ public class HappyComponent {
 
           创建携带spring约束的xml配置文件
 
-          ![](https://secure2.wostatic.cn/static/7eC1WeTyXz1oLaGkPfJBfh/image.png)
+        
 
           编写配置文件：
 
@@ -1278,7 +1274,7 @@ public class ClientService {
   private static ClientService clientService = new ClientService();
   private ClientService() {}
 
-  public static ClientService createInstance() {
+  public static ClientServicecreateInstance() {
   
     return clientService;
   }
@@ -1678,7 +1674,6 @@ public void testExperiment08()  {
           如果此 `FactoryBean` 返回单例，则返回 `true` ，否则返回 `false` 。此方法的默认实现返回 `true` （注意，lombok插件使用，可能影响效果）。
       - `Class<?> getObjectType()`: 返回 `getObject()` 方法返回的对象类型，如果事先不知道类型，则返回 `null` 。
 
-      
   2. FactoryBean使用场景
       1. 代理类的创建
       2. 第三方框架整合
@@ -1762,7 +1757,6 @@ public void testExperiment07()  {
 
       搭建一个三层架构案例，模拟查询全部学生（学生表）信息，持久层使用JdbcTemplate和Druid技术，使用XML方式进行组件管理！
 
-      
   2. 数据库准备
 
 ```Java
@@ -4549,8 +4543,8 @@ public void printLogAfterCoreException(JoinPoint joinPoint, Throwable targetMeth
 
 
 ​          
-      2. **切点表达式语法**
-    
+​      2. **切点表达式语法**
+​    
           切点表达式总结
     
           ![](http://heavy_code_industry.gitee.io/code_heavy_industry/assets/img/img011.dde1a79a.png)

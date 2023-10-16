@@ -4733,15 +4733,446 @@ Map接口中常用的方法
 | int size()                               | 返回该 Map 里 key-value 对的个数                             |
 | Collection values()                      | 返回该 Map 里所有 value 组成的 Collection                    |
 
+**例一**
 
+每名学生都有属于自己的唯一编号，即学号。在毕业时需要将该学生的信息从系统中移除。
+
+下面编写 Java 程序，使用 HashMap 来存储学生信息，其键为学生学号，值为姓名。毕业时，需要用户输入学生的学号，并根据学号进行删除操作。具体的实现代码如下：
+
+```java
+public class Test09 {
+    public static void main(String[] args) {
+        HashMap users = new HashMap();
+        users.put("11", "张浩太"); // 将学生信息键值对存储到Map中
+        users.put("22", "刘思诚");
+        users.put("33", "王强文");
+        users.put("44", "李国量");
+        users.put("55", "王路路");
+        System.out.println("******** 学生列表 ********");
+        Iterator it = users.keySet().iterator();
+        while (it.hasNext()) {
+            // 遍历 Map
+            Object key = it.next();
+            Object val = users.get(key);
+            System.out.println("学号：" + key + "，姓名:" + val);
+        }
+        Scanner input = new Scanner(System.in);
+        System.out.println("请输入要删除的学号：");
+        int num = input.nextInt();
+        if (users.containsKey(String.valueOf(num))) { // 判断是否包含指定键
+            users.remove(String.valueOf(num)); // 如果包含就删除
+        } else {
+            System.out.println("该学生不存在！");
+        }
+        System.out.println("******** 学生列表 ********");
+        it = users.keySet().iterator();
+        while (it.hasNext()) {
+            Object key = it.next();
+            Object val = users.get(key);
+            System.out.println("学号：" + key + "，姓名：" + val);
+        }
+    }
+}
+```
+
+在该程序中，两次使用 while 循环遍历 HashMap 集合。当有学生毕业时，用户需要输入该学生的学号，根据学号使用 HashMap 类的 remove() 方法将对应的元素删除。程序运行结果如下所示。
+
+```
+******** 学生列表 ********
+学号：44，姓名:李国量
+学号：55，姓名:王路路
+学号：22，姓名:刘思诚
+学号：33，姓名:王强文
+学号：11，姓名:张浩太
+请输入要删除的学号：
+22
+******** 学生列表 ********
+学号：44，姓名：李国量
+学号：55，姓名：王路路
+学号：33，姓名：王强文
+学号：11，姓名：张浩太
+```
+
+```java
+******** 学生列表 ********
+学号：44，姓名:李国量
+学号：55，姓名:王路路
+学号：22，姓名:刘思诚
+学号：33，姓名:王强文
+学号：11，姓名:张浩太
+请输入要删除的学号：
+44
+******** 学生列表 ********
+学号：55，姓名：王路路
+学号：22，姓名：刘思诚
+学号：33，姓名：王强文
+学号：11，姓名：张浩太
+```
+
+treeMap类的使用方法与HashMap类相同，不同的是TreeMap类可以对键对象进行排序
 
 ## 9.6遍历Map集合
+
+Map 集合的遍历与 List 和 Set 集合不同。Map 有两组值，因此遍历时可以只遍历值的集合，也可以只遍历键的集合，也可以同时遍历。Map 以及实现 Map 的接口类（如 HashMap、TreeMap、LinkedHashMap、Hashtable 等）都可以用以下几种方式遍历。
+
+1）在for循环中使用entries实现Map的遍历
+
+```java
+public static void main(String[] args) {
+    Map<String, String> map = new HashMap<String, String>();
+    map.put("谢钦", "河南人");
+    map.put("战地五", "好玩");
+    for (Map.Entry<String, String> entry : map.entrySet()) {
+        String mapKey = entry.getKey();
+        String mapValue = entry.getValue();
+        System.out.println(mapKey + "：" + mapValue);
+    }
+}
+```
+
+2)使用foreach循环遍历key和values，一般适用于只需要Map中的key或者value时使用。性能比entryset好
+
+```java
+Map<String, String> map = new HashMap<String, String>();
+map.put("谢钦", "河南人");
+    map.put("战地五", "好玩");
+// 打印键集合
+for (String key : map.keySet()) {
+    System.out.println(key);
+}
+// 打印值集合
+for (String value : map.values()) {
+    System.out.println(value);
+}
+```
+
+3)使用迭代器（Iterator）遍历
+
+```java
+Map<String, String> map = new HashMap<String, String>();
+map.put("谢钦", "河南人");
+map.put("战地五", "好玩");
+Iterator<Entry<String, String>> entries = map.entrySet().iterator();
+while (entries.hasNext()) {
+    Entry<String, String> entry = entries.next();
+    String key = entry.getKey();
+    String value = entry.getValue();
+    System.out.println(key + ":" + value);
+}
+```
+
+4)通过键值遍历，这种方式的效率比较低，因为本身从键取值就是耗时操作
+
+```
+for(String key : map.keySet()){
+    String value = map.get(key);
+    System.out.println(key+":"+value);
+}
+```
+
+
 
 ## 9.7java8中新增的方法
 
 ## 9.8Collection类
 
+Collections 类是 java  提供的一个操作 Set、List 和 Map 等集合的工具类。Collections 类提供了许多操作集合的静态方法，借助这些静态方法可以实现集合元素的排序、查找替换和复制等操作
+
+### 排序(正向和逆向)
+
+Collections 提供了如下方法用于对 List 集合元素进行排序。
+
+- void reverse(List list)：对指定 List 集合元素进行逆向排序。
+- void shuffle(List list)：对 List 集合元素进行随机排序（shuffle 方法模拟了“洗牌”动作）。
+- void sort(List list)：根据元素的自然顺序对指定 List 集合的元素按升序进行排序。
+- void sort(List list, Comparator c)：根据指定 Comparator 产生的顺序对 List 集合元素进行排序。
+- void swap(List list, int i, int j)：将指定 List 集合中的 i 处元素和 j 处元素进行交换。
+- void rotate(List list, int distance)：当 distance 为正数时，将 list 集合的后 distance 个元素“整体”移到前面；当 distance 为负数时，将 list 集合的前 distance 个元素“整体”移到后面。该方法不会改变集合的长度。
+
+
+
+下面程序简单示范了利用 Collections 工具类来操作 List 集合。
+
+**例一**
+
+```java
+public class Test1 {
+    public static void main(String[] args) {
+        Scanner input = new Scanner(System.in);
+        List prices = new ArrayList();
+        for (int i = 0; i < 5; i++) {
+            System.out.println("请输入第 " + (i + 1) + " 个商品的价格：");
+            int p = input.nextInt();
+            prices.add(Integer.valueOf(p)); // 将录入的价格保存到List集合中
+        }
+        Collections.sort(prices); // 调用sort()方法对集合进行排序
+        System.out.println("价格从低到高的排列为：");
+        for (int i = 0; i < prices.size(); i++) {
+            System.out.print(prices.get(i) + "\t");
+        }
+    }
+}
+```
+
+输入后执行结果如下：
+
+```java
+请输入第 1 个商品的价格：
+85
+请输入第 2 个商品的价格：
+48
+请输入第 3 个商品的价格：
+66
+请输入第 4 个商品的价格：
+80
+请输入第 5 个商品的价格：
+18
+价格从低到高的排列为：
+18    48    66    80    85
+```
+
+**例二**
+
+循环录入 5 个商品的名称，并按录入时间的先后顺序进行降序排序，即后录入的先输出。
+
+下面编写程序，使用 Collections 类的 reverse() 方法对保存到 List 集合中的 5 个商品名称进行反转排序，并输出排序后的商品信息。具体的实现代码如下：
+
+```java
+public class Test2 {
+    public static void main(String[] args) {
+        Scanner input = new Scanner(System.in);
+        List students = new ArrayList();
+        System.out.println("******** 商品信息 ********");
+        for (int i = 0; i < 5; i++) {
+            System.out.println("请输入第 " + (i + 1) + " 个商品的名称：");
+            String name = input.next();
+            students.add(name); // 将录入的商品名称存到List集合中
+        }
+        Collections.reverse(students); // 调用reverse()方法对集合元素进行反转排序
+        System.out.println("按录入时间的先后顺序进行降序排列为：");
+        for (int i = 0; i < 5; i++) {
+            System.out.print(students.get(i) + "\t");
+        }
+    }
+}
+```
+
+执行后输出结果如下
+
+```java
+******** 商品信息 ********
+请输入第 1 个商品的名称：
+果粒橙
+请输入第 2 个商品的名称：
+冰红茶
+请输入第 3 个商品的名称：
+矿泉水
+请输入第 4 个商品的名称：
+软面包
+请输入第 5 个商品的名称：
+巧克力
+按录入时间的先后顺序进行降序排列为：
+巧克力    软面包    矿泉水    冰红茶    果粒橙   
+```
+
+
+
+### 查找替换操作
+
+Collections 还提供了如下常用的用于查找、替换集合元素的方法。
+
+- int binarySearch(List list, Object key)：使用二分搜索法搜索指定的 List 集合，以获得指定对象在 List 集合中的索引。如果要使该方法可以正常工作，则必须保证 List 中的元素已经处于有序状态。
+- Object max(Collection coll)：根据元素的自然顺序，返回给定集合中的最大元素。
+- Object max(Collection coll, Comparator comp)：根据 Comparator 指定的顺序，返回给定集合中的最大元素。
+- Object min(Collection coll)：根据元素的自然顺序，返回给定集合中的最小元素。
+- Object min(Collection coll, Comparator comp)：根据 Comparator 指定的顺序，返回给定集合中的最小元素。
+- void fill(List list, Object obj)：使用指定元素 obj 替换指定 List 集合中的所有元素。
+- int frequency(Collection c, Object o)：返回指定集合中指定元素的出现次数。
+- int indexOfSubList(List source, List target)：返回子 List 对象在父 List 对象中第一次出现的位置索引；如果父 List 中没有出现这样的子 List，则返回 -1。
+- int lastIndexOfSubList(List source, List target)：返回子 List 对象在父 List 对象中最后一次出现的位置索引；如果父 List 中没有岀现这样的子 List，则返回 -1。
+- boolean replaceAll(List list, Object oldVal, Object newVal)：使用一个新值 newVal 替换 List 对象的所有旧值 oldVal。
+
+下面的代码展示了Collection工具类的用法
+
+**例三**
+
+```java
+public class Test3 {
+    public static void main(String[] args) {
+        Scanner input = new Scanner(System.in);
+        List products = new ArrayList();
+        System.out.println("******** 商品信息 ********");
+        for (int i = 0; i < 3; i++) {
+            System.out.println("请输入第 " + (i + 1) + " 个商品的名称：");
+            String name = input.next();
+            products.add(name); // 将用户录入的商品名称保存到List集合中
+        }
+        System.out.println("重置商品信息，将所有名称都更改为'未填写'");
+        Collections.fill(products, "未填写");
+        System.out.println("重置后的商品信息为：");
+        for (int i = 0; i < products.size(); i++) {
+            System.out.print(products.get(i) + "\t");
+        }
+    }
+}
+```
+
+运行后结果如下
+
+```java
+******** 商品信息 ********
+请输入第 1 个商品的名称：
+苏打水
+请输入第 2 个商品的名称：
+矿泉水
+请输入第 3 个商品的名称：
+冰红茶
+重置商品信息，将所有名称都更改为'未填写'
+重置后的商品信息为：
+未填写    未填写    未填写    
+```
+
+
+
+**例四**
+
+在一个集合中保存 4 个数据，分别输出最大最小元素和指定数据在集合中出现的次数。
+
+```java
+public class Test4 {
+    public static void main(String[] args) {
+        ArrayList nums = new ArrayList();
+        nums.add(2);
+        nums.add(-5);
+        nums.add(3);
+        nums.add(0);
+        System.out.println(nums); // 输出：[2, -5, 3, 0]
+        System.out.println(Collections.max(nums)); // 输出最大元素，将输出 3
+        System.out.println(Collections.min(nums)); // 输出最小元素，将输出-5
+        Collections.replaceAll(nums, 0, 1);// 将 nums中的 0 使用 1 来代替
+        System.out.println(nums); // 输出：[2, -5, 3, 1]
+        // 判断-5在List集合中出现的次数，返回1
+        System.out.println(Collections.frequency(nums, -5));
+        Collections.sort(nums); // 对 nums集合排序
+        System.out.println(nums); // 输出：[-5, 1, 2, 3]
+        // 只有排序后的List集合才可用二分法查询，输出3
+        System.out.println(Collections.binarySearch(nums, 3));
+    }
+}
+```
+
+运行后执行结果如下
+
+```java
+[2, -5, 3, 0]
+3
+-5
+[2, -5, 3, 1]
+1
+[-5, 1, 2, 3]
+3
+```
+
+### 复制
+
+Collections 类的 copy() 静态方法用于将指定集合中的所有元素复制到另一个集合中。执行 copy() 方法后，目标集合中每个已复制元素的索引将等同于源集合中该元素的索引。
+
+copy() 方法的语法格式如下：
+
+```java
+void copy(List <? super T> dest,List<? extends T> src)
+```
+
+其中dest表示目标集合对象，src表示原集合对象
+
+注意：目标集合的长度至少和源集合的长度相同，如果目标集合的长度更长，则不影响目标集合中的其余元素。如果目标集合长度不够而无法包含整个源集合元素，程序将抛出 IndexOutOfBoundsException 异常。
+
+**例五**
+
+```java
+public class Test5 {
+    public static void main(String[] args) {
+        Scanner input = new Scanner(System.in);
+        List srcList = new ArrayList();
+        List destList = new ArrayList();
+        destList.add("苏打水");
+        destList.add("木糖醇");
+        destList.add("方便面");
+        destList.add("火腿肠");
+        destList.add("冰红茶");
+        System.out.println("原有商品如下：");
+        for (int i = 0; i < destList.size(); i++) {
+            System.out.println(destList.get(i));
+        }
+        System.out.println("输入替换的商品名称：");
+        for (int i = 0; i < 3; i++) {
+            System.out.println("第 " + (i + 1) + " 个商品：");
+            String name = input.next();
+            srcList.add(name);
+        }
+        // 调用copy()方法将当前商品信息复制到原有商品信息集合中
+        Collections.copy(destList, srcList);
+        System.out.println("当前商品有：");
+        for (int i = 0; i < destList.size(); i++) {
+            System.out.print(destList.get(i) + "\t");
+        }
+    }
+}
+```
+
+结果如下
+
+```java
+原有商品如下：
+苏打水
+木糖醇
+方便面
+火腿肠
+冰红茶
+输入替换的商品名称：
+第 1 个商品：
+燕麦片
+第 2 个商品：
+八宝粥
+第 3 个商品：
+软面包
+当前商品有：
+燕麦片    八宝粥    软面包    火腿肠    冰红茶
+```
+
+
+
 ## 9.9Lambda表达式遍历迭代器
+
+java8 为 Iterable 接口新增了一个 forEach(Consumer action) 默认方法，该方法所需参数的类型是一个函数式接口，而 Iterable 接口是 Collection 接口的父接口，因此 Collection 集合也可直接调用该方法。
+
+当程序调用 Iterable 的 forEach(Consumer action) 遍历集合元素时，程序会依次将集合元素传给 Consumer 的 accept(T t) 方法（该接口中唯一的抽象方法）。正因为 Consumer 是函数式接口，因此可以使用 Lambda 表达式来遍历集合元素。
+
+如下程序示范了使用 Lambda 表达式来遍历集合元素。
+
+```java
+public class CollectionEach {
+    public static void main(String[] args) {
+        // 创建一个集合
+        Collection objs = new HashSet();
+        objs.add("C语言中文网Java教程");
+        objs.add("C语言中文网C语言教程");
+        objs.add("C语言中文网C++教程");
+        // 调用forEach()方法遍历集合
+        objs.forEach(obj -> System.out.println("迭代集合元素：" + obj));
+    }
+}
+```
+
+输出结果
+
+```java
+迭代集合元素：C语言中文网C++教程
+迭代集合元素：C语言中文网C语言教程
+迭代集合元素：C语言中文网Java教程
+```
+
+上面程序中粗体字代码调用了 Iterable 的 forEach() 默认方法来遍历集合元素，传给该方法的参数是一个 Lambda 表达式，该 Lambda 表达式的目标类型是 Comsumer。forEach() 方法会自动将集合元素逐个地传给 Lambda 表达式的形参，这样 Lambda 表达式的代码体即可遍历到集合元素了。
 
 ## 9.10使用迭代器遍历集合元素
 
