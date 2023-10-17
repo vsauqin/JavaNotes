@@ -4429,11 +4429,533 @@ public class Test {
 0.0
 ```
 
+## 7.8instanceof关键字
+
+严格来说是一个双目运算符，由于是由字母组成也是Java的关键字，可以用来判断一个对象是否为一个类或是接口或是抽象类或是父类，
+
+语法格式如下
+
+```java
+boolean result = obj instanceof Class
+```
+
+其中，obj 是一个对象，Class 表示一个类或接口。obj 是 class 类（或接口）的实例或者子类实例时，结果 result 返回 true，否则返回 false。
+
+下面介绍 Java instanceof 关键字的几种用法。
+
+#### 1）声明一个 class 类的对象，判断 obj 是否为 class 类的实例对象（很普遍的一种用法），如以下代码：
+
+```java
+Integer integer = new Integer(1);
+System.out.println(integer instanceof Integer);  // true
+```
 
 
 
+#### 2）声明一个 class 接口实现类的对象 obj，判断 obj 是否为 class 接口实现类的实例对象，如以下代码：
+
+Java 集合中的 List 接口有个典型实现类 ArrayList。
+
+```java
+public class ArrayList<E> extends AbstractList<E>
+    implements List<E>, RandomAccess, Cloneable, java.io.Serializable
+```
+
+所以我们可以用 instanceof 运算符判断 ArrayList 类的对象是否属于 List 接口的实例，如果是返回 true，否则返回 false。
+
+```java
+ArrayList arrayList = new ArrayList();
+System.out.println(arrayList instanceof List);  // true
+```
+
+或者反过来也是返回 true
+
+```java
+List list = new ArrayList();
+System.out.println(list instanceof ArrayList);  // true
+```
+
+#### 3）obj 是 class 类的直接或间接子类
+
+我们新建一个父类 Person.class，代码如下：
+
+```java
+public class Person {
+}
+```
+
+创建 Person 的子类 Man，代码如下：
+
+```java
+public class Man extends Person {
+}
+```
+
+测试代码如下：
+
+```java
+Person p1 = new Person();
+Person p2 = new Man();
+Man m1 = new Man();
+System.out.println(p1 instanceof Man);    // false
+System.out.println(p2 instanceof Man);    // true
+System.out.println(m1 instanceof Man);    // true
+```
+
+**注意：**
+
+obj只能是引用数据类型不能是基本数据类型
+
+
+
+当obj为null时直接返回false因为null没有引用任何对象
+
+
+
+当class为null时会发生编译错误，所以class只能是类或者接口
+
+
+
+## 7.9抽象类( abstract)
+
+Java有两种类：具体类和抽象类
+
+语法格式如下
+
+```java
+<abstract>class<class_name> {
+    <abstract><type><method_name>(parameter-iist);
+}
+```
+
+其中，abstract 表示该类或该方法是抽象的；class_name 表示抽象类的名称；method_name 表示抽象方法名称，parameter-list 表示方法参数列表。
+
+如果一个方法使用 abstract 来修饰，则说明该方法是抽象方法，抽象方法只有声明没有实现。需要注意的是 abstract 关键字只能用于普通方法，不能用于 static 方法或者构造方法中。
+
+
+
+抽象方法的 3 个特征如下：
+
+1. 抽象方法没有方法体
+2. 抽象方法必须存在于抽象类中
+3. 子类重写父类时，必须重写父类所有的抽象方法
+
+
+
+注意：在使用 abstract 关键字修饰抽象方法时不能使用 private 修饰，因为抽象方法必须被子类重写，而如果使用了 private 声明，则子类是无法重写的。
+
+抽象类的定义和使用规则如下：
+
+1. 抽象类和抽象方法都要使用 abstract 关键字声明。
+2. 如果一个方法被声明为抽象的，那么这个类也必须声明为抽象的。而一个抽象类中，可以有 0~n 个抽象方法，以及 0~n 个具体方法。
+3. 抽象类不能实例化，也就是不能使用 new 关键字创建对象。
+
+
+
+#### 例 1
+
+不同几何图形的面积计算公式是不同的，但是它们具有的特性是相同的，都具有长和宽这两个属性，也都具有面积计算的方法。那么可以定义一个抽象类，在该抽象类中含有两个属性（width 和 height）和一个抽象方法 area( )，具体步骤如下。
+
+1）首先创建一个表示图形的抽象类 Shape，代码如下所示。
+
+```java
+public abstract class Shape {
+    public int width; // 几何图形的长
+    public int height; // 几何图形的宽
+    public Shape(int width, int height) {
+        this.width = width;
+        this.height = height;
+    }
+    public abstract double area(); // 定义抽象方法，计算面积
+}
+```
+
+2）定义一个正方形类，该类继承自形状类Shape，并重写了area()抽象方法。代码如下：
+
+```java
+public class Square extends Shape {
+    public Square(int width, int height) {
+        super(width, height);
+    }
+    // 重写父类中的抽象方法，实现计算正方形面积的功能
+    @Override
+    public double area() {
+        return width * height;
+    }
+}
+```
+
+3)定义一个三角形类，该类与正方形类一样，需要继承形状类 Shape，并重写父类中的抽象方法 area()。三角形类的代码实现如下：
+
+```java
+public class Triangle extends Shape {
+    public Triangle(int width, int height) {
+        super(width, height);
+    }
+    // 重写父类中的抽象方法，实现计算三角形面积的功能
+    @Override
+    public double area() {
+        return 0.5 * width * height;
+    }
+}
+```
+
+4）最后创建一个测试类，分别创建正方形类和三角形类的对象，并调用各类中的 area() 方法，打印出不同形状的几何图形的面积。测试类的代码如下：
+
+```java
+public class ShapeTest {
+    public static void main(String[] args) {
+        Square square = new Square(5, 4); // 创建正方形类对象
+        System.out.println("正方形的面积为：" + square.area());
+        Triangle triangle = new Triangle(2, 5); // 创建三角形类对象
+        System.out.println("三角形的面积为：" + triangle.area());
+    }
+}
+```
+
+5）运行该程序，输出的结果如下：
+
+```java
+正方形的面积为：20.0
+三角形的面积为：5.0
+```
+
+
+
+## 7.10接口的定义与实现(Interface)
+
+抽象类是从多个类中抽象出来的模板，如果将这种抽象进行的更彻底，则可以提炼出一种更加特殊的“抽象类”——接口（Interface）。接口是 [Java](https://c.biancheng.net/java/) 中最重要的概念之一，它可以被理解为一种特殊的类，不同的是接口的成员没有执行体，是由全局常量和公共的抽象方法所组成。
+
+### 定义接口
+
+Java 接口的定义方式与类基本相同，不过接口定义使用的关键字是 interface，接口定义的语法格式如下：、
+
+```java
+[public] interface interface_name [extends interface1_name[, interface2_name,…]] {
+    // 接口体，其中可以包含定义常量和声明方法
+    [public] [static] [final] type constant_name = value;    // 定义常量
+    [public] [abstract] returnType method_name(parameter_list);    // 声明方法
+}
+```
+
+对以上语法的说明如下：
+
+- public 表示接口的修饰符，当没有修饰符时，则使用默认的修饰符，此时该接口的访问权限仅局限于所属的包；
+- interface_name 表示接口的名称。接口名应与类名采用相同的命名规则，即如果仅从语法角度来看，接口名只要是合法的标识符即可。如果要遵守 Java 可读性规范，则接口名应由多个有意义的单词连缀而成，每个单词首字母大写，单词与单词之间无需任何分隔符。
+- extends 表示接口的继承关系；
+- interface1_name 表示要继承的接口名称；
+- constant_name 表示变量名称，一般是 static 和 final 型的；
+- returnType 表示方法的返回值类型；
+- parameter_list 表示参数列表，在接口中的方法是没有方法体的。
+
+```java
+注意：一个接口可以有多个直接父接口，但接口只能继承接口，不能继承类。
+```
+
+接口对于其声明、变量和方法都做了许多限制，这些限制作为接口的特征归纳如下：
+
+- 具有 public 访问控制符的接口，允许任何类使用；没有指定 public 的接口，其访问将局限于所属的包。
+
+- 方法的声明不需要其他修饰符，在接口中声明的方法，将隐式地声明为公有的（public）和抽象的（abstract）。
+
+- 在 Java 接口中声明的变量其实都是常量，接口中的变量声明，将隐式地声明为 public、static 和 final，即常量，所以接口中定义的变量必须初始化。
+
+- 接口没有构造方法，不能被实例化。例如：
+
+  ```java
+  public interface A {
+      public A(){…}    // 编译出错，接口不允许定义构造方法
+  }
+  ```
+
+一个接口不能够实现另一个接口，但它可以继承多个其他接口。子接口可以对父接口的方法和常量进行重写。例如：
+
+```java
+public interface StudentInterface extends PeopleInterface {
+    // 接口 StudentInterface 继承 PeopleInterface
+    int age = 25;    // 常量age重写父接口中的age常量
+    void getInfo();    // 方法getInfo()重写父接口中的getInfo()方法
+}
+```
+
+例如，定义一个接口 MyInterface，并在该接口中声明常量和方法，如下：
+
+```java
+public interface MyInterface {    // 接口myInterface
+    String name;    // 不合法，变量name必须初始化
+    int age = 20;    // 合法，等同于 public static final int age = 20;
+    void getInfo();    // 方法声明，等同于 public abstract void getInfo();
+}
+```
+
+### 实现接口
+
+接口的主要用途就是被实现类实现，一个类可以实现一个或多个接口，继承使用 extends 关键字，实现则使用 implements 关键字。因为一个类可以实现多个接口，这也是 Java 为单继承灵活性不足所作的补充。类实现接口的语法格式如下：
+
+```java
+<public> class <class_name> [extends superclass_name] [implements interface1_name[, interface2_name…]] {
+    // 主体
+}
+```
+
+对以上语法的说明如下：
+
+- public：类的修饰符；
+- superclass_name：需要继承的父类名称；
+- interface1_name：要实现的接口名称。
+
+实现接口需要注意以下几点：
+
+- 实现接口与继承父类相似，一样可以获得所实现接口里定义的常量和方法。如果一个类需要实现多个接口，则多个接口之间以逗号分隔。
+- 一个类可以继承一个父类，并同时实现多个接口，implements 部分必须放在 extends 部分之后。
+- **一个类实现了一个或多个接口之后，这个类必须完全实现这些接口里所定义的全部抽象方法**（也就是重写这些抽象方法）；否则，该类将保留从父接口那里继承到的抽象方法，该类也必须定义成抽象类。
+
+
+
+**例一**
+
+1）创建一个名称为 IMath 的接口，代码如下：
+
+```java
+public interface IMath {
+    public int sum();    // 完成两个数的相加
+    public int maxNum(int a,int b);    // 获取较大的数
+}
+```
+
+2）定义一个 MathClass 类并实现 IMath 接口，MathClass 类实现代码如下：
+
+```java
+public class MathClass implements IMath {
+    private int num1;    // 第 1 个操作数
+    private int num2;    // 第 2 个操作数
+    public MathClass(int num1,int num2) {
+        // 构造方法
+        this.num1 = num1;
+        this.num2 = num2;
+    }
+    // 实现接口中的求和方法
+    public int sum() {
+        return num1 + num2;
+    }
+    // 实现接口中的获取较大数的方法
+    public int maxNum(int a,int b) {
+        if(a >= b) {
+            return a;
+        } else {
+            return b;
+        }
+    }
+}
+```
+
+在实现类中，所有的方法都使用了 public 访问修饰符声明。无论何时实现一个由接口定义的方法，它都必须实现为 public，因为接口中的所有成员都显式声明为 public。
+
+3）最后创建测试类 NumTest，实例化接口的实现类 MathClass，调用该类中的方法并输出结果。该类内容如下：
+
+```java
+public class NumTest {
+    public static void main(String[] args) {
+        // 创建实现类的对象
+        MathClass calc = new MathClass(100, 300);
+        System.out.println("100 和 300 相加结果是：" + calc.sum());
+        System.out.println("100 比较 300，哪个大：" + calc.maxNum(100, 300));
+    }
+}
+```
+
+程序运行结果如下所示。
+
+```java
+100 和 300 相加结果是：400
+100 比较 300，哪个大：300
+```
+
+## 7.11接口和抽象类的区别和联系
+
+接口和抽象类的区别
+
+接口（interface）可以说成是抽象类的一种特例，接口中的所有方法都必须是抽象的。接口中的方法定义默认为public abstract类型，接口中的成员变量类型默认为public static final。另外，接口和抽象类在方法上有区别：
+
+> - 抽象类可以有构造方法，接口中不能有构造方法。
+> - 抽象类中可以包含非抽象的普通方法，接口中的所有方法必须都是抽象的，不能有非抽象的普通方法。
+> - 抽象类中可以有普通成员变量，接口中没有普通成员变量
+> - 抽象类中的抽象方法的访问类型可以是public，protected和默认类型
+> - 抽象类中可以包含静态方法，接口中不能包含静态方法
+> - 抽象类和接口中都可以包含静态成员变量，抽象类中的静态成员变量的访问类型可以任意，但接口中定义的变量只能是public static final类型，并且默认即为public static final类型
+> - 一个类可以实现多个接口，但只能继承一个抽象类。二者在应用方面也有一定的区别：接口更多的是在系统架构设计方法发挥作用，主要用于定义模块之间的通信契约。而抽象类在代码实现方面发挥作用，可以实现代码的重用，例如，模板方法设计模式是抽象类的一个典型应用，假设某个项目的所有Servlet类都要用相同的方式进行权限判断、记录访问日志和处理异常，那么就可以定义一个抽象的基类，让所有的Servlet都继承这个抽象基类，在抽象基类的service方法中完成权限判断、记录访问日志和处理异常的代码，在各个子类中只是完成各自的业务逻辑代码。
+
+## 7.12内部类简介
+
+在类内部可定义成员变量和方法，且在类内部也可以定义另一个类。如果在类 Outer 的内部再定义一个类 Inner，此时类 Inner 就称为内部类（或称为嵌套类），而类 Outer 则称为外部类（或称为宿主类）。
+
+内部类可以很好地实现隐藏，一般的非内部类是不允许有 private 与 protected 权限的，但内部类可以。内部类拥有外部类的所有元素的访问权限。
+
+**内部类可以分为：实例内部类、静态内部类和成员内部类**
+
+内部类的特点如下：
+
+1. 内部类仍然是一个独立的类，在编译之后内部类会被编译成独立的`.class`文件，但是前面冠以外部类的类名和`$`符号。
+2. 内部类不能用普通的方式访问。内部类是外部类的一个成员，因此内部类可以自由地访问外部类的成员变量，无论是否为 private 的。
+3. 内部类声明成静态的，就不能随便访问外部类的成员变量，仍然是只能访问外部类的静态成员变量。
+
+**例一**
+
+内部类的简单应用
+
+```java
+public class Test {
+    public class InnerClass {
+        public int getSum(int x,int y) {
+            return x + y;
+        }
+    }
+    public static void main(String[] args) {
+        Test.InnerClass ti = new Test().new InnerClass();
+        int i = ti.getSum(2,3);
+        System.out.println(i);    // 输出5
+    }
+}
+```
+
+有关内部类的说明有如下几点。
+
+- 外部类只有两种访问级别：public 和默认；内部类则有 4 种访问级别：public、protected、 private 和默认。
+- 在外部类中可以直接通过内部类的类名访问内部类。
+
+```
+InnerClass ic = new InnerClass();    // InnerClass为内部类的类名
+```
+
+- 在外部类以外的其他类中则需要通过内部类的完整类名访问内部类。
+
+```
+Test.InnerClass ti = newTest().new InnerClass();    // Test.innerClass是内部类的完整类名
+```
+
+- 内部类与外部类不能重名。
+
+
+
+## 7.13实例内部类
+
+## 7.14静态内部类
+
+## 7.15局部内部类
+
+局部内部类就是在方法中定义的类
+
+
+
+特点：
+
+1. 与局部变量一样不能使用访问控制修饰符和static修饰符
+
+2. 只在当前方法生效
+
+3. 不能在类中定义static成员
+
+4. 还可以包含内部类，到那时这些内部类也不能使用访问控制修饰符和static修饰符
+
+5. 局部内内部类可以访问外部类的所有成员
+
+6. 在局部内部类中只可以访问当前方法中的final类型的参数与变量，如果方法中的成员与外部类中的成员同名，则可以使用 <OuterClassName>.this.<MemberName> 的形式访问外部类中的成员。
+
+   ```java
+   public class Test {
+       int a = 0;
+       int d = 0;
+       public void method() {
+           int b = 0;
+           final int c = 0;
+           final int d = 10;
+           class Inner {
+               int a2 = a;    // 访问外部类中的成员
+               // int b2 = b;    // 编译出错
+               int c2 = c;    // 访问方法中的成员
+               int d2 = d;    // 访问方法中的成员
+               int d3 = Test.this.d;    //访问外部类中的成员
+           }
+           Inner i = new Inner();
+           System.out.println(i.d2);    // 输出10
+           System.out.println(i.d3);    // 输出0
+       }
+       public static void main(String[] args) {
+           Test t = new Test();
+           t.method();
+       }
+   }
+   ```
+
+
+
+## 7.16匿名内部类
+
+## 7.17Lanbda表达式
+
+Lambda 表达式（Lambda expression）是一个匿名函数，基于数学中的λ演算得名，也可称为闭包（Closure）。现在很多语言都支持 Lambda 表达式，如 C++、C#、Java、Python 和 JavaScript 等。
+
+Lambda 表达式是推动 Java 8 发布的重要新特性，它允许把函数作为一个方法的参数（函数作为参数传递进方法中），下面通过例 1 来理解 Lambda 表达式的概念。
+
+Lambda 表达式标准语法形式如下：
+
+(参数列表) -> {
+  // Lambda表达式体
+}
+
+`->`被称为箭头操作符或 Lambda 操作符，箭头操作符将 Lambda 表达式拆分成两部分：
+
+- 左侧：Lambda 表达式的参数列表。
+- 右侧：Lambda 表达式中所需执行的功能，用`{ }`包起来，即 Lambda 体。
+
+#### Java Lambda 表达式的优缺点
+
+优点：
+
+1. 代码简洁，开发迅速
+2. 方便函数式编程
+3. 非常容易进行并行计算
+4. Java 引入 Lambda，改善了集合操作（引入 Stream API）
+
+缺点：
+
+1. 代码可读性变差
+2. 在非并行计算中，很多计算未必有传统的 for 性能要高
+3. 不容易进行调试
+
+
+
+### 函数式接口
+
+Lambda 表达式实现的接口不是普通的接口，而是函数式接口。如果一个接口中，有且只有一个抽象的方法（Object 类中的方法不包括在内），那这个接口就可以被看做是函数式接口。这种接口只能有一个方法。如果接口中声明多个抽象方法，那么 Lambda 表达式会发生编译错误：
+
+```java
+The target type of this expression must be a functional interface
+```
+
+这说明该接口不是函数式接口，为了防止在函数式接口中声明多个抽象方法，Java 8 提供了一个声明函数式接口注解 @FunctionalInterface，示例代码如下。
+
+```java
+// 可计算接口
+@FunctionalInterface
+public interface Calculable {
+    // 计算两个int数值
+    int calculateInt(int a, int b);
+}
+```
+
+在接口之前使用 @FunctionalInterface 注解修饰，那么试图增加一个抽象方法时会发生编译错误。但可以添加默认方法和静态方法。
+
+
+
+@FunctionalInterface 注解与 @Override 注解的作用类似。Java 8 中专门为函数式接口引入了一个新的注解 @FunctionalInterface。该注解可用于一个接口的定义上，一旦使用该注解来定义接口，编译器将会强制检查该接口是否确实有且仅有一个抽象方法，否则将会报错。需要注意的是，即使不使用该注解，只要满足函数式接口的定义，这仍然是一个函数式接口，使用起来都一样。
+ 
+
+提示：Lambda 表达式是一个匿名方法代码，Java 中的方法必须声明在类或接口中，那么 Lambda 表达式所实现的匿名方法是在函数式接口中声明的。
 
 # 8.Java异常处理
+
+
 
 # 9.Java集合，泛型和枚举
 
@@ -5176,7 +5698,100 @@ public class CollectionEach {
 
 ## 9.10使用迭代器遍历集合元素
 
+Iterator（迭代器）是一个接口，它的作用就是遍历容器的所有元素，也是 java 集合框架的成员，但它与 Collection 和 Map 系列的集合不一样，Collection 和 Map 系列集合主要用于盛装其他对象，而 Iterator 则主要用于遍历（即迭代访问）Collection 集合中的元素。
+
+
+
+Iterator 接口隐藏了各种 Collection 实现类的底层细节，向应用程序提供了遍历 Collection 集合元素的统一编程接口。Iterator 接口里定义了如下 4 个方法。
+
+- boolean hasNext()：如果被迭代的集合元素还没有被遍历完，则返回 true。
+- Object next()：返回集合里的下一个元素。
+- void remove()：删除集合里上一次 next 方法返回的元素。
+- void forEachRemaining(Consumer action)：这是 Java 8 为 Iterator 新增的默认方法，该方法可使用 Lambda 表达式来遍历集合元素。
+
+
+
+下面程序示范了通过 Iterator 接口来遍历集合元素。
+
+```java
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+public class IteratorTest {
+    public static void main(String[] args) {
+        // 创建一个集合
+        Collection objs = new HashSet();
+        objs.add("甘");
+        objs.add("文");
+        objs.add("崔");
+        // 调用forEach()方法遍历集合
+        // 获取books集合对应的迭代器
+        Iterator it = objs.iterator();
+        while (it.hasNext()) {
+            // it.next()方法返回的数据类型是Object类型，因此需要强制类型转换
+            String obj = (String) it.next();
+            System.out.println(obj);
+            if (obj.equals("甘")) {
+                // 从集合中删除上一次next()方法返回的元素
+                it.remove();
+            }
+            // 对book变量赋值，不会改变集合元素本身
+            obj = "文";
+        }
+        System.out.println(objs);
+    }
+}
+```
+
+从上面代码中可以看出，Iterator 仅用于遍历集合，如果需要创建 Iterator 对象，则必须有一个被迭代的集合。没有集合的 Iterator 没有存在的价值。
+
+注意：Iterator 必须依附于 Collection 对象，若有一个 Iterator 对象，则必然有一个与之关联的 Collection 对象。Iterator 提供了两个方法来迭代访问 Collection 集合里的元素，并可通过 remove() 方法来删除集合中上一次 next() 方法返回的集合元素。
+
+上面程序中第 24 行代码对迭代变量 obj 进行赋值，但当再次输岀 objs 集合时，会看到集合里的元素没有任何改变。所以当使用 Iterator 对集合元素进行迭代时，Iterator 并不是把集合元素本身传给了迭代变量，而是把集合元素的值传给了迭代变量，所以修改迭代变量的值对集合元素本身没有任何影响。
+
+当使用 Iterator 迭代访问 Collection 集合元素时，Collection 集合里的元素不能被改变，只有通过 Iterator 的 remove() 方法删除上一次 next() 方法返回的集合元素才可以，否则将会引发“java.util.ConcurrentModificationException”异常。下面程序示范了这一点。
+
+```java
+public class IteratorErrorTest {
+    public static void main(String[] args) {
+        // 创建一个集合
+        Collection objs = new HashSet();
+        objs.add("甘");
+        objs.add("文");
+        objs.add("崔");
+        // 获取books集合对应的迭代器
+        Iterator it = objs.iterator();
+        while (it.hasNext()) {
+            String obj = (String) it.next();
+            System.out.println(obj);
+            if (obj.equals("甘")) {
+                // 使用Iterator迭代过程中，不可修改集合元素，下面代码引发异常
+                objs.remove(obj);
+            }
+        }
+    }
+}
+```
+
+输出结果
+
+```java
+甘
+Exception in thread "main" java.util.ConcurrentModificationException
+        at java.util.HashMap$HashIterator.nextNode(Unknown Source)
+        at java.util.HashMap$KeyIterator.next(Unknown Source)
+        at IteratorErrorTest.main(IteratorErrorTest.java:15)
+```
+
+上面程序中第 15 行代码位于 Iterator 迭代块内，也就是在 Iterator 迭代 Collection 集合过程中修改了 Collection 集合，所以程序将在运行时引发异常。
+
+Iterator 迭代器采用的是快速失败（fail-fast）机制，一旦在迭代过程中检测到该集合已经被修改（通常是程序中的其他线程修改），程序立即引发 ConcurrentModificationException 异常，而不是显示修改后的结果，这样可以避免共享资源而引发的潜在问题。
+
+> 快速失败（fail-fast）机制，是 Java Collection 集合中的一种错误检测机制。
+
 ## 9.11Lambda表达式遍历迭代器
+
+
 
 ## 9.12foreach遍历Collection集合
 

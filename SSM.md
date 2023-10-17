@@ -1198,7 +1198,6 @@ List<String> userList = service.getUsernameList();
 
       Spring IoC 容器管理一个或多个 bean。这些 Bean 是使用您提供给容器的配置元数据创建的（例如，以 XML `<bean/>` 定义的形式）。
 
-      
   2. 思路
 
       ![](http://heavy_code_industry.gitee.io/code_heavy_industry/assets/img/img006.c8bae859.png)
@@ -2687,7 +2686,7 @@ public class SoldierController {
           - `@DenyAll`: 标识不提供针对该方法的访问控制。
           - `@DeclareRoles`: 声明安全角色。
 
-          但是你要理解JSR是Java提供的**技术规范**，也就是说，他只是规定了注解和注解的含义，**JSR并不是直接提供特定的实现**，而是提供标准和指导方针，由第三方框架（Spring）和库来实现和提供对应的功能。
+          要理解JSR是Java提供的**技术规范**，也就是说，他只是规定了注解和注解的含义，**JSR并不是直接提供特定的实现**，而是提供标准和指导方针，由第三方框架（Spring）和库来实现和提供对应的功能。
       - JSR-250 @Resource注解
 
           @Resource注解也可以完成属性注入。那它和@Autowired注解有什么区别？
@@ -2784,15 +2783,15 @@ public class CommonComponent {
 
 ```
 
-      catalog
-    
-    #### 4.3.5 实验五： 基于注解+XML方式整合三层架构组件
-      1. 需求分析
-    
-          搭建一个三层架构案例，模拟查询全部学生（学生表）信息，持久层使用JdbcTemplate和Druid技术，使用XML+注解方式进行组件管理！
-    
-          ![](https://secure2.wostatic.cn/static/6WsK3n5TJvotqmmNNjxY54/image.png)
-      2. 数据库准备
+ catalog
+
+#### 4.3.5 实验五： 基于注解+XML方式整合三层架构组件
+  1. 需求分析
+
+      搭建一个三层架构案例，模拟查询全部学生（学生表）信息，持久层使用JdbcTemplate和Druid技术，使用XML+注解方式进行组件管理！
+
+      
+  2. 数据库准备
 
 ```Java
 create database studb;
@@ -2819,11 +2818,11 @@ VALUES
   (8, '吴十', '男', 19, '高中二班');
 
 ```
-      3. 项目准备
-          1. 项目创建
-    
-              spring-annotation-practice-04
-          2. 依赖导入
+3. 项目准备
+      1. 项目创建
+
+          spring-annotation-practice-04
+      2. 依赖导入
 
 ```XML
 <dependencies>
@@ -2863,7 +2862,7 @@ VALUES
 
 </dependencies> 
 ```
-          3. 实体类准备
+3. 实体类准备
 
 ```Java
 public class Student {
@@ -2927,8 +2926,8 @@ public class Student {
 }
 
 ```
-      4. 三层架构搭建和实现
-          1. 持久层
+4. 三层架构搭建和实现
+      1. 持久层
 
 ```Java
 //接口
@@ -2968,7 +2967,7 @@ public class StudentDaoImpl implements StudentDao {
 }
 
 ```
-          2. 业务层
+2. 业务层
 
 ```Java
 //接口
@@ -3003,7 +3002,7 @@ public class StudentServiceImpl  implements StudentService {
 }
 
 ```
-          3. 表述层
+3. 表述层
 
 ```Java
 @Controller
@@ -3019,7 +3018,7 @@ public class StudentController {
 }
 
 ```
-      5. 三层架构IoC配置
+5. 三层架构IoC配置
 
 ```XML
 <?xml version="1.0" encoding="UTF-8"?>
@@ -3049,7 +3048,7 @@ public class StudentController {
 
 </beans>
 ```
-      6. 运行测试
+6. 运行测试
 
 ```Java
 public class ControllerTest {
@@ -3063,25 +3062,23 @@ public class ControllerTest {
     }
 }
 ```
-      7. 注解+XML IoC方式问题总结
-          1. 自定义类可以使用注解方式，但是第三方依赖的类依然使用XML方式！
-          2. XML格式解析效率低！
+7. 注解+XML IoC方式问题总结
+      1. 自定义类可以使用注解方式，但是第三方依赖的类依然使用XML方式！
+      2. XML格式解析效率低！
 
   ## 4.4 基于 配置类 方式管理 Bean
 
-    #### 4.4.1 完全注解开发理解
-    
-      Spring 完全注解配置（Fully Annotation-based Configuration）是指通过 Java配置类 代码来配置 Spring 应用程序，使用注解来替代原本在 XML 配置文件中的配置。相对于 XML 配置，完全注解配置具有更强的类型安全性和更好的可读性。
-    
-      **两种方式思维转化**：
-    
-      ![](https://secure2.wostatic.cn/static/uhRgky6LmFBAaYDJfS5SEm/image.png)
-    
-    #### 4.4.2 实验一：配置类和扫描注解
-    
-      **xml+注解方式**
-    
-      配置文件application.xml
+#### 4.4.1 完全注解开发理解
+
+  Spring 完全注解配置（Fully Annotation-based Configuration）是指通过 Java配置类 代码来配置 Spring 应用程序，使用注解来替代原本在 XML 配置文件中的配置。相对于 XML 配置，完全注解配置具有更强的类型安全性和更好的可读性。
+
+  
+
+#### 4.4.2 实验一：配置类和扫描注解
+
+  **xml+注解方式**
+
+  配置文件application.xml
 
 ```XML
 <?xml version="1.0" encoding="UTF-8"?>
@@ -3103,7 +3100,7 @@ public class ControllerTest {
 </beans>
 ```
 
-      测试创建IoC容器
+ 测试创建IoC容器
 
 ```Java
  // xml方式配置文件使用ClassPathXmlApplicationContext容器读取
@@ -3111,11 +3108,11 @@ public class ControllerTest {
                 new ClassPathXmlApplicationContext("application.xml");
 ```
 
-      **配置类+注解方式（完全注解方式）**
-    
-      配置类
-    
-      使用 @Configuration 注解将一个普通的类标记为 Spring 的配置类。
+**配置类+注解方式（完全注解方式）**
+
+  配置类
+
+  使用 @Configuration 注解将一个普通的类标记为 Spring 的配置类。
 
 ```Java
 import org.springframework.context.annotation.ComponentScan;
@@ -3133,7 +3130,7 @@ public class MyConfiguration {
 }
 ```
 
-      测试创建IoC容器
+ 测试创建IoC容器
 
 ```Java
 // AnnotationConfigApplicationContext 根据配置类创建 IOC 容器对象
@@ -3141,7 +3138,7 @@ ApplicationContext iocContainerAnnotation =
 new AnnotationConfigApplicationContext(MyConfiguration.class);
 ```
 
-      可以使用 no-arg 构造函数实例化 `AnnotationConfigApplicationContext` ，然后使用 `register()` 方法对其进行配置。此方法在以编程方式生成 `AnnotationConfigApplicationContext` 时特别有用。以下示例演示如何执行此操作：
+ 可以使用 no-arg 构造函数实例化 `AnnotationConfigApplicationContext` ，然后使用 `register()` 方法对其进行配置。此方法在以编程方式生成 `AnnotationConfigApplicationContext` 时特别有用。以下示例演示如何执行此操作：
 
 ```Java
 // AnnotationConfigApplicationContext-IOC容器对象
@@ -3154,23 +3151,23 @@ iocContainerAnnotation.refresh();
 
 ```
 
-      **总结：**
+**总结：**
+
+    @Configuration指定一个类为配置类，可以添加配置注解，替代配置xml文件
     
-        @Configuration指定一个类为配置类，可以添加配置注解，替代配置xml文件
+    @ComponentScan(basePackages = {"包","包"}) 替代<context:component-scan标签实现注解扫描
     
-        @ComponentScan(basePackages = {"包","包"}) 替代<context:component-scan标签实现注解扫描
+    @PropertySource("classpath:配置文件地址") 替代 <context:property-placeholder标签
     
-        @PropertySource("classpath:配置文件地址") 替代 <context:property-placeholder标签
-    
-        配合IoC/DI注解，可以进行完整注解开发！
-    
-    #### 4.4.3 实验二：@Bean定义组件
-    
-      **场景需求**：将Druid连接池对象存储到IoC容器
-    
-      **需求分析**：第三方jar包的类，添加到ioc容器，无法使用@Component等相关注解！因为源码jar包内容为只读模式！
-    
-      **xml方式实现**：
+    配合IoC/DI注解，可以进行完整注解开发！
+
+#### 4.4.3 实验二：@Bean定义组件
+
+  **场景需求**：将Druid连接池对象存储到IoC容器
+
+  **需求分析**：第三方jar包的类，添加到ioc容器，无法使用@Component等相关注解！因为源码jar包内容为只读模式！
+
+  **xml方式实现**：
 
 ```XML
 <?xml version="1.0" encoding="UTF-8"?>
@@ -3194,9 +3191,9 @@ iocContainerAnnotation.refresh();
 </beans>
 ```
 
-      **配置类方式实现**：
-    
-        `@Bean` 注释用于指示方法实例化、配置和初始化要由 Spring IoC 容器管理的新对象。对于那些熟悉 Spring 的 `<beans/>` XML 配置的人来说， `@Bean` 注释与 `<bean/>` 元素起着相同的作用。
+**配置类方式实现**：
+
+    `@Bean` 注释用于指示方法实例化、配置和初始化要由 Spring IoC 容器管理的新对象。对于那些熟悉 Spring 的 `<beans/>` XML 配置的人来说， `@Bean` 注释与 `<bean/>` 元素起着相同的作用。
 
 ```Java
 //标注当前类是配置类，替代application.xml    
@@ -3226,10 +3223,10 @@ public class MyConfiguration {
 }
 ```
 
-    #### 4.4.4 实验三：高级特性：@Bean注解细节
-      1. **@Bean生成BeanName问题**
-    
-          @Bean注解源码：
+#### 4.4.4 实验三：高级特性：@Bean注解细节
+  1. **@Bean生成BeanName问题**
+
+      @Bean注解源码：
 
 ```Java
 public @interface Bean {
@@ -3252,7 +3249,7 @@ public @interface Bean {
 
 ```
 
-          指定@Bean的名称：
+ 指定@Bean的名称：
 
 ```Java
 @Configuration
@@ -3265,7 +3262,7 @@ public class AppConfig {
 }
 ```
 
-          `@Bean` 注释注释方法。使用此方法在指定为方法返回值的类型的 `ApplicationContext` 中注册 Bean 定义。缺省情况下，Bean 名称与方法名称相同。下面的示例演示 `@Bean` 方法声明：
+`@Bean` 注释注释方法。使用此方法在指定为方法返回值的类型的 `ApplicationContext` 中注册 Bean 定义。缺省情况下，Bean 名称与方法名称相同。下面的示例演示 `@Bean` 方法声明：
 
 ```Java
 @Configuration
@@ -3278,16 +3275,16 @@ public class AppConfig {
 }
 ```
 
-          前面的配置完全等同于下面的Spring XML：
+前面的配置完全等同于下面的Spring XML：
 
 ```Java
 <beans>
   <bean id="transferService" class="com.acme.TransferServiceImpl"/>
 </beans>
 ```
-      2. **@Bean 初始化和销毁方法指定**
-    
-          `@Bean` 注解支持指定任意初始化和销毁回调方法，非常类似于 Spring XML 在 `bean` 元素上的 `init-method` 和 `destroy-method` 属性，如以下示例所示：
+2. **@Bean 初始化和销毁方法指定**
+
+      `@Bean` 注解支持指定任意初始化和销毁回调方法，非常类似于 Spring XML 在 `bean` 元素上的 `init-method` 和 `destroy-method` 属性，如以下示例所示：
 
 ```Java
 public class BeanOne {
@@ -3318,11 +3315,11 @@ public class AppConfig {
   }
 }
 ```
-      3. **@Bean Scope作用域**
-    
-          可以指定使用 `@Bean` 注释定义的 bean 应具有特定范围。您可以使用在 Bean 作用域部分中指定的任何标准作用域。
-    
-          默认作用域为 `singleton` ，但您可以使用 `@Scope` 注释覆盖此范围，如以下示例所示：
+3. **@Bean Scope作用域**
+
+      可以指定使用 `@Bean` 注释定义的 bean 应具有特定范围。您可以使用在 Bean 作用域部分中指定的任何标准作用域。
+
+      默认作用域为 `singleton` ，但您可以使用 `@Scope` 注释覆盖此范围，如以下示例所示：
 
 ```Java
 @Configuration
@@ -3335,9 +3332,9 @@ public class MyConfiguration {
   }
 }
 ```
-      4. **@Bean方法之间依赖**
-    
-          **准备组件**
+ 4. **@Bean方法之间依赖**
+
+      **准备组件**
 
 ```Java
 public class HappyMachine {
@@ -3374,11 +3371,11 @@ public class HappyComponent {
 }
 ```
 
-          **Java配置类实现：**
-    
-          方案1：
-    
-          直接调用方法返回 Bean 实例：在一个 `@Bean` 方法中直接调用其他 `@Bean` 方法来获取 Bean 实例，虽然是方法调用，也是通过IoC容器获取对应的Bean，例如：
+**Java配置类实现：**
+
+方案1：
+
+  直接调用方法返回 Bean 实例：在一个 `@Bean` 方法中直接调用其他 `@Bean` 方法来获取 Bean 实例，虽然是方法调用，也是通过IoC容器获取对应的Bean，例如：
 
 ```Java
 @Configuration
@@ -3400,9 +3397,9 @@ public class JavaConfig {
 }
 ```
 
-          方案2：
-    
-          参数引用法：通过方法参数传递 Bean 实例的引用来解决 Bean 实例之间的依赖关系，例如：
+方案2：
+
+参数引用法：通过方法参数传递 Bean 实例的引用来解决 Bean 实例之间的依赖关系，例如：
 
 ```Java
 package com.atguigu.config;
@@ -3452,9 +3449,9 @@ public class JavaConfig {
 }
 ```
 
-    #### 4.4.5 实验四：高级特性：@Import扩展
-    
-      `@Import` 注释允许从另一个配置类加载 `@Bean` 定义，如以下示例所示：
+#### 4.4.5 实验四：高级特性：@Import扩展
+
+  `@Import` 注释允许从另一个配置类加载 `@Bean` 定义，如以下示例所示：
 
 ```Java
 @Configuration
@@ -3477,7 +3474,7 @@ public class ConfigB {
 }
 ```
 
-      现在，在实例化上下文时不需要同时指定 `ConfigA.class` 和 `ConfigB.class` ，只需显式提供 `ConfigB` ，如以下示例所示：
+现在，在实例化上下文时不需要同时指定 `ConfigA.class` 和 `ConfigB.class` ，只需显式提供 `ConfigB` ，如以下示例所示：
 
 ```Java
 public static void main(String[] args) {
@@ -3489,15 +3486,15 @@ public static void main(String[] args) {
 }
 ```
 
-      此方法简化了容器实例化，因为只需要处理一个类，而不是要求您在构造期间记住可能大量的 `@Configuration` 类。
-    
-    #### 4.4.6 实验五：基于注解+配置类方式整合三层架构组件
-      1. 需求分析
-    
-          搭建一个三层架构案例，模拟查询全部学生（学生表）信息，持久层使用JdbcTemplate和Druid技术，使用注解+配置类方式进行组件管理！
-    
-          ![](https://secure2.wostatic.cn/static/spSLnBnMYbqJXYLqjr2C7y/image.png)
-      2. 数据库准备
+ 此方法简化了容器实例化，因为只需要处理一个类，而不是要求您在构造期间记住可能大量的 `@Configuration` 类。
+
+#### 4.4.6 实验五：基于注解+配置类方式整合三层架构组件
+  1. 需求分析
+
+      搭建一个三层架构案例，模拟查询全部学生（学生表）信息，持久层使用JdbcTemplate和Druid技术，使用注解+配置类方式进行组件管理！
+
+      
+  2. 数据库准备
 
 ```Java
 create database studb;
@@ -3524,11 +3521,11 @@ VALUES
   (8, '吴十', '男', 19, '高中二班');
 
 ```
-      3. 项目准备
-          1. 项目创建
-    
-              spring-java-practice-06
-          2. 依赖导入
+3. 项目准备
+      1. 项目创建
+
+          spring-java-practice-06
+      2. 依赖导入
 
 ```XML
 <dependencies>
@@ -3568,7 +3565,7 @@ VALUES
 
 </dependencies> 
 ```
-          3. 实体类准备
+3. 实体类准备
 
 ```Java
 public class Student {
@@ -3632,8 +3629,8 @@ public class Student {
 }
 
 ```
-      4. 三层架构搭建和实现
-          1. 持久层
+4. 三层架构搭建和实现
+      1. 持久层
 
 ```Java
 //接口
@@ -3673,7 +3670,7 @@ public class StudentDaoImpl implements StudentDao {
 }
 
 ```
-          2. 业务层
+2. 业务层
 
 ```Java
 //接口
@@ -3708,7 +3705,7 @@ public class StudentServiceImpl  implements StudentService {
 }
 
 ```
-          3. 表述层
+3. 表述层
 
 ```Java
 @Controller
@@ -3724,7 +3721,7 @@ public class StudentController {
 }
 
 ```
-      5. 三层架构IoC配置类
+5. 三层架构IoC配置类
 
 ```Java
 @Configuration
@@ -3761,7 +3758,7 @@ public class JavaConfig {
 
 }
 ```
-      6. 运行测试
+6. 运行测试
 
 ```Java
 public class ControllerTest {
@@ -3779,46 +3776,46 @@ public class ControllerTest {
     }
 }
 ```
-      7. 注解+配置类 IoC方式总结
-          1. 完全摒弃了XML配置文件
-          2. 自定义类使用IoC和DI注解标记
-          3. 第三方类使用配置类声明方法+@Bean方式处理
-          4. 完全注解方式（配置类+注解）是现在主流配置方式
+ 7. 注解+配置类 IoC方式总结
+      1. 完全摒弃了XML配置文件
+      2. 自定义类使用IoC和DI注解标记
+      3. 第三方类使用配置类声明方法+@Bean方式处理
+      4. 完全注解方式（配置类+注解）是现在主流配置方式
 
   ## 4.5 三种配置方式总结
 
-    #### 4.5.1 XML方式配置总结
-      1. 所有内容写到xml格式配置文件中
-      2. 声明bean通过<bean标签
-      3. <bean标签包含基本信息（id,class）和属性信息 <property name value / ref
-      4. 引入外部的properties文件可以通过<context:property-placeholder
-      5. IoC具体容器实现选择ClassPathXmlApplicationContext对象
-    
-    #### 4.5.2 XML+注解方式配置总结
-      1. 注解负责标记IoC的类和进行属性装配
-      2. xml文件依然需要，需要通过<context:component-scan标签指定注解范围
-      3. 标记IoC注解：@Component,@Service,@Controller,@Repository 
-      4. 标记DI注解：@Autowired @Qualifier @Resource @Value
-      5. IoC具体容器实现选择ClassPathXmlApplicationContext对象
-    
-    #### 4.5.3 完全注解方式配置总结
-      1. 完全注解方式指的是去掉xml文件，使用配置类 + 注解实现
-      2. xml文件替换成使用@Configuration注解标记的类
-      3. 标记IoC注解：@Component,@Service,@Controller,@Repository 
-      4. 标记DI注解：@Autowired @Qualifier @Resource @Value
-      5. <context:component-scan标签指定注解范围使用@ComponentScan(basePackages = {"com.atguigu.components"})替代
-      6. <context:property-placeholder引入外部配置文件使用@PropertySource({"classpath:application.properties","classpath:jdbc.properties"})替代
-      7. <bean 标签使用@Bean注解和方法实现
-      8. IoC具体容器实现选择AnnotationConfigApplicationContext对象
+#### 4.5.1 XML方式配置总结
+  1. 所有内容写到xml格式配置文件中
+  2. 声明bean通过<bean标签
+  3. <bean标签包含基本信息（id,class）和属性信息 <property name value / ref
+  4. 引入外部的properties文件可以通过<context:property-placeholder
+  5. IoC具体容器实现选择ClassPathXmlApplicationContext对象
+
+#### 4.5.2 XML+注解方式配置总结
+  1. 注解负责标记IoC的类和进行属性装配
+  2. xml文件依然需要，需要通过<context:component-scan标签指定注解范围
+  3. 标记IoC注解：@Component,@Service,@Controller,@Repository 
+  4. 标记DI注解：@Autowired @Qualifier @Resource @Value
+  5. IoC具体容器实现选择ClassPathXmlApplicationContext对象
+
+#### 4.5.3 完全注解方式配置总结
+  1. 完全注解方式指的是去掉xml文件，使用配置类 + 注解实现
+  2. xml文件替换成使用@Configuration注解标记的类
+  3. 标记IoC注解：@Component,@Service,@Controller,@Repository 
+  4. 标记DI注解：@Autowired @Qualifier @Resource @Value
+  5. <context:component-scan标签指定注解范围使用@ComponentScan(basePackages = {"com.atguigu.components"})替代
+  6. <context:property-placeholder引入外部配置文件使用@PropertySource({"classpath:application.properties","classpath:jdbc.properties"})替代
+  7. <bean 标签使用@Bean注解和方法实现
+  8. IoC具体容器实现选择AnnotationConfigApplicationContext对象
 
 ## 4.6 整合Spring5-Test5搭建测试环境
 
-    1. 整合测试环境作用
-    
-        好处1：不需要自己创建IOC容器对象了
-    
-        好处2：任何需要的bean都可以在测试类中直接享受自动装配
-    2. 导入相关依赖
+1. 整合测试环境作用
+
+    好处1：不需要自己创建IOC容器对象了
+
+    好处2：任何需要的bean都可以在测试类中直接享受自动装配
+2. 导入相关依赖
 
 ```XML
 <!--junit5测试-->
@@ -3834,7 +3831,7 @@ public class ControllerTest {
     <scope>test</scope>
 </dependency>
 ```
-    3. 整合测试注解使用
+3. 整合测试注解使用 
 
 ```Java
 //@SpringJUnitConfig(locations = {"classpath:spring-context.xml"})  //指定配置文件xml
@@ -4545,8 +4542,8 @@ public void printLogAfterCoreException(JoinPoint joinPoint, Throwable targetMeth
 ​          
 ​      2. **切点表达式语法**
 ​    
-          切点表达式总结
-    
+​          切点表达式总结
+​    
           ![](http://heavy_code_industry.gitee.io/code_heavy_industry/assets/img/img011.dde1a79a.png)
     
           语法细节
