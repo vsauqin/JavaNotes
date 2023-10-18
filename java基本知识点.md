@@ -241,7 +241,7 @@ import java.util.Scanner
 
 #### 1.4.1跳转控制语句break
 
-* 结束本次循环且下面循环不在执行，循环外的语句不受影响
+* 结束本次循环且下面循环不再执行，循环外的语句不受影响
 
 每次结束默认结束最近的一个循环。如果想要结束指定循环，在循环前面和break后添加相同的标签即可！*实际开发中尽量不要使用*如果没有标签默认终止最近的循环语句！
 
@@ -285,7 +285,7 @@ import java.util.Scanner
 
 * **数组扩容：**
 
-  ```
+  ```java
   in[] arr = {1,2,3,4}
   int[] arrNew = new int[arr.length+1];
   for(int i = 0;i < arr.length;i++){
@@ -543,7 +543,7 @@ while(head < end){
 
  例如：
 
-```
+```java
 Public int sum(int...num){
 //System.out.println("接收参数");
 		int res = 0;
@@ -632,6 +632,101 @@ public class Varargs {				//可变参数调用举例
 * this不能在类的定义外部使用，只能在类定义的方法中使用
 * 当this查找到方法或者对象时就会停止查找
 
+1.this.属性名
+
+```java
+// 创建构造方法，为上面的3个属性赋初始值
+public Teacher(String name,double salary,int age) {
+    this.name = name;    // 设置教师名称
+    this.salary = salary;    // 设置教师工资
+    this.age = age;    // 设置教师年龄
+}
+```
+
+在 Teacher 类的构造方法中使用了 this 关键字对属性 name、salary 和 age 赋值，this 表示当前对象。`this.name=name`语句表示一个赋值语句，等号左边的 this.name 是指当前对象具有的变量 name，等号右边的 name 表示参数传递过来的数值。
+
+
+
+2.this.方法名
+
+```
+public class DogTest {
+    public static void main(String[] args) {
+        // 创建Dog对象
+        Dog dog = new Dog();
+        // 调用Dog对象的run()方法
+        dog.run();
+    }
+}
+```
+
+
+
+```java
+/**
+ * 第二种定义Dog类方法
+ **/
+// 定义一个run()方法，run()方法需要借助jump()方法
+public void run() {
+    // 使用this引用调用run()方法的对象
+    this.jump();
+    System.out.println("正在执行run方法");
+}
+```
+
+
+
+1）在 run( ) 方法中调用 jump( ) 方法时是否一定需要一个 Dog 对象？
+
+答案是肯定的，因为没有使用 static 修饰的成员变量和方法都必须使用对象来调用。
+
+2）是否一定需要重新创建一个 Dog 对象？
+
+不一定，因为当程序调用 run( ) 方法时，一定会提供一个 Dog 对象，这样就可以直接使用这个已经存在的 Dog 对象，而无须重新创建新的 Dog 对象了。因此需要在 run() 方法中获得调用该方法的对象，通过 this 关键字就可以满足这个要求。
+
+this 可以代表任何对象，当 this 出现在某个方法体中时，它所代表的对象是不确定的，但它的类型是确定的，它所代表的只能是当前类的实例。只有当这个方法被调用时，它所代表的对象才被确定下来，谁在调用这个方法，this 就代表谁。
+
+```java
+public void run() {
+    jump();
+    System.out.println("正在执行run方法");
+}
+```
+
+大部分时候，一个方法访问该类中定义的其他方法、成员变量时加不加 this 前缀的效果是完全一样的。
+
+注意：对于 static 修饰的方法而言，可以使用类来直接调用该方法，如果在 static 修饰的方法中使用 this 关键字，则这个关键字就无法指向合适的对象。所以，static 修饰的方法中不能使用 this 引用。并且 Java 语法规定，静态成员不能直接访问非静态成员。
+
+省略 this 前缀只是一种假象，虽然程序员省略了调用 jump() 方法之前的 this，但实际上这个 this 依然是存在的。
+
+
+
+3.this()访问构造方法
+
+```java
+public class Student {
+    String name;
+    // 无参构造方法（没有参数的构造方法）
+    public Student() {
+        this("张三");
+    }
+    // 有参构造方法
+    public Student(String name) {
+        this.name = name;
+    }
+    // 输出name和age
+    public void print() {
+        System.out.println("姓名：" + name);
+    }
+    public static void main(String[] args) {
+        Student stu = new Student();
+        stu.print();
+    }
+}
+```
+
+
+
 # 4.面向对象（中级）
 
 ## 4.1包
@@ -682,7 +777,7 @@ java.aet    //做java的页面开发，GUI
 
 ### 4.2.1访问范围和注意事项
 
-* 公开级别：用public修饰，对外公开
+* 公开级别：用public修饰，对外公开，
 
 * 受保护级别：用proteed修饰，对子类和同一个包中的类展开
 
@@ -690,7 +785,7 @@ java.aet    //做java的页面开发，GUI
 
 * 私有级别：用private修饰，只有类本身可以访问，不对外公开
 
-  ![](C:\Users\86188\Pictures\Screenshots\屏幕截图 2023-05-26 093529.png)
+  ![](C:\Users\A1883\Pictures\Saved Pictures\aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL0pvdXJXb24vaW1hZ2UvbWFzdGVyL0phdmElRTUlOUYlQkElRTclQTElODAlRTglQUYlQUQlRTYlQjMlOTUvSmF2YSVFOCVBRSVCRiVFOSU5NyVBRSVFNCVCRiVBRSVFOSVBNSVCMCVFNyVBQyVBNi5wbmc.png)
 
   **使用注意事项**
 
@@ -1054,7 +1149,7 @@ public boolean equals(Object anObject) {
 
 ## 4.8断点调试
 
-纯勾八
+纯勾八        二零二三年九月四号复习的时候看见哈哈哈哈哈哈哈
 
 # 5.面向对象（高级）
 
@@ -3447,3 +3542,128 @@ String filePath = "d:\\new.txt";
   * getProperty(key)：根据键获取值
   * setProperty（key，value）：设置键值对到Properties对象
   * store：将Properties中的值对存储到配置文件，在idea中，保存信息到配置文件，如果含有中文，会存储unicode码
+
+
+
+
+
+# 反射reflection
+
+# 1.反射机制概念
+
+## 1.1概述
+
+1. Java反射机制的核心是在程序运行时动态加载类并获取类的详细信息，从而操作类或对象的属性和方法。本质是JVM得到class对象之后，**再通过class对象进行反编译，从而获取对象的各种信息。**这个class对象就像一面镜子包含类的所有信息
+2. Java属于先编译再运行的语言，程序中对象的类型在编译期就确定下来了，而当程序在运行时可能需要动态加载某些类，这些类因为之前用不到，所以没有被加载到JVM。通过反射，可以在运行时动态地创建对象并调用其属性，**不需要提前在编译期知道运行的对象是谁。**
+3. 被视为动态语言的关键。反射机制允许程序在运行期间借助于reflection API取得任何类的内部星系并能直接操作任意对象的内部属性及方法
+
+## 1.2应用
+
+- 在运行时判断任意一个对象所属的类
+- 构造任意一个类的点一下那个判断任意一个类所哟具有的成员变量和方法
+- 获取泛型信息
+- 运行时处理注解
+- 生成动态代理
+- 在运行时调用任意一个对象的成员变量和方法
+
+## 1.3反射主要的api
+
+- Java.lang.Class：代表一个类
+- java.lang.reflect.Method:代表类的方法
+- .Field:代表类的成员变量
+- .Cinstructor:代表类的构造器
+
+## 1 .4反射的优缺点
+
+**1、优点：**
+
+* 可以调用运行时类中的任意构造器属性方法，私有的也可以
+* 提高了Java程序的灵活性和扩展性降低了耦合性，提高了自适应能力
+* 允许程序创建和控制任何类的对象，无需提前硬编码目标类
+
+2，缺点
+
+- 性能较低主要应用于框架
+- 模糊内部逻辑，可读性较差
+
+# 2.Class的理解和获取
+
+## 2.1获取class实例的几种方式
+
+user是一个类名
+
+- ```java
+  //调用运行时类的静态属性
+  Class clazz = User.class;
+  ```
+
+- ```java
+  //调用运行时类的对象的getClass()
+  User u2 = new User();
+  Class clazz2 = u2.getClass();
+  
+  ```
+
+- ```java
+  调用class的静态方法forName（String className）
+  String className = "全路径"；
+  Class clazz3 = Class.forName(className);
+  ```
+
+- //使用类的加载其的方法
+
+
+
+## 2.2可以指向哪些结构
+
+1. calss：外部类，成员，局部内部类，匿名内部类
+2. interface：接口
+3. 数组
+4. 枚举
+5. annotation：注解@interface
+6. primitive type：基本数据类型
+7. void
+
+## 2.3类的加载过程
+
+1. 类的装载：将类的class文件读入内存，并为之创建一个class对象此过程由类的加载器完成
+
+2. 链接（Linking）：
+
+   验证：确保加载类信息符合jvm规范
+
+   准备：为类变量分配变量默认值
+
+   解析：
+
+3. 初始化：
+
+## 2.4类的加载器(了解)
+
+1. 作用：负责类的加载对应一个calss实例
+2. 分类分两种
+
+
+
+## 2.5通过类加载器加载指定配置文件
+
+```java
+Properties pros = new Properties();
+InputStream is = ClassLoader.getSystemClassLoader().getReaourceAsStream("配置文件名称");
+pros.load(is);
+String name = pros.getProperty();
+.....
+```
+
+
+
+# 3.反射的应用
+
+1. 创建运行时类的对象
+2. 获取运行时类的内部结构：了解：所有属性，所有方法，都有构造器；熟悉：父类，接口，包，带泛型的父类，父类的泛型等
+3. 调用指定的结构，指定的属性，方法，构造器（掌握）
+
+
+
+
+

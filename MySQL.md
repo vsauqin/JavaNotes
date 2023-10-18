@@ -23,12 +23,14 @@ CREATE DATABASE [IF NOT EXISTS] db_name
 * COLLATE:指定数据库字符集的校对规则，默认是utf8_general_ci
 
 * 显示数据库语句：SHOW DATABASES
-* 显示数据库创建语句：SHOW CREAT BATABASE db_name
+* 显示数据库创建语句：SHOW CREAT DATABASE db_name
 * 数据库删除语句：DROP DATABASE [IF EXISTS] db_name
 * 备份数据库(在DOS下执行)：mysqldump -u 用户名 -p -B数据库一 数据库二  数据库n > 文件名.sql
 * 恢复数据库(进入MySQL命令行再执行)：Souse  文件名.sql
 
 * 备份单张表：mysqldump -u 用户名 -p 密码  数据库 表1 表2...>备份的路径
+
+* USE DATABASE:指定使用的数据库
 
 # 2. 表
 
@@ -59,6 +61,13 @@ CREATE TABLE table_name
   ALTER TABLE tablename
   ADD   (column datatype  [DEFAULT  expr]
   		[,column datatype]...);
+  		
+  ```
+
+* 修改表名
+
+  ```java
+  ALTER TABLE 表名 RENAME TO 新的表名；
   ```
 
 * 修改列
@@ -286,6 +295,12 @@ CREATE TABLE table_name
   		LIMIT 每页记录数 * （第几页 — 1） ， 每页记录数
   ```
 
+* SHOW TABLES:查询当前数据库下所有表的名称
+
+  ```JAVA
+  SHOW TABLES;
+  ```
+  
 * **几个子语句的使用顺序**
 
   ```mysql
@@ -905,4 +920,4 @@ FLUSH  PRIVILEGES;
 ```
 
 * 细节说明
-  * 在创建用户的时候，如果不指定Host，则为%，%表示所有IP都有连接权限
+  * 在创建用户的时候，如果不指定Host，则为%，%表示所有IP都有连接权限 
