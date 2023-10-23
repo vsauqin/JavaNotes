@@ -438,7 +438,191 @@ Linux中一切皆文件
 
 # 8.磁盘分区和挂载
 
-## 分区
+- Linux无论有多少个分区.分给哪一个目录,整个文件系统也只有一个根目录.它的每一个分区都是用来组成整个文件系统的一部分.Linux使用一种”载入”的处理办法.将分区和目录联系起来.这时要载入一个分区,将使它的存储空间在一个目录下获得.
 
-- 原理介绍
-  - 
+## fdisk分区
+
+​     fdisk是一个基于MBR老牌的分区工具，支持几乎所有的Linux的发型版本。
+
+- fdisk命令只有具有超级用户权限才能运行
+- 使用fdisk -l可以列出所有安装的磁盘及其分区信息
+- 使用fdisk /dev/sd[a-z]可以对目标磁盘进行分区操作
+- 分区之后需要使用partprobe命令让内核更新分区信息，否则需要重启才能识别新的分区
+- /proc/partitions文件也可以用来查看分区信息
+
+![img](https://images0.cnblogs.com/blog2015/500720/201507/071820125493964.png)
+
+fdisk /dev/sd[a-z]指令
+
+a  toggle a bootable flag   
+
+b  edit bsd disklabel
+
+c  toggle the dos compatibility flag
+
+**d  delete a partition       删除一个分区**
+
+**l  list known partition types          列出所有分区类型**
+
+**m  print this menu         列出帮助信息**
+
+**n  add a new partition     添加一个分区**
+
+o  create a new empty DOS partition table         
+
+**p  print the partition table      列出分区表**
+
+**q  quit without saving changes       不保存，退出**
+
+s  create a new empty Sun disklabel      
+
+**t  change a partition's system id          改变分区类型**
+
+u  change display/entry units
+
+v  verify the partition table
+
+**w  write table to disk and exit       把分区表写入硬盘并退出**
+
+x  extra functionality (experts only)
+
+
+
+## 文件系统 （格式化磁盘）
+
+​     创建分区之后，分区还不可以使用，操作系统必须通过文件系统才能管理文件和数据，磁盘或分区需要创建文件系统之后才能为操作系统使用，创建文件系统的过程被称之为格式化。
+
+- 没有文件系统的设备被成为裸（raw）设备。
+- 常见的文件系统有fat32、NTFS、ext2、ext3、ext4、HFS等
+- 文件系统之间的区别：日志、支持的分区大小、支持的单个文件大小、性能等等
+- windows下主流文件系统是NTFS，Linux下主流文件系统是ext3、ext4
+
+ 
+
+Linux支持的文件系统
+
+​     **ext2     ext3     ext4     fat（msdos）     vfat**     
+
+​     **nfs       iso9660  proc     gfs       jfs    ......**
+
+ 
+
+**创建文件系统：**
+
+​     mke2fs [参数] -t [文件系统类型] 分区
+
+​     **参数：**
+
+​          **-b   blocksize      指定文件系统块大小**
+
+​          **-c                 建立文件系统时检查损坏块**
+
+​          **-L   lable              指定卷标**
+
+​          **-j                  建立文件系统日志（ext3、ext4默认建立日志）**
+
+​     mkfs也可以用于创建文件系统,支持参数较少，不能进行精细化
+
+​          mkfs.ext3     /dev/sdb1
+
+​          mkfs.ext4 /dev/sdb2
+
+​          mkfs.ext4 /dev/sdb1
+
+![img](https://images0.cnblogs.com/blog2015/500720/201507/071820476745666.png)
+
+**查看分区的文件系统的信息**
+
+```
+dumpe2fs /dev/sdb5
+```
+
+会列出sdb5分区下文件系统的详细信息
+
+**文件系统标签**
+
+给分区打上标签方便后期管理
+
+```
+e2label 分区   --- 显示分区标签，如果没有设置过，则显示为空
+
+e2label 分区 标签名  ---  给分区设置标签
+```
+
+**检查并修复文件系统**
+
+```
+fsck /dev/sda*
+```
+
+ 
+
+![img](https://images0.cnblogs.com/blog2015/500720/201507/071821040804854.png)
+
+ 
+
+**fsck -y /dev/sda\*   可以遇到错误不提示，直接修复**
+
+对于损坏的又修复成功但无法确定位置的文件，fsck会把这些数据放入lost+found目录中
+
+每次启动系统时候会对磁盘进行fsck操作
+
+ 
+
+
+
+## 挂载硬盘
+
+​     新硬盘分区完并且建立好文件系统之后，还需要挂载到一个目录上才可以使用
+
+​     Linux需要手动进行挂载操作或者配置/etc/fstab文件来自动挂载
+
+**手动挂载**
+
+​          使用命令
+
+```
+mount [参数] 挂载分区 挂载点
+```
+
+​        **常用参数：**
+
+​               **-t   指定文件系统的类型**
+
+​               **-o   指定挂载选项**
+
+​     挂载选项如图
+
+![img](https://images0.cnblogs.com/blog2015/500720/201507/081118131112107.png)
+
+​     使用命令
+
+```
+umount 文件系统或者挂载点
+```
+
+​    来卸载挂载的文件系统
+
+如果在卸载过程中出现**device is busy**报错，则表示这个文件系统正在被使用，无法卸载
+
+​     使用命令：
+
+```
+fuser -m /挂载目录
+```
+
+   来查看使用文件系统的进程
+
+​     使用命令
+
+```
+lsof 挂载目录
+```
+
+　　来查看正在被使用的文件
+
+**配置文件自动挂载**
+
+​     编辑/etc/fstab文件可以自动挂载文件系统到指定目录下格式如下
+
+![img](https://images0.cnblogs.com/blog2015/500720/201507/081118439712514.png)
