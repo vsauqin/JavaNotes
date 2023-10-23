@@ -4949,7 +4949,7 @@ public interface Calculable {
 
 
 @FunctionalInterface 注解与 @Override 注解的作用类似。Java 8 中专门为函数式接口引入了一个新的注解 @FunctionalInterface。该注解可用于一个接口的定义上，一旦使用该注解来定义接口，编译器将会强制检查该接口是否确实有且仅有一个抽象方法，否则将会报错。需要注意的是，即使不使用该注解，只要满足函数式接口的定义，这仍然是一个函数式接口，使用起来都一样。
- 
+
 
 提示：Lambda 表达式是一个匿名方法代码，Java 中的方法必须声明在类或接口中，那么 Lambda 表达式所实现的匿名方法是在函数式接口中声明的。
 
@@ -5805,7 +5805,616 @@ Iterator 迭代器采用的是快速失败（fail-fast）机制，一旦在迭�
 
 ## 9.17泛型
 
+集合被设计成可以存放任何类型的对象，但是存放之后集合会忘记存放的对象类型，因此导致了两个问题：
 
+1. 集合对元素类型没有任何限制，这样可能引发一些问题。例如，想创建一个只能保存 Dog 对象的集合，但程序也可以轻易地将 Cat 对象“丢”进去，所以可能引发异常。
+2. 由于把对象“丢进”集合时，集合丢失了对象的状态信息，集合只知道它盛装的是 Object，因此取出集合元素后通常还需要进行强制类型转换。这种强制类型转换既增加了编程的复杂度，也可能引发 ClassCastException 异常。
+
+
+
+所以为了解决上述问题，从 Java 1.5 开始提供了泛型。泛型可以在编译的时候检查类型安全，并且所有的强制转换都是自动和隐式的，提高了代码的重用率。
+
+
+
+### 泛型集合
+
+泛型本质上是提供类型的”类型参数“，也就是参数化类型。我们可以为类，接口，方法指定一个类型参数，通过这个参数显示操作的数据类型，从而保证类型转换的绝对安全
+
+**例一**
+
+下面将结合泛型与集合编写一个案例实现图书信息输出。
+
+1）首先需要创建一个表示图书的实体类 Book，其中包括的图书信息有图书编号、图书名称和价格。Book 类的具体代码如下：
+
+```java
+public class Book {
+    private int Id; // 图书编号
+    private String Name; // 图书名称
+    private int Price; // 图书价格
+    public Book(int id, String name, int price) { // 构造方法
+        this.Id = id;
+        this.Name = name;
+        this.Price = price;
+    }
+    public String toString() { // 重写 toString()方法
+        return this.Id + ", " + this.Name + "，" + this.Price;
+    }
+}
+```
+
+2）使用Book作为类型的创建Map和List两个泛型集合，然后象集合中添加图书元素，最后输出集合中的元素，代码如下
+
+```java
+public class Test14 {
+    public static void main(String[] args) {
+        // 创建3个Book对象
+        Book book1 = new Book(1, "唐诗三百首", 8);
+        Book book2 = new Book(2, "小星星", 12);
+        Book book3 = new Book(3, "成语大全", 22);
+        Map<Integer, Book> books = new HashMap<Integer, Book>(); // 定义泛型 Map 集合
+        books.put(1001, book1); // 将第一个 Book 对象存储到 Map 中
+        books.put(1002, book2); // 将第二个 Book 对象存储到 Map 中
+        books.put(1003, book3); // 将第三个 Book 对象存储到 Map 中
+        System.out.println("泛型Map存储的图书信息如下：");
+        for (Integer id : books.keySet()) {
+            // 遍历键
+            System.out.print(id + "——");
+            System.out.println(books.get(id)); // 不需要类型转换
+        }
+        List<Book> bookList = new ArrayList<Book>(); // 定义泛型的 List 集合
+        bookList.add(book1);
+        bookList.add(book2);
+        bookList.add(book3);
+        System.out.println("泛型List存储的图书信息如下：");
+        for (int i = 0; i < bookList.size(); i++) {
+            System.out.println(bookList.get(i)); // 这里不需要类型转换
+        }
+    }
+}
+```
+
+在该示例中，第 7 行代码创建了一个键类型为 Integer、值类型为 Book 的泛型集合，即指明了该 Map 集合中存放的键必须是 Integer 类型、值必须为 Book 类型，否则编译出错。在获取 Map 集合中的元素时，不需要将`books.get(id);`获取的值强制转换为 Book 类型，程序会隐式转换。在创建 List 集合时，同样使用了泛型，因此在获取集合中的元素时也不需要将`bookList.get(i)`代码强制转换为 Book 类型，程序会隐式转换。
+
+执行结果如下：
+
+```java
+泛型Map存储的图书信息如下：
+1001——1, 唐诗三百首，8
+1003——3, 成语大全，22
+1002——2, 小星星，12
+泛型List存储的图书信息如下：
+1, 唐诗三百首，8
+2, 小星星，12
+3, 成语大全，22
+```
+
+### 泛型类
+
+除了可以定义泛型集合之外，还可以直接限定泛型类的类型参数，语法格式如下
+
+```java
+public class class_name <data_typel,data_type2,...>{}
+```
+
+其中，class_name 表示类的名称，data_ type1 等表示类型参数。Java 泛型支持声明一个以上的类型参数，只需要将类型用逗号隔开即可。
+
+泛型类一般用于类中的属性类型不确定的情况下。在声明属性时，使用下面的语句：
+
+```java
+private data_type1 property_name1;
+private data_type2 property_name2;
+```
+
+该语句中的 data_type1 与类声明中的 data_type1 表示的是同一种数据类型。
+
+**例2** 
+
+在实例化泛型类时，需要指明泛型类中的类型参数，并赋予泛型类属性相应类型的值。例如，下面的示例代码创建了一个表示学生的泛型类，该类中包括 3 个属性，分别是姓名、年龄和性别。
+
+```java
+public class Stu<N, A, S> {
+    private N name; // 姓名
+    private A age; // 年龄
+    private S sex; // 性别
+    // 创建类的构造函数
+    public Stu(N name, A age, S sex) {
+        this.name = name;
+        this.age = age;
+        this.sex = sex;
+    }
+    // 下面是上面3个属性的setter/getter方法
+    public N getName() {
+        return name;
+    }
+    public void setName(N name) {
+        this.name = name;
+    }
+    public A getAge() {
+        return age;
+    }
+    public void setAge(A age) {
+        this.age = age;
+    }
+    public S getSex() {
+        return sex;
+    }
+    public void setSex(S sex) {
+        this.sex = sex;
+    }
+}
+```
+
+创建测试类
+
+```java
+public class Test14 {
+    public static void main(String[] args) {
+        Stu<String, Integer, Character> stu = new Stu<String, Integer, Character>("张晓玲", 28, '女');
+        String name = stu.getName();
+        Integer age = stu.getAge();
+        Character sex = stu.getSex();
+        System.out.println("学生信息如下：");
+        System.out.println("学生姓名：" + name + "，年龄：" + age + "，性别：" + sex);
+    }
+}
+```
+
+结果如下
+
+```java
+学生信息如下：
+学生姓名：张晓玲，年龄：28，性别：女
+```
+
+### 泛型方法
+
+泛型可以在类中包含参数化的方法，而方法所在的类可以是泛型类，也可以不是。也就是说，是否拥有泛型方法，于其所在类是不是泛型没有关系
+
+
+
+泛型方法是的该方法能够独立于类而产生变化。如果泛型方法可以取代类泛型化，那么就应该只使用泛型方法。
+
+
+
+对于一个static方法而言，无法访问泛型类的类型参数，因此如果static方法需要使用泛型能力，就必须使其成为泛型方法
+
+
+
+**定义泛型方法的语法格式如下：**
+
+```java
+[访问权限修饰符] [static] [final] <类型参数列表> 返回值类型 方法名([形式参数列表])
+```
+
+例如
+
+```java
+public static <T> List find (Class<T> cs,int userId){}
+```
+
+一般来说编写 Java 泛型方法，其返回值类型至少有一个参数类型应该是泛型，而且类型应该是一致的，如果只有返回值类型或参数类型之一使用了泛型，那么这个泛型方法的使用就被限制了。下面就来定义一个泛型方法，具体介绍泛型方法的创建和使用。
+
+**例三**
+
+使用泛型方法打印图书信息。定义泛型方法，参数类型使用“T”来代替。在方法的主体中打印出图书信息。代码的实现如下
+
+```java
+public class Test16 {
+    public static <T> void List(T book) { // 定义泛型方法
+        if (book != null) {
+            System.out.println(book);
+        }
+    }
+    public static void main(String[] args) {
+        Book stu = new Book(1, "细学 Java 编程", 28);
+        List(stu); // 调用泛型方法
+    }
+}
+```
+
+该程序中的 Book 类为前面示例中使用到的 Book 类。在该程序中定义了一个名称为 List 的方法，该方法的返回值类型为 void，类型参数使用“T”来代替。在调用该泛型方法时，将一个 Book 对象作为参数传递到该方法中，相当于指明了该泛型方法的参数类型为 Book。
+
+该程序的运行结果如下：
+
+```java
+1, 细学 Java 编程，28
+```
+
+### 泛型的高级用法
+
+#### 限制泛型可用类型
+
+在Java中默认可以使用任何类型来实例化一个泛型类对象，当然也可以对泛型类实例的类型进行限制，语法格式如下：
+
+```java
+calss 类名称 <T extends anyClass> 
+```
+
+其中，anyClass 指某个接口或类。使用泛型限制后，泛型类的类型必须实现或继承 anyClass 这个接口或类。无论 anyClass 是接口还是类，在进行泛型限制时都必须使用 extends 关键字。
+
+例如，在下面的示例代码中创建了一个 ListClass 类，并对该类的类型限制为只能是实现 List 接口的类。
+
+```java
+// 限制ListClass的泛型类型必须实现List接口
+public class ListClass<T extends List> {
+    public static void main(String[] args) {
+        // 实例化使用ArrayList的泛型类ListClass，正确
+        ListClass<ArrayList> lc1 = new ListClass<ArrayList>();
+        // 实例化使用LinkedList的泛型类LlstClass，正确
+        ListClass<LinkedList> lc2 = new ListClass<LinkedList>();
+        // 实例化使用HashMap的泛型类ListClass，错误，因为HasMap没有实现List接口
+        // ListClass<HashMap> lc3=new ListClass<HashMap>();
+    }
+}
+```
+
+在上述代码中，定义 ListClass 类时设置泛型类型必须实现 List 接口。例如，ArrayList 和 LinkedList 都实现了 List 接口，所以可以实例化 ListClass 类。而 HashMap 没有实现 List 接口，所以在实例化 ListClass 类时会报错。
+
+当没有使用 extends 关键字限制泛型类型时，其实是默认使用 Object 类作为泛型类型。因此，Object 类下的所有子类都可以实例化泛型类对象，如图 1 所示的这两种情况。
+
+
+
+![img](https://c.biancheng.net/uploads/allimg/181026/3-1Q026102419131.jpg)
+图1 两个等价的泛型类
+
+#### 适用类型通配符
+
+作用是创建一个泛型类对象时限制这个泛型类的而理性必须实现或是继承某个接口或类
+
+使用泛型类型通配符的语法格式如下：
+
+```java
+泛型类名称<? extends List>a = null;
+```
+
+其中<? extends List>作为一个整体表示类型未知，当需要泛型时单独实例化
+
+下面演示使用
+
+```jva
+A <? extends List>a = null;
+a = new A<ArrayList> ();    // 正确
+b = new A<LinkedList> ();    // 正确
+c = new A<HashMap> ();    // 错误
+```
+
+在上述代码中，同样由于 HashMap 类没有实现 List 接口，所以在编译时会报错。
+
+####  继承泛型类和实现泛型接口
+
+定义为泛型的类和接口也可以被继承和实现。例如下面的示例代码演示了如何继承泛型类。
+
+```java
+public class FatherClass<T1>{}
+public class SonClass<T1,T2,T3> extents FatherClass<T1>{}
+```
+
+如果要在 SonClass 类继承 FatherClass 类时保留父类的泛型类型，需要在继承时指定，否则直接使用 extends FatherClass 语句进行继承操作，此时 T1、T2 和 T3 都会自动变为 Object，所以一般情况下都将父类的泛型类型保留。
+
+下面的示例代码演示了如何在泛型中实现接口。
+
+```java
+
+interface interface1<T1>{}
+interface SubClass<T1,T2,T3> implements
+Interface1<T2>{}
+```
+
+
+
+
+
+## 9.18枚举
+
+枚举是一个被命名的整数常数集合，用于声明一组带标识符的常数。枚举在曰常生活中很常见，例如一个人的性别只能是“男”或者“女”，一周的星期只能是 7 天中的一个等。类似这种当一个变量有几种固定可能的取值时，就可以将它定义为枚举类型。
+
+
+
+### 声明枚举
+
+声明枚举时必须使用 enum 关键字，然后定义枚举的名称、可访问性、基础类型和成员等。枚举声明的语法如下：
+
+```java
+enum-modifiers enum enumname:enum-base {
+    enum-body,
+}
+```
+
+其中，enum-modifiers 表示枚举的修饰符主要包括 public、private 和 internal；enumname 表示声明的枚举名称；enum-base 表示基础类型；enum-body 表示枚举的成员，它是枚举类型的命名常数。
+
+**提示：如果没有显示的声明基础类型的枚举，那么意味着它所对应的基础类型时int**
+
+**例一**
+
+下面定义了一个表示性别的枚举类型SexEnum和一个表示颜色的枚举类型
+
+```java
+public enum SexEnum {
+    male,female;
+}
+public enum Color {
+    RED,BLUE,GREEN,BLACK;
+}
+```
+
+之后便可以通过枚举类型名直接引用常量，如：SexEnum.male
+
+使用枚举还可以使switch语句的可读性更强
+
+```java
+enum Signal {
+    // 定义一个枚举类型
+    GREEN,YELLOW,RED
+}
+public class TrafficLight {
+    Signal color = Signal.RED;
+    public void change() {
+        switch(color) {
+            case RED:
+                color = Signal.GREEN;
+                break;
+            case YELLOW:
+                color = Signal.RED;
+                break;
+            case GREEN:
+                color = Signal.YELLOW;
+                break;
+        }
+    }
+}
+```
+
+
+
+### 枚举类
+
+Java中所有的枚举都继承自java.lang.Enum类当定义一个枚举类型时，每一个枚举类型成员都可以看做是Enum类的实例，这些枚举成员默认都被final，public，static修饰，当使用枚举类型成员时，直接使用枚举名称调用成员即可
+
+
+
+所有枚举实例都可以调用Enum类的实例方法，常用方法如下
+
+| 方法名称    | 描述                               |
+| ----------- | ---------------------------------- |
+| values()    | 以数组的形式返回枚举类型的所有成员 |
+| valueOf()   | 将普通字符串转换为枚举实例         |
+| compareTo() | 比较两个枚举成员在定义时的顺序     |
+| ordinal（） | 获取枚举成员的索引位置             |
+
+**例二**
+
+通过调用枚举类型实例的 `values( ) 方法`可以将枚举的所有成员以数组形式返回，也可以通过该方法获取枚举类型的成员。
+
+下面的示例创建一个包含 3 个成员的枚举类型 Signal，然后调用 values() 方法输出这些成员。
+
+```java
+enum Signal{
+	GREEN,YELLOW,RED;
+}
+public static void main(String[] args) {
+    for(int i = 0;i < Signal.values().length;i++) {
+        System.out.println("枚举成员："+Signal.values()[i]);
+    }
+}
+```
+
+输出结果如下：
+
+```java
+枚举成员：GREEN
+枚举成员：YELLOW
+枚举成员：RED
+```
+
+**例三**
+
+```java
+public class TestEnum {
+    public enum Sex {
+        // 定义一个枚举
+        male,female;
+    }
+    public static void main(String[] args) {
+        compare(Sex.valueOf("male"));    // 比较
+    }
+    public static void compare(Sex s) {
+        for(int i = 0;i < Sex.values().length;i++) {
+            System.out.println(s + "与" + Sex.values()[i] + "的比较结果是：" + s.compareTo(Sex.values()[i]));
+        }
+    }
+}
+```
+
+上述代码中使用 Sex.valueOf("male") 取出枚举成员 male 对应的值，再将该值与其他枚举成员进行比较。最终输出结果如下：
+
+```java
+male与male的比较结果是：0
+male与female的比较结果是：-1
+```
+
+**例四**
+
+通过调用枚举类型实例的`ordinal() 方法`可以获取一个成员在枚举中的索引位置。下面的示例创建一个包含 3 个成员的枚举类型 Signal，然后调用 ordinal() 方法输出成员及对应索引位置。
+
+具体实现代码如下：
+
+```java
+public class TestEnum1 {
+    enum Signal {
+        // 定义一个枚举类型
+        GREEN,YELLOW,RED;
+    }
+    public static void main(String[] args) {
+        for(int i = 0;i < Signal.values().length;i++) {
+            System.out.println("索引" + Signal.values()[i].ordinal()+"，值：" + Signal.values()[i]);
+        }
+    }
+}
+```
+
+输出结果如下：
+
+```java
+索引0，值：GREEN
+索引1，值：YELLOW
+索引2，值：RED
+```
+
+### 为枚举添加方法
+
+Java 为枚举类型提供了一些内置的方法，同时枚举常量也可以有自己的方法。此时要注意必须在枚举实例的最后一个成员后添加分号，而且必须先定义枚举实例。
+
+**例5** 
+
+下面的代码创建了一个枚举类型 WeekDay，而且在该类型中添加了自定义的方法。
+
+```java
+enum WeekDay {
+    Mon("Monday"),Tue("Tuesday"),Wed("Wednesday"),Thu("Thursday"),Fri("Friday"),Sat("Saturday"),Sun("Sunday");
+    // 以上是枚举的成员，必须先定义，而且使用分号结束
+    private final String day;
+    private WeekDay(String day) {
+        this.day = day;
+    }
+    public static void printDay(int i) {
+        switch(i) {
+            case 1:
+                System.out.println(WeekDay.Mon);
+                break;
+            case 2:
+                System.out.println(WeekDay.Tue);
+                break;
+            case 3:
+                System.out.println(WeekDay.Wed);
+                break;
+            case 4:
+                System.out.println(WeekDay.Thu);
+                break;
+            case 5:
+                System.out.println(WeekDay.Fri);
+                break;
+            case 6:
+                System.out.println(WeekDay.Sat);
+                break;
+            case 7:
+                System.out.println(WeekDay.Sun);
+                break;
+            default:
+                System.out.println("wrong number!");
+        }
+    }
+    public String getDay() {
+        return day;
+    }
+}
+```
+
+
+
+上面代码创建了 WeekDay 枚举类型，下面遍历该枚举中的所有成员，并调用 printDay() 方法。示例代码如下
+
+```java
+public static void main(String[] args) {
+    for(WeekDay day : WeekDay.values()) {
+        System.out.println(day+"====>" + day.getDay());
+    }
+    WeekDay.printDay(5);
+}
+
+```
+
+输出结果如下：
+
+```java
+Mon====>Monday
+Tue====>Tuesday
+Wed====>Wednesday
+Thu====>Thursday
+Fri====>Friday
+Sat====>Saturday
+Sun====>Sunday
+Fri
+```
+
+Java 中的 enum 还可以跟 Class 类一样覆盖基类的方法。下面示例代码创建的 Color 枚举类型覆盖了 toString() 方法。
+
+```java
+public class Test {
+    public enum Color {
+        RED("红色",1),GREEN("绿色",2),WHITE("白色",3),YELLOW("黄色",4);
+        // 成员变量
+        private String name;
+        private int index;
+        // 构造方法
+        private Color(String name,int index) {
+            this.name = name;
+            this.index = index;
+        }
+        // 覆盖方法
+        @Override
+        public String toString() {
+            return this.index + "-" + this.name;
+        }
+    }
+    public static void main(String[] args) {
+        System.out.println(Color.RED.toString());    // 输出：1-红色
+    }
+}
+```
+
+### EunmMap和EnumSet
+
+#### EnumMap类
+
+EnumMap 是专门为枚举类型量身定做的 Map 实现。虽然使用其他的 Map（如 [HashMap](http://c-local.biancheng.net/view/1067.html)）实现也能完成枚举类型实例到值的映射，但是使用 EnumMap 会更加高效。
+
+*HashMap 只能接收同一枚举类型的实例作为键值*，并且由于枚举类型实例的数量相对固定并且有限，所以 EnumMap 使用数组来存放与枚举类型对应的值，使得 EnumMap 的效率非常高。
+
+**例六**
+
+```java
+// 定义数据库类型枚举
+public enum DataBaseType {
+    MYSQUORACLE,DB2,SQLSERVER
+}
+// 某类中定义的获取数据库URL的方法以及EnumMap的声明
+private EnumMap<DataBaseType,String>urls = new EnumMap<DataBaseType,String>(DataBaseType.class);
+public DataBaseInfo() {
+    urls.put(DataBaseType.DB2,"jdbc:db2://localhost:5000/sample");
+    urls.put(DataBaseType.MYSQL,"jdbc:mysql://localhost/mydb");
+    urls.put(DataBaseType.ORACLE,"jdbc:oracle:thin:@localhost:1521:sample");
+    urls.put(DataBaseType.SQLSERVER,"jdbc:microsoft:sqlserver://sql:1433;Database=mydb");
+}
+//根据不同的数据库类型，返回对应的URL
+// @param type DataBaseType 枚举类新实例
+// @return
+public String getURL(DataBaseType type) {
+    return this.urls.get(type);
+}
+```
+
+#### EnumSet类
+
+EnumSet是枚举类型的高性能Set实现，**它要求放入它的枚举常量必须属于同一枚举类型**。EnumSet 提供了许多工厂方法以便于初始化，如表 2 所示。
+
+| 方法名称                      | 描述                                                         |
+| ----------------------------- | ------------------------------------------------------------ |
+| allOf(Class<E> element type)  | 创建一个包含指定枚举类型中所有枚举成员的 EnumSet 对象        |
+| complementOf(EnumSet<E> s)    | 创建一个与指定 EnumSet 对象 s 相同的枚举类型 EnumSet 对象， 并包含所有 s 中未包含的枚举成员 |
+| copyOf(EnumSet<E> s)          | 创建一个与指定 EnumSet 对象 s 相同的枚举类型 EnumSet 对象， 并与 s 包含相同的枚举成员 |
+| noneOf(<Class<E> elementType) | 创建指定枚举类型的空 EnumSet 对象                            |
+| of(E first,e...rest)          | 创建包含指定枚举成员的 EnumSet 对象                          |
+| range(E from ,E to)           | 创建一个 EnumSet 对象，该对象包含了 from 到 to 之间的所有枚 举成员 |
+
+EnumSet 作为 Set 接口实现，它支持对包含的枚举常量的遍历。
+
+```java
+for(Operation op:EnumSet.range(Operation.PLUS,Operation.MULTIPLY)) {
+    doSomeThing(op);
+}
+```
+
+[java](www.baidu.com)
 
 # 10.反射机制
 
@@ -5948,5 +6557,439 @@ java.lang.reflect 包提供了反射中用到类，主要的类说明如下：
 
 # 11.输入输出流
 
-# 12.注解
+## 11.1流的概念
 
+在java 中所有数据都是使用流读写的。流是一组有序的数据序列，将数据从一个地方带到另一个地方。根据数据流向的不同，可以分为输入（Input）流和输出（Output）流两种。
+
+### 什么是输入/输出流
+
+输入就是将数据从各种输入设备（包括文件、键盘等）中读取到内存中，输出则正好相反，是将数据写入到各种输出设备（比如文件、显示器、磁盘等）。例如键盘就是一个标准的输入设备，而显示器就是一个标准的输出设备，但是文件既可以作为输入设备，又可以作为输出设备。
+
+数据流是 Java 进行 I/O 操作的对象，它按照不同的标准可以分为不同的类别。
+
+- 按照流的方向主要分为输入流和输出流两大类。
+- 数据流按照数据单位的不同分为字节流和字符流。
+- 按照功能可以划分为节点流和处理流。
+
+
+
+数据流的处理只能按照数据序列的顺序来进行，即前一个数据处理完之后才能处理后一个数据。数据流以输入流的形式被程序获取，再以输出流的形式将数据输出到其它设备。图 1 为输入流模式，图 2 为输出流模式。
+
+![输入流模式](https://c.biancheng.net/uploads/allimg/200115/5-200115142HWK.png)
+图 1 输入流模式
+
+![输出流模式](https://c.biancheng.net/uploads/allimg/200115/5-200115142K1644.png)
+图 2 输出流模式
+
+
+
+### 输入流
+
+Java 流相关的类都封装在 java.io 包中，而且每个数据流都是一个对象。所有输入流类都是 InputStream 抽象类（字节输入流）和 Reader 抽象类（字符输入流）的子类。其中 InputStream 类是字节输入流的抽象类，是所有字节输入流的父类，其层次结构如图 3 所示。
+
+
+
+![InputStream类的层次结构图](https://c.biancheng.net/uploads/allimg/200115/5-200115145253550.png)
+														图 3 InputStream类的层次结构图
+
+InputStream 类中所有方法遇到错误时都会引发 IOException 异常。如下是该类中包含的常用方法。
+
+| 名称                               | 作用                                                         |
+| ---------------------------------- | ------------------------------------------------------------ |
+| int read()                         | 从输入流读入一个 8 字节的数据，将它转换成一个 0~ 255 的整数，返回一个整数，如果遇到输入流的结尾返回 -1 |
+| int read(byte[] b)                 | 从输入流读取若干字节的数据保存到参数 b 指定的字节数组中，返回的字节数表示读取的字节数，如果遇到输入流的结尾返回 -1 |
+| int read(byte[] b,int off,int len) | 从输入流读取若干字节的数据保存到参数 b 指定的字节数组中，其中 off 是指在数组中开始保存数据位置的起始下标，len 是指读取字节的位数。返回的是实际读取的字节数，如果遇到输入流的结尾则返回 -1 |
+| void close()                       | 关闭数据流，当完成对数据流的操作之后需要关闭数据流           |
+| int available()                    | 返回可以从数据源读取的数据流的位数。                         |
+| skip(long n)                       | 从输入流跳过参数 n 指定的字节数目                            |
+| boolean markSupported()            | 判断输入流是否可以重复读取，如果可以就返回 true              |
+| void mark(int readLimit)           | 如果输入流可以被重复读取，从流的当前位置开始设置标记，readLimit 指定可以设置标记的字节数 |
+| void reset()                       | 使输入流重新定位到刚才被标记的位置，这样可以重新读取标记过的数据 |
+
+上述最后 3 个方法一般会结合在一起使用，首先使用 markSupported() 判断，如果可以重复读取，则使用 mark(int readLimit) 方法进行标记，标记完成之后可以使用 read() 方法读取标记范围内的字节数，最后使用 reset() 方法使输入流重新定位到标记的位置，继而完成重复读取操作。
+
+
+
+Java 中的字符是 Unicode 编码，即双字节的，而 InputerStream 是用来处理单字节的，在处理字符文本时不是很方便。这时可以使用 Java 的文本输入流 Reader 类，该类是字符输入流的抽象类，即所有字符输入流的实现都是它的子类，该类的方法与 InputerSteam 类的方法类似
+
+
+
+### 输出流
+
+在 Java 中所有输出流类都是 OutputStream 抽象类（字节输出流）和 Writer 抽象类（字符输出流）的子类。其中 OutputStream 类是字节输出流的抽象类，是所有字节输出流的父类，其层次结构如图 4 所示。
+
+![OutputStream类的层次结构图](https://c.biancheng.net/uploads/allimg/200115/5-200115151G3J0.png)
+													图 4 OutputStream 类的层次结构图
+
+
+
+OutputStream 类是所有字节输出流的超类，用于以二进制的形式将数据写入目标设备，该类是抽象类，不能被实例化。OutputStream 类提供了一系列跟数据输出有关的方法，如下所示。
+
+| 名称                                 | 作用                                                     |
+| ------------------------------------ | -------------------------------------------------------- |
+| int write(b)                         | 将指定字节的数据写入到输出流                             |
+| int write (byte[] b)                 | 将指定字节数组的内容写入输出流                           |
+| int write (byte[] b,int off,int len) | 将指定字节数组从 off 位置开始的 len 字节的内容写入输出流 |
+| close()                              | 关闭数据流，当完成对数据流的操作之后需要关闭数据流       |
+| flush()                              | 刷新输出流，强行将缓冲区的内容写入输出流                 |
+
+
+
+## 11.2java系统流
+
+每个 java 程序运行时都带有一个系统流，系统流对应的类为 java.lang.System。Sytem 类封装了 Java 程序运行时的 3 个系统流，分别通过 in、out 和 err 变量来引用。这 3 个系统流如下所示：
+
+- System.in：标准输入流，默认设备是键盘。
+- System.out：标准输出流，默认设备是控制台。
+- System.err：标准错误流，默认设备是控制台。
+
+以上变量为public和static，因此在程序的任何部分，都不需要引用System对象就可以使用
+
+**例一**
+
+演示如何使用System.in读取字节数组，使用System.out输出字节数组
+
+```java
+public class Test01 {
+    public static void main(String[] args) {
+        byte[] byteData = new byte[100]; // 声明一个字节数组
+        System.out.println("请输入英文：");
+        try {
+            System.in.read(byteData);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println("您输入的内容如下：");
+        for (int i = 0; i < byteData.length; i++) {
+            System.out.print((char) byteData[i]);
+        }
+    }
+}
+```
+
+结果如下
+
+```java
+请输入英文：
+abcdefg hijklmn opqrst uvwxyz
+您输入的内容如下：
+abcdefg hijklmn opqrst uvwxyz
+```
+
+System.in 是 InputStream 类的一个对象，因此上述代码的 System.in.read() 方法实际是访问 InputStream 类定义的 read() 方法。该方法可以从键盘读取一个或多个字符。对于 System.out 输出流主要用于将指定内容输出到控制台。
+
+System.out 和 System.error 是 PrintStream 类的对象。因为 PrintStream 是一个从 OutputStream 派生的输出流，所以它还执行低级别的 write() 方法。因此，除了 print() 和 println() 方法可以完成控制台输出以外，System.out 还可以调用 write() 方法实现控制台输出。
+
+
+
+write() 方法的简单形式如下：
+
+```java
+void write(int byteval) throws IOException
+```
+
+该方法通过 byteval 参数向文件写入指定的字节。在实际操作中，print() 方法和 println() 方法比 write() 方法更常用。
+
+注意：尽管它们通常用于对控制台进行读取和写入字符，但是这些都是字节流。因为预定义流是没有引入字符流的 Java 原始规范的一部分，所以它们不是字符流而是字节流，但是在 Java 中可以将它们打包到基于字符的流中使用。
+
+## 11.3字符编码介绍
+
+常见编码说明如下：
+
+- ISO8859-1：属于单字节编码，最多只能表示 0~255 的字符范围。
+- GBK/GB2312：中文的国标编码，用来表示汉字，属于双字节编码。GBK 可以表示简体中文和繁体中文，而 GB2312 只能表示简体中文。GBK 兼容 GB2312。
+- Unicode：是一种编码规范，是为解决全球字符通用编码而设计的。UTF-8 和 UTF-16 是这种规范的一种实现，此编码不兼容 ISO8859-1 编码。Java 内部采用此编码。
+- UTF：UTF 编码兼容了 ISO8859-1 编码，同时也可以用来表示所有的语言字符，不过 UTF 编码是不定长编码，每一个字符的长度为 1~6 个字节不等。一般在中文网页中使用此编码，可以节省空间。
+
+本地的默认编码可以使用 System 类查看。Java 中 System 类可以取得与系统有关的信息，所以直接使用此类可以找到系统的默认编码。方法如下所示：
+
+```java
+public static Properties getProperty()
+```
+
+使用上述方法可以查看 JVM 的默认编码，代码如下：
+
+```java
+public static void main(String[] args){
+	//获取当前系统编码
+	System.out.println("系统默认编码：" + System.getProperty("file.encoding"));
+}
+```
+
+
+
+运行结果如下
+
+```java
+系统默认编码：GBK
+```
+
+可以看出，现在操作系统的默认编码是 GBK。
+
+下面通过一个示例讲解乱码的产生。现在本地的默认编码是 GBK，下面通过 ISO8859-1 编码对文字进行编码转换。如果要实现编码的转换可以使用 String 类中的 getBytes(String charset) 方法，此方法可以设置指定的编码，该方法的格式如下：
+
+```java
+public byte[] getBytes(String charset);
+```
+
+示例如下
+
+```java
+public class Test {
+    public static void main(String[] args) throws Exception {
+        File f = new File("D:" + File.separator + "test.txt");
+        // 实例化输出流
+        OutputStream out = new FileOutputStream(f);
+        // 指定ISO8859-1编码
+        byte b[] = "你好世界！".getBytes("ISO8859-1");
+        // 保存转码之后的数据
+        out.write(b);
+        // 关闭输出流
+        out.close();
+    }
+}
+```
+
+结果是文件乱码
+
+## 11.4File类
+
+在Java中file类是唯一代表磁盘文件本身的对象，也就是说如果希望在程序中操作文件和目录，都可以通过File来完成
+
+
+
+File类不能访问文件本身，如果需要访问文件本身，则需要使用输入输出流
+
+
+
+File 类提供了如下三种形式构造方法。
+
+1. File(String path)：如果 path 是实际存在的路径，则该 File 对象表示的是目录；如果 path 是文件名，则该 File 对象表示的是文件。
+2. File(String path, String name)：path 是路径名，name 是文件名。
+3. File(File dir, String name)：dir 是路径对象，name 是文件名
+
+使用任意一个构造方法都可以创建一个 File 对象，然后调用其提供的方法对文件进行操作。在表 1 中列出了 File 类的常用方法及说明。
+
+| 方法名称                      | 说明                                                         |
+| ----------------------------- | ------------------------------------------------------------ |
+| boolean canRead()             | 测试应用程序是否能从指定的文件中进行读取                     |
+| boolean canWrite()            | 测试应用程序是否能写当前文件                                 |
+| boolean delete()              | 删除当前对象指定的文件                                       |
+| boolean exists()              | 测试当前 File 是否存在                                       |
+| String getAbsolutePath()      | 返回由该对象表示的文件的绝对路径名                           |
+| String getName()              | 返回表示当前对象的文件名或路径名（如果是路径，则返回最后一级子路径名） |
+| String getParent()            | 返回当前 File 对象所对应目录（最后一级子目录）的父目录名     |
+| boolean isAbsolute()          | 测试当前 File 对象表示的文件是否为一个绝对路径名。该方法消除了不同平台的差异，可以直接判断 file 对象是否为绝对路径。在 UNIX/Linux/BSD 等系统上，如果路径名开头是一条斜线`/`，则表明该 File 对象对应一个绝对路径；在 Windows 等系统上，如果路径开头是盘符，则说明它是一个绝对路径。 |
+| boolean isDirectory()         | 测试当前 File 对象表示的文件是否为一个路径                   |
+| boolean isFile()              | 测试当前 File 对象表示的文件是否为一个“普通”文件             |
+| long lastModified()           | 返回当前 File 对象表示的文件最后修改的时间                   |
+| long length()                 | 返回当前 File 对象表示的文件长度                             |
+| String[] list()               | 返回当前 File 对象指定的路径文件列表                         |
+| String[] list(FilenameFilter) | 返回当前 File 对象指定的目录中满足指定过滤器的文件列表       |
+| boolean mkdir()               | 创建一个目录，它的路径名由当前 File 对象指定                 |
+| boolean mkdirs()              | 创建一个目录，它的路径名由当前 File 对象指定                 |
+| boolean renameTo(File)        | 将当前 File 对象指定的文件更名为给定参数 File 指定的路径名   |
+
+File 类中有以下两个常用常量：
+
+- public static final String pathSeparator：指的是分隔连续多个路径字符串的分隔符，Windows 下指`;`。例如 `java -cp test.jar;abc.jar HelloWorld`。
+- public static final String separator：用来分隔同一个路径字符串中的目录的，Windows 下指`/`。例如 `C:/Program Files/Common Files`。
+
+注意：可以看到 File 类的常量定义的命名规则不符合标准命名规则，常量名没有全部大写，这是因为 Java 的发展经过了一段相当长的时间，而命名规范也是逐步形成的，File 类出现较早，所以当时并没有对命名规范有严格的要求，这些都属于 Java 的历史遗留问题。
+
+> Windows 的路径分隔符使用反斜线“\”，而 Java 程序中的反斜线表示转义字符，所以如果需要在 Windows 的路径下包括反斜线，则应该使用两条反斜线或直接使用斜线“/”也可以。Java 程序支持将斜线当成平台无关的路径分隔符。
+
+假设在 Windows 操作系统中有一文件 `D:\javaspace\hello.java`，在 Java 中使用的时候，其路径的写法应该为 `D:/javaspace/hello.java` 或者 `D:\\javaspace\\hello.java`。
+
+
+
+### 获取文件属性
+
+获取文件属性的第一步是先创建一个File对象并指向那个已经存在的文件，然后调用表一的方法进行操作
+
+**例1** 
+
+假设有一个文件位于 `C:\windows\notepad.exe`。编写 Java 程序获取并显示该文件的长度、是否可写、最后修改日期以及文件路径等属性信息。实现代码如下：
+
+```java
+public class Test02 {
+    public static void main(String[] args) {
+        String path = "C:/windows/"; // 指定文件所在的目录
+        File f = new File(path, "notepad.exe"); // 建立File变量,并设定由f变量引用
+        System.out.println("C:\\windows\\notepad.exe文件信息如下：");
+        System.out.println("============================================");
+        System.out.println("文件长度：" + f.length() + "字节");
+        System.out.println("文件或者目录：" + (f.isFile() ? "是文件" : "不是文件"));
+        System.out.println("文件或者目录：" + (f.isDirectory() ? "是目录" : "不是目录"));
+        System.out.println("是否可读：" + (f.canRead() ? "可读取" : "不可读取"));
+        System.out.println("是否可写：" + (f.canWrite() ? "可写入" : "不可写入"));
+        System.out.println("是否隐藏：" + (f.isHidden() ? "是隐藏文件" : "不是隐藏文件"));
+        System.out.println("最后修改日期：" + new Date(f.lastModified()));
+        System.out.println("文件名称：" + f.getName());
+        System.out.println("文件路径：" + f.getPath());
+        System.out.println("绝对路径：" + f.getAbsolutePath());
+    }
+}
+```
+
+### 删除和创建文件
+
+File不仅可以获取已知文件的属性和信息，还能指定路径创建文件，创建文件的同时需要使用createNewFile（）方法，删除文件需要调用create（）方法，无论是创建还是删除都要先调用exists（）方法判断文件是否存在
+
+**例二**
+
+假设要在C盘上创建一个test.txt文件，程序启动时回自动检测该文件是否存在，不过不存在就创建，如果存在就删除在创建
+
+```java
+public class Test03 {
+    public static void main(String[] args) throws IOException {
+        File f = new File("C:\\test.txt"); // 创建指向文件的File对象
+        if (f.exists()) // 判断文件是否存在
+        {
+            f.delete(); // 存在则先删除
+        }
+        f.createNewFile(); // 再创建
+    }
+}
+```
+
+运行程序之后可以发现，在 C 盘中已经创建好了 test.txt 文件。但是如果在不同的操作系统中，路径的分隔符是不一样的，例如：
+
+- Windows 中使用反斜杠`\`表示目录的分隔符。
+- Linux 中使用正斜杠`/`表示目录的分隔符。
+
+那么既然 Java 程序本身具有可移植性的特点，则在编写路径时最好可以根据程序所在的操作系统自动使用符合本地操作系统要求的分隔符，这样才能达到可移植性的目的。要实现这样的功能，则就需要使用 File 类中提供的两个常量。
+
+代码修改如下：
+
+```java
+public static void main(String[] args) throws IOException {
+    String path = "C:" + File.separator + "test.txt"; // 拼凑出可以适应操作系统的路径
+    File f = new File(path);
+    if (f.exists()) // 判断文件是否存在
+    {
+        f.delete(); // 存在则先删除
+    }
+    f.createNewFile(); // 再创建
+}
+```
+
+程序的运行结果和前面程序一样，但是此时的程序可以在任意的操作系统中使用。
+
+注意：在操作文件时一定要使用 File.separator 表示分隔符。在程序的开发中，往往会使用 Windows 开发环境，因为在 Windows 操作系统中支持的开发工具较多，使用方便，而在程序发布时往往是直接在 Linux 或其它操作系统上部署，所以这时如果不使用 File.separator，则程序运行就有可能存在问题。关于这一点我们在以后的开发中一定要有所警惕。
+
+### 创建和删除目录
+
+File 类除了对文件的创建和删除外，还可以创建和删除目录。创建目录需要调用 mkdir() 方法，删除目录需要调用 delete() 方法。无论是创建还是删除目录都可以调用 exists() 方法判断目录是否存在。
+
+**例三**
+
+编写一个程序判断 C 盘根目录下是否存在 config 目录，如果存在则先删除再创建。实现代码如下：
+
+```java
+public class Test04 {
+    public static void main(String[] args) {
+        String path = "C:/config/"; // 指定目录位置
+        File f = new File(path); // 创建File对象
+        if (f.exists()) {
+            f.delete();
+        }
+        f.mkdir(); // 创建目录
+    }
+}
+```
+
+### 遍历目录
+
+通过遍历目录可以在指定的目录中查找文件，或者显示所有的文件列表。File 类的 list() 方法提供了遍历目录功能，该方法有如下两种重载形式。
+
+#### 1. String[] list()
+
+该方法表示返回由 File 对象表示目录中所有文件和子目录名称组成的字符串数组，如果调用的 File 对象不是目录，则返回 null。
+
+提示：list() 方法返回的数组中仅包含文件名称，而不包含路径。但不保证所得数组中的相同字符串将以特定顺序出现，特别是不保证它们按字母顺序出现。
+
+#### 2. String[] list(FilenameFilter filter)
+
+该方法的作用与 list() 方法相同，不同的是返回数组中仅包含符合 filter 过滤器的文件和目录，如果 filter 为 null，则接受所有名称。
+
+**例四**
+
+遍历C盘下的所有文件和目录，并显示文件或者目录名，类型以及大小
+
+```java
+public class Test05 {
+    public static void main(String[] args) {
+        File f = new File("C:/"); // 建立File变量,并设定由f变量变数引用
+        System.out.println("文件名称\t\t文件类型\t\t文件大小");
+        System.out.println("===================================================");
+        String fileList[] = f.list(); // 调用不带参数的list()方法
+        for (int i = 0; i < fileList.length; i++) { // 遍历返回的字符数组
+            System.out.print(fileList[i] + "\t\t");
+            System.out.print((new File("C:/", fileList[i])).isFile() ? "文件" + "\t\t" : "文件夹" + "\t\t");
+            System.out.println((new File("C:/", fileList[i])).length() + "字节");
+        }
+    }
+}
+```
+
+由于 list() 方法返回的字符数组中仅包含文件名称，因此为了获取文件类型和大小，必须先转换为 File 对象再调用其方法。如下所示的是实例的运行效果
+
+```java
+$Recycle.Bin		文件夹		4096字节
+$WinREAgent		文件夹		0字节
+appverifUI.dll		文件		112080字节
+Documents and Settings		文件夹		4096字节
+DumpStack.log		文件		12288字节
+DumpStack.log.tmp		文件		12288字节
+hiberfil.sys		文件		6548586496字节
+jetbrains-agent.jar		文件		2248607字节
+JetBrainsCrack		文件夹		0字节
+KuGou		文件夹		0字节
+OneDriveTemp		文件夹		0字节
+pagefile.sys		文件		8321499136字节
+PerfLogs		文件夹		0字节
+Program Files		文件夹		8192字节
+Program Files (x86)		文件夹		8192字节
+ProgramData		文件夹		8192字节
+Recovery		文件夹		0字节
+SteamLibrary		文件夹		4096字节
+swapfile.sys		文件		16777216字节
+System Volume Information		文件夹		8192字节
+Users		文件夹		4096字节
+vfcompat.dll		文件		66160字节
+Windows		文件夹		16384字节
+
+```
+
+**例五**
+
+假设希望只列出目录下的某些文件，这就需要调用带过滤器参数的 list() 方法。首先需要创建文件过滤器，该过滤器必须实现 `java.io.FilenameFilter` 接口，并在 accept() 方法中指定允许的文件类型。
+
+如下所示为允许 SYS、TXT 和 BAK 格式文件的过滤器实现代码：
+
+```java
+public class ImageFilter implements FilenameFilter {
+    // 实现 FilenameFilter 接口
+    @Override
+    public boolean accept(File dir, String name) {
+        // 指定允许的文件类型
+        return name.endsWith(".sys") || name.endsWith(".txt") || name.endsWith(".bak");
+    }
+}
+```
+
+上述代码创建的过滤器名称为 ImageFilter，接下来只需要将该名称传递给 list() 方法即可实现筛选文件。如下所示为修改后的 list() 方法，其他代码与例 4 相同，这里不再重复。
+
+```java
+String fileList[] = f.list(new ImageFilter());
+```
+
+再次运行程序，遍历结果如下所示：
+
+```java
+文件名称        文件类型        文件大小
+===================================================
+offline_FtnInfo.txt        文件        296字节
+pagefile.sys        文件        8436592640字节
+```
