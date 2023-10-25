@@ -509,3 +509,87 @@ Linux中一切皆文件
 - 常用选项：
   - -p:显示进程的PID
   - -u：显示进程的所属用户
+
+## 服务管理
+
+- 服务的本质就是进程，但是是运行在后台，通常都会监听某个端口，等待其他程序的请求，比如（mysql，sshd，防火墙等），因此我们又称为守护进程
+- service管理命令：
+  - service  服务名  [start|stop|restart|reload|status]
+  - service指令管理的服务在 /etc/init.d查看
+
+- Linux的其中运行级别
+  - 0：系统停机状态，系统默认不能设为0，否则不能正常启动
+  - 1：单用户工作状态，root权限，用于系统维护，进制远程登录
+  - 2：多用户状态（没有NFS），不支持网络
+  - 3：完全的多用户状态（有NFS），无界面，登陆后进入控制台命令行模式
+  - 4：系统未使用，保留
+  - 5：X11控制台，登陆后进入图形GUI模式
+  - 6：系统正常关闭并重启，默认运行级别不能设为6，否则不能正常启动
+
+- 设置成5级别：systemd  set-default  graphical.target
+- 设置成3级别：systemd  set-default  multi-user.target
+
+
+
+___
+
+- chkconfig指令
+  - 介绍
+    - chkconfig命令可以给服务的各个运行级别设置自启动或是关闭
+    - chkconfig指令管理的服务在/etc/init.d查看
+  - chkconfig基本语法
+    - 查看服务：chkconfig  --list  [| grep  xxx]
+    - chkconfig  服务名  --list
+    - chkconfig  --level  5  服务名  on/off
+- systemctl指令
+  - 基本语法：systemctl  [start|stop|restart|staus]  服务名
+  - systenctl指令在/user/lib/systemd/system查看
+  - systemctl设置服务的自启动状态
+    - systemctl list-unit-files [|grep  服务名] （查看服务开机启动状态）
+    - systemctl  enable  服务名  （设置服务开机启动）
+    - systemctl  disable  服务名  （关闭服务开机启动）
+    - systemctl  is-enable  服务名  （查询某个服务是否自启动）
+- firewall指令
+  - 查看端口协议：netstat -anp |more
+  - 打开端口：firewall-cmd  --permanent --add-port=端口号/协议
+  - 关闭端口：firewall-cmd  --permanent --remove-port=端口号/协议
+  - 重新载入才能生效：firewall-cmd --reload
+  - 查询端口是否开放：firewall-cmd --query-port=端口/协议
+
+## 动态监控进程
+
+- top和ps命令相似，他们都用来显示正在执行的进程。最大的不同是，top在指定一段时间可以更新正在运行的进程
+- 基本语法：top  [选项]
+- 选项说明
+  - -d 秒数：指定功能每隔几秒更新。默认是三秒
+  - -i:使top不显示任何闲置或是僵死的进程
+  - -p：通过指定监控进程id来仅仅监控某个进程的状态
+
+- 交互操作说明：
+  - P:以cpu使用率排序，默认就是此项
+  - M:以内存的使用率来排序
+  - N:以PID排序
+  - q：退出top
+
+
+
+# 11.rpm包管理
+
+- rpm包的简单查询指令：rpm  -qa |grep  xx
+- 其他查询指令
+  - rpm -qa：查询所安装的所有rpm软件包
+  - rpm -q  软件包名：查询软件包是否安装
+  - rpm -qi  软件包名：查询软件包信息
+  - rpm  -ql  软件包名：查询软件包中的文件
+  - rpm  -qf  文件全路径名：查询文件所属的软件包
+
+- 写在rpm包：rpm  -e  包名
+  - 强制删除：添加--nodeps参数
+- 安装rpm包：rpm  -ivh  包的全路径
+  - 参数说明
+  - i：install  安装
+  - v：verbose  提示
+  - h：hash  进度条
+
+## yum
+
