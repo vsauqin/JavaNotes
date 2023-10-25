@@ -5124,6 +5124,240 @@ try{
 }
 ```
 
+## 8.4try...catch语句详解
+
+语法格式如下：
+
+```java
+try{
+	//可能发生异常的语句
+}catch（Exception e）{
+	//处理异常语句
+}
+```
+
+在以上语法中，把可能引发异常的语句封装在 try 语句块中，用以捕获可能发生的异常。catch 后的`( )`里放匹配的异常类，指明 catch 语句可以处理的异常类型，发生异常时产生异常类的实例化对象。
+
+如果 try 语句块中发生异常，那么一个相应的异常对象就会被拋出，然后 catch 语句就会依据所拋出异常对象的类型进行捕获，并处理。处理之后，程序会跳过 try 语句块中剩余的语句，转到 catch 语句块后面的第一条语句开始执行。
+
+如果 try 语句块中没有异常发生，那么 try 块正常结束，后面的 catch 语句块被跳过，程序将从 catch 语句块后的第一条语句开始执行。
+
+
+
+注意：try...catch 与 if...else 不一样，try 后面的花括号`{ }`不可以省略，即使 try 块里只有一行代码，也不可省略这个花括号。与之类似的是，catch 块后的花括号`{ }`也不可以省略。另外，try 块里声明的变量只是代码块内的局部变量，它只在 try 块内有效，其它地方不能访问该变量。
+
+
+
+在上面语法的处理代码块 1 中，可以使用以下 3 个方法输出相应的异常信息。
+
+- printStackTrace() 方法：指出异常的类型、性质、栈层次及出现在程序中的位置
+- getMessage() 方法：输出错误的性质。
+- toString() 方法：给出异常的类型与性质。
+
+
+
+**例一**
+
+```java
+import java.util.Scanner;
+public class Test02 {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("---------学生信息录入---------------");
+        String name = ""; // 获取学生姓名
+        int age = 0; // 获取学生年龄
+        String sex = ""; // 获取学生性别
+        try {
+            System.out.println("请输入学生姓名：");
+            name = scanner.next();
+            System.out.println("请输入学生年龄：");
+            age = scanner.nextInt();
+            System.out.println("请输入学生性别：");
+            sex = scanner.next();
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("输入有误！");
+        }
+        System.out.println("姓名：" + name);
+        System.out.println("年龄：" + age);
+    }
+}
+```
+
+上述代码在 main() 方法中使用 try catch 语句来捕获异常，将可能发生异常的`age = scanner.nextlnt();`代码放在了 try 块中，在 catch 语句中指定捕获的异常类型为 Exception，并调用异常对象的 printStackTrace() 方法输出异常信息。运行结果如下所示。
+
+```java
+---------学生信息录入---------------
+请输入学生姓名：
+徐白
+请输入学生年龄：
+110a
+java.util.InputMismatchException
+    at java.util.Scanner.throwFor(Unknown Source)
+    at java.util.Scanner.next(Unknown Source)
+    at java.util.Scanner.nextInt(Unknown Source)
+    at java.util.Scanner.nextInt(Unknown Source)
+输入有误！
+姓名：徐白
+年龄：0
+    at text.text.main(text.java:19)
+```
+
+### 多重catch语句
+
+如果try代码中有很多语句会发生异常，而且异常的种类很多。那么可以在try后面跟多个catch代码块，代码格式如下：
+
+```java
+try {
+    // 可能会发生异常的语句
+} catch(ExceptionType e) {
+    // 处理异常语句
+} catch(ExceptionType e) {
+    // 处理异常语句
+} catch(ExceptionType e) {
+    // 处理异常语句
+...
+}
+```
+
+在多个 catch 代码块的情况下，当一个 catch 代码块捕获到一个异常时，其它的 catch 代码块就不再进行匹配。
+
+注意：当捕获的多个异常类之间存在父子关系时，捕获异常时一般先捕获子类，再捕获父类。所以子类异常必须在父类异常的前面，否则子类捕获不到。
+
+**例二**
+
+```java
+public class Test03 {
+    public static void main(String[] args) {
+        Date date = readDate();
+        System.out.println("读取的日期 = " + date);
+    }
+    public static Date readDate() {
+        FileInputStream readfile = null;
+        InputStreamReader ir = null;
+        BufferedReader in = null;
+        try {
+            readfile = new FileInputStream("readme.txt");
+            ir = new InputStreamReader(readfile);
+            in = new BufferedReader(ir);
+            // 读取文件中的一行数据
+            String str = in.readLine();
+            if (str == null) {
+                return null;
+            }
+            DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+            Date date = df.parse(str);
+            return date;
+        } catch (FileNotFoundException e) {
+            System.out.println("处理FileNotFoundException...");
+            e.printStackTrace();
+        } catch (IOException e) {
+            System.out.println("处理IOException...");
+            e.printStackTrace();
+        } catch (ParseException e) {
+            System.out.println("处理ParseException...");
+            e.printStackTrace();
+        }
+        return null;
+    }
+}
+```
+
+在 try 代码块中第 12 行代码调用 FileInputStream 构造方法可能会发生 FileNotFoundException 异常。第 16 行代码调用 BufferedReader 输入流的 readLine() 方法可能会发生 IOException 异常。FileNotFoundException 异常是 IOException 异常的子类，应该先捕获 FileNotFoundException 异常，见代码第 23 行；后捕获 IOException 异常，见代码第 26 行。
+
+如果将 FileNotFoundException 和 IOException 捕获顺序调换，那么捕获 FileNotFoundException 异常代码块将永远不会进入，FileNotFoundException 异常处理永远不会执行。 上述代码第 29 行 ParseException 异常与 IOException 和 FileNotFoundException 异常没有父子关系，所以捕获 ParseException 异常位置可以随意放置。
+
+## 8.5try...catch...finally语句
+
+实际中try  catch语句执行时语句块不能完全被执行，而有些处理的代码块要求必须被执行。如打开的一些物理资源必须显式回收
+
+**Java中的垃圾回收机制不会回收任何物理资源，只回收堆内存中对象占用的内存**
+
+finally 语句可以与前面介绍的 [try catch](http://c-local.biancheng.net/view/6732.html) 语句块匹配使用，语法格式如下：
+
+```java
+try {
+    // 可能会发生异常的语句
+} catch(ExceptionType e) {
+    // 处理异常语句
+} finally {
+    // 清理代码块
+}
+```
+
+对于以上格式，无论是否发生异常（除特殊情况外），finally 语句块中的代码都会被执行。此外，finally 语句也可以和 try 语句匹配使用，其语法格式如下：
+
+```java
+try {
+    // 逻辑代码块
+} finally {
+    // 清理代码块
+}
+```
+
+使用try-catch-finally语句需要注意以下几点：
+
+1. 异常处理语法中只有try块是必须的，也就是说没有try后面的catch和finally也不能有
+2. catch块和finally块都是可选的，但是必须出现其中之一，或者同时出现
+3. 可以有多个catch块捕获父类异常，但是父类异常必须放在子类异常后面
+4. 三个出现顺序必须是先try再catch在finally
+
+try catch finally 语句块的执行情况可以细分为以下 3 种情况：
+
+1. 如果 try 代码块中没有拋出异常，则执行完 try 代码块之后直接执行 finally 代码块，然后执行 try catch finally 语句块之后的语句。
+2. 如果 try 代码块中拋出异常，并被 catch 子句捕捉，那么在拋出异常的地方终止 try 代码块的执行，转而执行相匹配的 catch 代码块，之后执行 finally 代码块。如果 finally 代码块中没有拋出异常，则继续执行 try catch finally 语句块之后的语句；如果 finally 代码块中拋出异常，则把该异常传递给该方法的调用者。
+3. 如果 try 代码块中拋出的异常没有被任何 catch 子句捕捉到，那么将直接执行 finally 代码块中的语句，并把该异常传递给该方法的调用者。
+
+
+
+**例一**
+
+当Windows系统启动之后，不做任何操作，在关机时都会显示“谢谢使用”，下面展示这个过程
+
+```java
+import java.util.Scanner;
+public class Test04 {
+    public static void main(String[] args) {
+        Scanner input = new Scanner(System.in);
+        System.out.println("Windows 系统已启动！");
+        String[] pros = { "记事本", "计算器", "浏览器" };
+        try {
+            // 循环输出pros数组中的元素
+            for (int i = 0; i < pros.length; i++) {
+                System.out.println(i + 1 + "：" + pros[i]);
+            }
+            System.out.println("是否运行程序：");
+            String answer = input.next();
+            if (answer.equals("y")) {
+                System.out.println("请输入程序编号：");
+                int no = input.nextInt();
+                System.out.println("正在运行程序[" + pros[no - 1] + "]");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            System.out.println("谢谢使用!");
+        }
+    }
+}
+```
+
+上述代码在 main() 方法中使用 try catch finally 语句模拟了系统的使用过程。当系统启动之后显示提示语，无论是否运行了程序，或者在运行程序时出现了意外，程序都将执行 finally 块中的语句，即显示“谢谢使用！”。输出时的结果如下所示。
+
+```java
+Windows 系统已启动！
+1：记事本
+2：计算器
+3：浏览器
+是否运行程序：
+y
+请输入程序编号：
+5
+谢谢使用!
+java.lang.ArrayIndexOutOfBoundsException: 4
+    at text.text.main(text.java:23)
+```
+
 
 
 # 9.Java集合，泛型和枚举
