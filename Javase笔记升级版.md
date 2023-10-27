@@ -5358,7 +5358,199 @@ java.lang.ArrayIndexOutOfBoundsException: 4
     at text.text.main(text.java:23)
 ```
 
+## 8.6finally和return的执行顺序
 
+### 第一种情况
+
+try语句块中有return语句，catch和finally语句块里面都没有return
+
+示例代码
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        System.out.println(test1());
+    }
+    public static int test1() {
+        int i =10;
+        try {
+            System.out.println("try语句");
+            return --i;
+        }
+        catch (Exception e) {
+            System.out.println("catch语句");
+        }
+        finally {
+            System.out.println("finally语句");
+        }
+    return 0;
+    }
+}
+```
+
+运行结果
+
+```
+try语句
+finally语句
+9
+```
+
+执行顺序：
+
+1. 先执行try块中的语句，包括return语句中的运算表达式，但是不返回
+2. 执行finally语句块中的全部代码
+3. 最有执行try块中的return返回
+
+
+
+### 第二种情况
+
+try语句块和finally语句块里面有return语句，catch语句块里面没有return
+
+示例代码如下
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        System.out.println(test2());
+    }
+    public static int test2() {
+        int i =10;
+        try {
+            System.out.println("try语句");
+            return --i;
+        }
+        catch (Exception e) {
+            System.out.println("catch语句");
+        }
+        finally {
+            System.out.println("finally语句");
+            return --i;
+        }
+    }
+}
+```
+
+运行结果如下
+
+```
+try语句
+finally语句
+8
+```
+
+执行顺序：
+
+1. 先执行try块中的语句，包括return，但是不返回
+2. 执行finally语句块中的全部代码
+3. 最后发现finally语句块中有return语句，从这里返回
+
+
+
+### 第三种情况
+
+try和catch语句块中有return语句，finally语句块里面没有return语句，存在异常
+
+示例代码如下
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        System.out.println(test3());
+    }
+    public static int test3() {
+        int i =10;
+        try {
+            System.out.println("try语句");
+            int j = 10 / 0;
+            return --i;
+        }
+        catch (Exception e) {
+            System.out.println("catch语句");
+            return --i;
+        }
+        finally {
+            System.out.println("finally语句");
+        }
+    }
+}
+```
+
+运行结果如下：
+
+```
+try语句
+catch语句
+finally语句
+9
+```
+
+执行顺序：
+
+1. 先执行try块中的语句，出现异常，catch捕获异常
+2. 执行catch块中的语句，包括return语句中的表达式运算，但是不返回
+3. 执行finally语句块中的全部代码
+4. 最后执行catch块中的return返回
+
+### 第四种情况
+
+try语句块，catch语句块和finally语句块里面都有return语句，存在异常
+
+示例代码如下
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        System.out.println(test4());
+    }
+    public static int test4() {
+        int i =10;
+        try {
+            System.out.println("try语句");
+            int j = 10 / 0;
+            return --i;
+        }
+        catch (Exception e) {
+            System.out.println("catch语句");
+            return --i;
+        }
+        finally {
+            System.out.println("finally语句");
+            return --i;
+        }
+    }
+}
+```
+
+运行结果
+
+```
+try语句
+catch语句
+finally语句
+8
+```
+
+执行顺序：
+
+1.先执行try块中语句，出现异常，catch捕获到异常。
+
+2.执行catch块中语句，包括return语句中的表达式运算，但不返回。
+
+3.执行finally语句块中的全部代码。
+
+4.最后发现finally语句块中有return语句，从这里返回。
+
+
+
+### 总结
+
+1. finally语句在return语句执行之后return语句返回之前执行
+2. finally块中的return语句会覆盖try块中的return返回
+3. 如果fianlly语句块中没有return语句覆盖返回值，那么原来的返回值可能因俄日finally里的修改而改变也可能不变
+4. try块里的return语句在存在异常的情况下不会执行，具体返回哪个值看情况
+5. 当异常发生后，catch中的return执行情况与未发生异常的try中的return的执行情况完全一样
 
 # 9.Java集合，泛型和枚举
 
