@@ -1,5 +1,7 @@
 SSM
 
+[快速掌握：全新SSM+Spring Boot+MyBatis-Plus实战精讲 (wolai.com)](https://www.wolai.com/v5Kuct5ZtPeVBk4NBUGBWF)
+
 ---
 
 # 一、Maven简介和快速入门
@@ -916,6 +918,8 @@ set REPOSITORY_PATH=D:\repository  改成你本地仓库地址即可！
 
     分布式架构，项目主要应用技术框架：SpringBoot (SSM), SpringCloud , 中间件等
 
+  
+  
   ## 1.2 框架概念和理解
 
 框架( Framework )是一个集成了基本结构、规范、设计模式、编程语言和程序库等基础组件的软件系统，它可以用来构建更高级别的应用程序。框架的设计和实现旨在解决特定领域中的常见问题，帮助开发人员更高效、更稳定地实现软件开发目标。
@@ -952,7 +956,7 @@ https://spring.io/projects
 
 广义上的 Spring 泛指以 Spring Framework 为基础的 Spring 技术栈。
 
-经过十多年的发展，Spring 已经不再是一个单纯的应用框架，而是逐渐发展成为一个由多个不同子项目（模块）组成的成熟技术，例如 Spring Framework、Spring MVC、SpringBoot、Spring Cloud、Spring Data、Spring Security 等，其中 Spring Framework 是其他子项目的基础。
+经过十多年的发展，Spring 已经不再是一个单纯的应用框架，而是逐渐发展成为一个由多个不同子项目（模块）组成的成熟技术，例如 *Spring Framework、Spring MVC、SpringBoot、Spring Cloud、Spring Data、Spring Security 等，其中 Spring Framework 是其他子项目的基础。*
 
 这些子项目涵盖了从企业级应用开发到云计算等各方面的内容，能够帮助开发人员解决软件发展过程中不断产生的各种实际问题，给开发人员带来了更好的开发体验。
 
@@ -979,9 +983,9 @@ Spring全家桶的其他框架都是以SpringFramework框架为基础！
 
 
   ## 2.3 SpringFramework 主要优势
-1. 丰富的生态系统：Spring 生态系统非常丰富，支持许多模块和库，如 Spring Boot、Spring Security、Spring Cloud 等等，可以帮助开发人员快速构建高可靠性的企业应用程序。
-2. 模块化的设计：框架组件之间的松散耦合和模块化设计使得 Spring Framework 具有良好的可重用性、可扩展性和可维护性。开发人员可以轻松地选择自己需要的模块，根据自己的需求进行开发。
-3. 简化 Java 开发：Spring Framework 简化了 Java 开发，提供了各种工具和 API，可以降低开发复杂度和学习成本。同时，Spring Framework 支持各种应用场景，包括 Web 应用程序、RESTful API、消息传递、批处理等等。
+1. **丰富的生态系统**：Spring 生态系统非常丰富，支持许多模块和库，如 Spring Boot、Spring Security、Spring Cloud 等等，可以帮助开发人员快速构建高可靠性的企业应用程序。
+2. **模块化的设计**：框架组件之间的松散耦合和模块化设计使得 Spring Framework 具有良好的可重用性、可扩展性和可维护性。开发人员可以轻松地选择自己需要的模块，根据自己的需求进行开发。
+3. **简化 Java 开发**：Spring Framework 简化了 Java 开发，提供了各种工具和 API，可以降低开发复杂度和学习成本。同时，Spring Framework 支持各种应用场景，包括 Web 应用程序、RESTful API、消息传递、批处理等等。
 4. 不断创新和发展：Spring Framework 开发团队一直在不断创新和发展，保持与最新技术的接轨，为开发人员提供更加先进和优秀的工具和框架。
 
 因此，这些优点使得 Spring Framework 成为了一个稳定、可靠、且创新的框架，为企业级 Java 开发提供了一站式的解决方案。
@@ -992,37 +996,35 @@ Spring 使创建 Java 企业应用程序变得容易。它提供了在企业环�
 
   ## 3.1 组件和组件管理概念
 
+### 3.1.1 Spring充当组件管理角色（IoC）**
 
 
-- **3.1.1 Spring充当组件管理角色（IoC）**
 
-  
+组件可以完全交给Spring 框架进行管理，Spring框架替代了程序员原有的new对象和对象属性赋值动作等！
 
-  组件可以完全交给Spring 框架进行管理，Spring框架替代了程序员原有的new对象和对象属性赋值动作等！
+Spring具体的组件管理动作包含：
 
-  Spring具体的组件管理动作包含：
+- 组件对象实例化
+- 组件属性属性赋值
+- 组件对象之间引用
+- 组件对象存活周期管理
+- ......
 
-  - 组件对象实例化
-  - 组件属性属性赋值
-  - 组件对象之间引用
-  - 组件对象存活周期管理
-  - ......
+我们只需要编写元数据（配置文件）告知Spring 管理哪些类组件和他们的关系即可！
 
-  我们只需要编写元数据（配置文件）告知Spring 管理哪些类组件和他们的关系即可！
+注意：组件是映射到应用程序中所有可重用组件的Java对象，应该是可复用的功能对象！
 
-  注意：组件是映射到应用程序中所有可重用组件的Java对象，应该是可复用的功能对象！
+- 组件一定是对象
+- 对象不一定是组件
 
-  - 组件一定是对象
-  - 对象不一定是组件
+综上所述，Spring 充当一个组件容器，创建、管理、存储组件，减少了我们的编码压力，让我们更加专注进行业务编写！
 
-  综上所述，Spring 充当一个组件容器，创建、管理、存储组件，减少了我们的编码压力，让我们更加专注进行业务编写！
+### 3.1.2 组件交给Spring管理优势**!
 
-- **3.1.2 组件交给Spring管理优势**!
-
-  1. 降低了组件之间的耦合性：Spring IoC容器通过依赖注入机制，将组件之间的依赖关系削弱，减少了程序组件之间的耦合性，使得组件更加松散地耦合。
-  2. 提高了代码的可重用性和可维护性：将组件的实例化过程、依赖关系的管理等功能交给Spring IoC容器处理，使得组件代码更加模块化、可重用、更易于维护。
-  3. 方便了配置和管理：Spring IoC容器通过XML文件或者注解，轻松的对组件进行配置和管理，使得组件的切换、替换等操作更加的方便和快捷。
-  4. 交给Spring管理的对象（组件），方可享受Spring框架的其他功能（AOP,声明事务管理）等
+1. 降低了组件之间的耦合性：Spring IoC容器通过依赖注入机制，将组件之间的依赖关系削弱，减少了程序组件之间的耦合性，使得组件更加松散地耦合。
+2. 提高了代码的可重用性和可维护性：将组件的实例化过程、依赖关系的管理等功能交给Spring IoC容器处理，使得组件代码更加模块化、可重用、更易于维护。
+3. 方便了配置和管理：Spring IoC容器通过XML文件或者注解，轻松的对组件进行配置和管理，使得组件的切换、替换等操作更加的方便和快捷。
+4. 交给Spring管理的对象（组件），方可享受Spring框架的其他功能（AOP,声明事务管理）等
 
 
 ## 3.2Spring IoC**容器和容器实现**
@@ -1273,7 +1275,7 @@ public class ClientService {
   private static ClientService clientService = new ClientService();
   private ClientService() {}
 
-  public static ClientServicecreateInstance() {
+  public static ClientService createInstance() {
   
     return clientService;
   }
@@ -1306,9 +1308,9 @@ public class ClientService {
 ```Java
 public class DefaultServiceLocator {
 
-  private static ClientServiceImplclientService = new ClientServiceImpl();
+  private static ClientServiceImpl clientService = new ClientServiceImpl();
 
-  public ClientService createClientServiceInstance() {
+  public ClientServiceImpl createClientServiceInstance() {
     return clientService;
   }
 }
@@ -1403,7 +1405,7 @@ public class UserService {
     
     private String name;
 
-    public UserService(int age , String name ,UserDao userDao) {
+    public UserService(UserDao userDao) {
         this.userDao = userDao;
         this.age = age;
         this.name = name;
@@ -2790,7 +2792,6 @@ public class CommonComponent {
 
       搭建一个三层架构案例，模拟查询全部学生（学生表）信息，持久层使用JdbcTemplate和Druid技术，使用XML+注解方式进行组件管理！
 
-      
   2. 数据库准备
 
 ```Java
@@ -3493,7 +3494,6 @@ public static void main(String[] args) {
 
       搭建一个三层架构案例，模拟查询全部学生（学生表）信息，持久层使用JdbcTemplate和Druid技术，使用注解+配置类方式进行组件管理！
 
-      
   2. 数据库准备
 
 ```Java
@@ -4544,8 +4544,8 @@ public void printLogAfterCoreException(JoinPoint joinPoint, Throwable targetMeth
 ​    
 ​          切点表达式总结
 ​    
-          ![](http://heavy_code_industry.gitee.io/code_heavy_industry/assets/img/img011.dde1a79a.png)
-    
+​          ![](http://heavy_code_industry.gitee.io/code_heavy_industry/assets/img/img011.dde1a79a.png)
+​    
           语法细节
     
           - 第一位：execution( ) 固定开头
