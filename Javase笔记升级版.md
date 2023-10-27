@@ -5552,6 +5552,203 @@ finally语句
 4. try块里的return语句在存在异常的情况下不会执行，具体返回哪个值看情况
 5. 当异常发生后，catch中的return执行情况与未发生异常的try中的return的执行情况完全一样
 
+
+
+
+
+## 8.7Java9 增强的自动资源管理器
+
+当程序使用finally块关闭资源时，程序会显得特别臃肿，如下：
+
+```java
+public static void main(String[] args) {
+    FileInputStream fis = null;
+    try {
+        fis = new FileInputStream("a.txt");
+    } catch (FileNotFoundException e) {
+        e.printStackTrace();
+    } finally {
+        // 关闭磁盘文件，回收资源
+        if (fis != null) {
+            try {
+                fis.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
+```
+
+
+
+为了解决这个问题Java在后续的更新中添加的 **自动资源管理**，该特性是在太try的基础上扩展，主动释放不再需要的文件或是其他资源
+
+
+
+自动资源管理替代了finally代码块，并优化了代码结构和可读性，语法如下
+
+```java
+try (声明或初始化资源语句) {
+    // 可能会生成异常语句
+} catch(Throwable e1){
+    // 处理异常e1
+} catch(Throwable e2){
+    // 处理异常e1
+} catch(Throwable eN){
+    // 处理异常eN
+}
+```
+
+**注意：**
+
+1. try语句中的声明的资源被隐式的声明为final，资源的作用局限与这个try语句
+2. 可以在一条try语句中声明或是初始化多个资源，每个资源以 `;`隔开即可
+3. 需要关闭的资源必须实现了AutoCloseable或Closeable接口
+
+
+
+Closeable 是 AutoCloseable 的子接口，Closeable 接口里的 close() 方法声明抛出了 IOException，因此它的实现类在实现 close() 方法时只能声明抛出 IOException 或其子类；AutoCloseable 接口里的 close() 方法声明抛出了 Exception，因此它的实现类在实现 close() 方法时可以声明抛出任何异常。
+
+
+
+下面示范如何使用自动关闭资源的 try 语句。
+
+```java
+public class AutoCloseTest {
+    public static void main(String[] args) throws IOException {
+        try (
+                // 声明、初始化两个可关闭的资源
+                // try语句会自动关闭这两个资源
+                BufferedReader br = new BufferedReader(new FileReader("AutoCloseTest.java"));
+                PrintStream ps = new PrintStream(new FileOutputStream("a.txt"))) {
+            // 使用两个资源
+            System.out.println(br.readLine());
+            ps.println("日向雏田");
+        }
+    }
+}
+```
+
+上面程序中粗体字代码分别声明、初始化了两个 IO 流，BufferedReader 和 PrintStream 都实现了 Closeable 接口，并在 try 语句中进行了声明和初始化，所以 try 语句会自动关闭它们。
+
+自动关闭资源的 try 语句相当于包含了隐式的 finally 块（这个 finally 块用于关闭资源），因此这个 try 语句可以既没有 catch 块，也没有 finally 块。
+
+> Java 7 几乎把所有的“资源类”（包括文件 IO 的各种类、JDBC 编程的 Connection 和 Statement 等接口）进行了改写，改写后的资源类都实现了 AutoCloseable 或 Closeable 接口。
+
+如果程序需要，自动关闭资源的 try 语句后也可以带多个 catch 块和一个 finally 块。
+
+Java 9 再次增强了这种 try 语句。Java 9 不要求在 try 后的圆括号内声明并创建资源，只需要自动关闭的资源有 final 修饰或者是有效的 final (effectively final)，Java 9 允许将资源变量放在 try 后的圆括号内。上面程序在 Java 9 中可改写为如下形式。
+
+```java
+public class AutoCloseTest {
+    public static void main(String[] args) throws IOException {
+        // 有final修饰的资源
+        final BufferedReader br = new BufferedReader(new FileReader("AutoCloseTest.java"));
+        // 没有显式使用final修饰，但只要不对该变量重新赋值，该变量就是有效的
+        final PrintStream ps = new PrintStream(new FileOutputStream("a. txt"));
+        // 只要将两个资源放在try后的圆括号内即可
+        try (br; ps) {
+            // 使用两个资源
+            System.out.println(br.readLine());
+            ps.println("漩涡鸣人");
+        }
+    }
+}
+```
+
+## 8.8声明和抛出异常
+
+可以通过throws在方法上生命该方法要抛出的异常，然后再方法内部通过throw抛出异常对象
+
+### throws声明异常
+
+使用throws声明的方法表示该方法不处理异常。具体格式如下
+
+```java
+returnType method_name(paramList) throws Exception 1,Exception2,…{…}
+```
+
+其中，returnType 表示返回值类型；method_name 表示方法名；paramList 表示参数列表；Exception 1，Exception2，… 表示异常类。
+
+
+
+如果有多个异常类使用逗号隔开
+
+使用 throws 声明抛出异常的思路是，当前方法不知道如何处理这种类型的异常，该异常应该由向上一级的调用者处理；如果 main 方法也不知道如何处理这种类型的异常，也可以使用 throws 声明抛出异常，该异常将交给 JVM 处理。JVM 对异常的处理方法是，打印异常的跟踪栈信息，并中止程序运行，这就是前面程序在遇到异常后自动结束的原因。
+
+**例一**
+
+创建一个 readFile() 方法，该方法用于读取文件内容，在读取的过程中可能会产生 IOException 异常，但是在该方法中不做任何的处理，而将可能发生的异常交给调用者处理。在 main() 方法中使用 try catch 捕获异常，并输出异常信息。代码如下：
+
+```java
+import java.io.FileInputStream;
+import java.io.IOException;
+public class Test04 {
+    public void readFile() throws IOException {
+        // 定义方法时声明异常
+        FileInputStream file = new FileInputStream("read.txt"); // 创建 FileInputStream 实例对象
+        int f;
+        while ((f = file.read()) != -1) {
+            System.out.println((char) f);
+            f = file.read();
+        }
+        file.close();
+    }
+    public static void main(String[] args) {
+        Throws t = new Test04();
+        try {
+            t.readFile(); // 调用 readFHe()方法
+        } catch (IOException e) {
+            // 捕获异常
+            System.out.println(e);
+        }
+    }
+}
+```
+
+以上代码，首先在定义 readFile() 方法时用 throws 关键字声明在该方法中可能产生的异常，然后在 main() 方法中调用 readFile() 方法，并使用 catch 语句捕获产生的异常。
+
+
+
+**方法重写时抛出异常的限制**
+
+*子类方法声明抛出的异常类型应该是父类方法声明抛出的异常类型的子类或相同，子类方法声明抛出的异常不允许比父类方法声明抛出的异常多*
+
+```java
+public class OverrideThrows {
+    public void test() throws IOException {
+        FileInputStream fis = new FileInputStream("a.txt");
+    }
+}
+class Sub extends OverrideThrows {
+    // 子类方法声明抛出了比父类方法更大的异常
+    // 所以下面方法出错
+    public void test() throws Exception {
+    }
+}
+```
+
+上面程序中 Sub 子类中的 test() 方法声明抛出 Exception，该 Exception 是其父类声明抛出异常 IOException 类的父类，这将导致程序无法通过编译。
+
+所以在编写类继承代码时要注意，子类在重写父类带 throws 子句的方法时，子类方法声明中的 throws 子句不能出现父类对应方法的 throws 子句中没有的异常类型，因此 throws 子句可以限制子类的行为。也就是说，子类方法拋出的异常不能超过父类定义的范围。
+
+### throw抛出异常
+
+throw 语句用来直接拋出一个异常，后接一个可拋出的异常类对象，其语法格式如下：
+
+```
+throw ExceptionObject;
+```
+
+其中，ExceptionObject 必须是 Throwable 类或其子类的对象。如果是自定义异常类，也必须是 Throwable 的直接或间接子类。例如，以下语句在编译时将会产生语法错误：
+
+```java
+throw new String("拋出异常");    // String类不是Throwable类的子类
+```
+
+
+
 # 9.Java集合，泛型和枚举
 
 ## 9.1集合
