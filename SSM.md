@@ -919,7 +919,7 @@ set REPOSITORY_PATH=D:\repository  改成你本地仓库地址即可！
     分布式架构，项目主要应用技术框架：SpringBoot (SSM), SpringCloud , 中间件等
 
   
-  
+
   ## 1.2 框架概念和理解
 
 框架( Framework )是一个集成了基本结构、规范、设计模式、编程语言和程序库等基础组件的软件系统，它可以用来构建更高级别的应用程序。框架的设计和实现旨在解决特定领域中的常见问题，帮助开发人员更高效、更稳定地实现软件开发目标。
@@ -1306,6 +1306,9 @@ public class ClientService {
       1. 准备组建类
 
 ```Java
+public class ClientServiceImpl {
+}
+
 public class DefaultServiceLocator {
 
   private static ClientServiceImpl clientService = new ClientServiceImpl();
@@ -1321,12 +1324,12 @@ public class DefaultServiceLocator {
 
 ```XML
 <!-- 将工厂类进行ioc配置 -->
-<bean id="serviceLocator" class="examples.DefaultServiceLocator">
+<bean id="DefaultServiceLocator" class="examples.DefaultServiceLocator">
 </bean>
 
 <!-- 根据工厂对象的实例工厂方法进行实例化组件对象 -->
 <bean id="clientService"
-  factory-bean="serviceLocator"
+  factory-bean="DefaultServiceLocator"
   factory-method="createClientServiceInstance"/>
 ```
 
@@ -1344,11 +1347,12 @@ public class DefaultServiceLocator {
       
       
       
-  3. 基于构造函数的依赖注入（单个构造参数）
+  3. **基于构造函数的依赖注入（单个构造参数）**
+      
       1. 介绍
-
+      
           基于构造函数的 DI 是通过容器调用具有多个参数的构造函数来完成的，每个参数表示一个依赖项。
-
+      
           下面的示例演示一个只能通过构造函数注入进行依赖项注入的类！
       2. 准备组件类
 
@@ -1384,11 +1388,12 @@ public class UserService {
 ```
 
  - constructor-arg标签：可以引用构造参数 ref引用其他bean的标识。
-  4. 基于构造函数的依赖注入（多构造参数解析）
+  4. **基于构造函数的依赖注入（多构造参数解析）**
+      
       1. 介绍
-
+      
           基于构造函数的 DI 是通过容器调用具有多个参数的构造函数来完成的，每个参数表示一个依赖项。
-
+      
           下面的示例演示通过构造函数注入多个参数，参数包含其他bean和基本数据类型！
       2. 准备组件类
 
@@ -1405,7 +1410,7 @@ public class UserService {
     
     private String name;
 
-    public UserService(UserDao userDao) {
+    public UserService(int age,String name,UserDao userDao) {
         this.userDao = userDao;
         this.age = age;
         this.name = name;
@@ -1420,7 +1425,7 @@ public class UserService {
   <bean id="userService" class="x.y.UserService">
     <!-- value直接注入基本类型值 -->
     <constructor-arg  value="18"/>
-    <constructor-arg  value="赵伟风"/>
+    <constructor-arg  value="XWW"/>
     
     <constructor-arg  ref="userDao"/>
   </bean>
@@ -1433,7 +1438,7 @@ public class UserService {
 <beans>
   <bean id="userService" class="x.y.UserService">
     <!-- value直接注入基本类型值 -->
-    <constructor-arg name="name" value="赵伟风"/>
+    <constructor-arg name="name" value="XWW"/>
     <constructor-arg name="userDao" ref="userDao"/>
     <constructor-arg name="age"  value="18"/>
   </bean>
@@ -1447,7 +1452,7 @@ public class UserService {
 <beans>
     <bean id="userService" class="x.y.UserService">
     <!-- value直接注入基本类型值 -->
-    <constructor-arg index="1" value="赵伟风"/>
+    <constructor-arg index="1" value="XWW"/>
     <constructor-arg index="2" ref="userDao"/>
     <constructor-arg index="0"  value="18"/>
   </bean>
@@ -1458,11 +1463,12 @@ public class UserService {
 ```
 - constructor-arg标签：指定构造参数和对应的值
           - constructor-arg标签：name属性指定参数名、index属性指定参数角标、value属性指定普通属性值
+  
   5. **基于Setter方法依赖注入**
       1. 介绍
-
+  
           开发中，除了构造函数注入（DI）更多的使用的Setter方法进行注入！
-
+  
           下面的示例演示一个只能使用纯 setter 注入进行依赖项注入的类。
       2. 准备组件类
 
@@ -1511,11 +1517,16 @@ public class SimpleMovieLister {
 
   **总结：**
 
-    依赖注入（DI）包含引用类型和基本数据类型，同时注入的方式也有多种！主流的注入方式为setter方法注入和构造函数注入，两种注入语法都需要掌握！
-    
-    需要特别注意：引用其他bean，使用ref属性。直接注入基本类型值，使用value属性。
+```java
+依赖注入（DI）包含引用类型和基本数据类型，同时注入的方式也有多种！主流的注入方式为setter方法注入和构造函数注入，两种注入语法都需要掌握！
+
+需要特别注意：引用其他bean，使用ref属性。直接注入基本类型值，使用value属性。
+```
+
+
 
 #### 4.2.3 实验三： IoC容器创建和使用
+
   1. 介绍
 
       上面的实验只是讲解了如何在XML格式的配置文件编写IoC和DI配置！
@@ -1530,12 +1541,12 @@ ApplicationContext context =
            new ClassPathXmlApplicationContext("services.xml", "daos.xml");
            
 //方式2:先实例化，再指定配置文件，最后刷新容器触发Bean实例化动作 [springmvc源码和contextLoadListener源码方式]  
-ApplicationContext context = 
+ApplicationContext context1 = 
            new ClassPathXmlApplicationContext();   
 //设置配置配置文件,方法参数为可变参数,可以设置一个或者多个配置
-iocContainer1.setConfigLocations("services.xml", "daos.xml");
+context1.setConfigLocations("services.xml", "daos.xml");
 //后配置的文件,需要调用refresh方法,触发刷新配置
-iocContainer1.refresh();           
+context1.refresh();           
 
 ```
 3. Bean对象读取
@@ -1544,7 +1555,7 @@ iocContainer1.refresh();
 //方式1: 根据id获取
 //没有指定类型,返回为Object,需要类型转化!
 HappyComponent happyComponent = 
-        (HappyComponent) iocContainer.getBean("bean的id标识");
+        (HappyComponent) context1.getBean("bean的id标识");
         
 //使用组件对象        
 happyComponent.doWork();
@@ -1552,11 +1563,11 @@ happyComponent.doWork();
 //方式2: 根据类型获取
 //根据类型获取,但是要求,同类型(当前类,或者之类,或者接口的实现类)只能有一个对象交给IoC容器管理
 //配置两个或者以上出现: org.springframework.beans.factory.NoUniqueBeanDefinitionException 问题
-HappyComponent happyComponent = iocContainer.getBean(HappyComponent.class);
+HappyComponent happyComponent = context1.getBean(HappyComponent.class);
 happyComponent.doWork();
 
 //方式3: 根据id和类型获取
-HappyComponent happyComponent = iocContainer.getBean("bean的id标识", HappyComponent.class);
+HappyComponent happyComponent = context1.getBean("bean的id标识", HappyComponent.class);
 happyComponent.doWork();
 
 根据类型来获取bean时，在满足bean唯一性的前提下，其实只是看：『对象 instanceof 指定的类型』的返回结果，
@@ -4546,8 +4557,8 @@ public void printLogAfterCoreException(JoinPoint joinPoint, Throwable targetMeth
 ​    
 ​          ![](http://heavy_code_industry.gitee.io/code_heavy_industry/assets/img/img011.dde1a79a.png)
 ​    
-          语法细节
-    
+​          语法细节
+​    
           - 第一位：execution( ) 固定开头
           - 第二位：方法访问修饰符
 
