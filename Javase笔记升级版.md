@@ -4624,7 +4624,7 @@ public class ShapeTest {
 
 ## 7.10接口的定义与实现(Interface)
 
-抽象类是从多个类中抽象出来的模板，如果将这种抽象进行的更彻底，则可以提炼出一种更加特殊的“抽象类”——接口（Interface）。接口是 [Java](https://c.biancheng.net/java/) 中最重要的概念之一，它可以被理解为一种特殊的类，不同的是接口的成员没有执行体，是由全局常量和公共的抽象方法所组成。
+抽象类是从多个类中抽象出来的模板，如果将这种抽象进行的更彻底，则可以提炼出一种更加特殊的“抽象类”——接口（Interface）。接口是java中最重要的概念之一，它可以被理解为一种特殊的类，不同的是接口的成员没有执行体，是由全局常量和公共的抽象方法所组成。
 
 ### 定义接口
 
@@ -4656,9 +4656,9 @@ Java 接口的定义方式与类基本相同，不过接口定义使用的关键
 
 - 具有 public 访问控制符的接口，允许任何类使用；没有指定 public 的接口，其访问将局限于所属的包。
 
-- 方法的声明不需要其他修饰符，在接口中声明的方法，将隐式地声明为公有的（public）和抽象的（abstract）。
+- **方法的声明不需要其他修饰符，在接口中声明的方法，将隐式地声明为公有的（public）和抽象的（abstract）。**
 
-- 在 Java 接口中声明的变量其实都是常量，接口中的变量声明，将隐式地声明为 public、static 和 final，即常量，所以接口中定义的变量必须初始化。
+- **在 Java 接口中声明的变量其实都是常量，接口中的变量声明，将隐式地声明为 public、static 和 final，即常量，所以接口中定义的变量必须初始化。**
 
 - 接口没有构造方法，不能被实例化。例如：
 
@@ -5748,6 +5748,169 @@ throw new String("拋出异常");    // String类不是Throwable类的子类
 ```
 
 
+
+## 8.9多异常捕获
+
+多 catch 代码块虽然客观上提高了程序的健壮性，但是也导致了程序代码量大大增加。如果有些异常种类不同，但捕获之后的处理是相同的，例如以下代码。
+
+```java
+try{
+    // 可能会发生异常的语句
+} catch (FileNotFoundException e) {
+    // 调用方法methodA处理
+} catch (IOException e) {
+    // 调用方法methodA处理
+} catch (ParseException e) {
+    // 调用方法methodA处理
+}
+```
+
+
+
+为了解决这种问题，java7推出了多异常捕获技术，结合修改后代码如下
+
+```java
+try{
+    // 可能会发生异常的语句
+} catch (IOException | ParseException e) {
+    // 调用方法methodA处理
+}
+```
+
+注意：由于 FileNotFoundException 属于 IOException 异常，IOException 异常可以捕获它的所有子类异常。所以不能写成 `FileNotFoundException | IOException | ParseException` 。
+
+
+
+使用一个 catch 块捕获多种类型的异常时需要注意如下两个地方。
+
+- 捕获多种类型的异常时，多种异常类型之间用竖线`|`隔开。
+- 捕获多种类型的异常时，异常变量有隐式的 final 修饰，因此程序不能对异常变量重新赋值。
+
+
+
+下面示例多异常捕获
+
+```java
+public class ExceptionTest {
+    public static void main(String[] args) {
+        try {
+            int a = Integer.parseInt(args[0]);
+            int b = Integer.parseInt(args[1]);
+            int c = a / b;
+            System.out.println("您输入的两个数相除的结果是：" + c);
+        } catch (IndexOutOfBoundsException | NumberFormatException | ArithmeticException e) {
+            System.out.println("程序发生了数组越界、数字格式异常、算术异常之一");
+            // 捕获多异常时，异常变量默认有final修饰
+            // 所以下面代码有错
+            e = new ArithmeticException("test");
+        } catch (Exception e) {
+            System.out.println("未知异常");
+            // 捕获一种类型的异常时，异常变量没有final修饰
+            // 所以下面代码完全正确
+            e = new RuntimeException("test");
+        }
+    }
+}
+```
+
+上面程序中第一行粗体字代码使用了`IndexOutOfBoundsException|NumberFormatException|ArithmeticException`来定义异常类型，这就表明该 catch 块可以同时捕获这 3 种类型的异常。捕获多种类型的异常时，异常变量使用隐式的 final 修饰，因此上面程序的第 12 行代码将产生编译错误；捕获一种类型的异常时，异常变量没有 final 修饰，因此上面程序的第 17 行代码完全正确。
+
+
+
+## 8.10自定义异常
+
+如果Java提供的异常类型不能满足使用，可以自定义异常类型，这时异常需要继承Exception类或其他子类，如果自定义运行时异常需要继承RunException类或其子类
+
+自定义异常语法形式如下
+
+```java
+<class><自定义异常名><extends><Exception>
+```
+
+在编码规范上，一般将自定义异常类的类名命名为XXXException，其中XXX表示异常作用
+
+**自定义异常一般含有两个构造方法：一个是无参默认的构造方法，另一个是构造方法以字符串形式接收一个定制的异常消息，并将该消息传递给超类的构造方法**
+
+例如，以下代码创建一个名称为 IntegerRangeException 的自定义异常类：
+
+```java
+class IntegerRangeException extends Exception {
+    public IntegerRangeException() {
+        super();
+    }
+    public IntegerRangeException(String s) {
+        super(s);
+    }
+}
+
+```
+
+以上代码创建的自定义异常类 IntegerRangeException 类继承自 Exception 类，在该类中包含两个构造方法。
+
+**例一**
+
+编写一个程序，对会员注册时的年龄进行验证，检测是否在一到一百之间
+
+1）这里创建了一个异常类 MyException，并提供两个构造方法。MyException 类的实现代码如下：
+
+```java
+public class MyException extends Exception {
+    public MyException() {
+        super();
+    }
+    public MyException(String str) {
+        super(str);
+    }
+}
+```
+
+2）接着创建测试类，调用自定义异常类。代码实现如下：
+
+```java
+import java.util.InputMismatchException;
+import java.util.Scanner;
+public class Test07 {
+    public static void main(String[] args) {
+        int age;
+        Scanner input = new Scanner(System.in);
+        System.out.println("请输入您的年龄：");
+        try {
+            age = input.nextInt();    // 获取年龄
+            if(age < 0) {
+                throw new MyException("您输入的年龄为负数！输入有误！");
+            } else if(age > 100) {
+                throw new MyException("您输入的年龄大于100！输入有误！");
+            } else {
+                System.out.println("您的年龄为："+age);
+            }
+        } catch(InputMismatchException e1) {
+            System.out.println("输入的年龄不是数字！");
+        } catch(MyException e2) {
+            System.out.println(e2.getMessage());
+        }
+    }
+}
+```
+
+3）运行该程序，当用户输入的年龄为负数时，则拋出 MyException 自定义异常，执行第二个 catch 语句块中的代码，打印出异常信息。程序的运行结果如下所示。
+
+```
+请输入您的年龄：
+-2
+您输入的年龄为负数！输入有误！
+```
+
+当用户输入的年龄大于 100 时，也会拋出 MyException 自定义异常，同样会执行第二个 catch 语句块中的代码，打印出异常信息，如下所示。
+
+```java
+请输入您的年龄：
+110
+您输入的年龄大于100！输入有误！
+```
+
+在该程序的主方法中，使用了 if…else if…else 语句结构判断用户输入的年龄是否为负数和大于 100 的数，如果是，则拋出自定义异常 MyException，调用自定义异常类 MyException 中的含有一个 String 类型的构造方法。在 catch 语句块中捕获该异常，并调用 getMessage() 方法输出异常信息。
+
+提示：因为自定义异常继承自 Exception 类，因此自定义异常类中包含父类所有的属性和方法。
 
 # 9.Java集合，泛型和枚举
 
