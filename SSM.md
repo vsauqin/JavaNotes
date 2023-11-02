@@ -4548,23 +4548,22 @@ public void printLogAfterCoreException(JoinPoint joinPoint, Throwable targetMeth
 
       ![](http://heavy_code_industry.gitee.io/code_heavy_industry/assets/img/img028.cb7f2153.png)
 
+   2. **切点表达式语法**
+  ​    
+  ​          切点表达式总结
+  ​    
+  ​          ![](http://heavy_code_industry.gitee.io/code_heavy_industry/assets/img/img011.dde1a79a.png)
+  ​
+  ​          语法细节
 
-​          
-​      2. **切点表达式语法**
-​    
-​          切点表达式总结
-​    
-​          ![](http://heavy_code_industry.gitee.io/code_heavy_industry/assets/img/img011.dde1a79a.png)
-​    
-​          语法细节
-​    
-​          - 第一位：execution( ) 固定开头
-​          - 第二位：方法访问修饰符
+  **第一位**：execution( ) 固定开头
+
+ **第二位**：方法访问修饰符
 
 ```Java
 public private 直接描述对应修饰符即可
 ```
-          - 第三位：方法返回值
+**第三位**：方法返回值
 
 ```Java
 int String void 直接描述返回值类型
@@ -4573,38 +4572,42 @@ int String void 直接描述返回值类型
 
  注意：
 
-          特殊情况 不考虑 访问修饰符和返回值
-    
-            execution(* * ) 这是错误语法
-    
-            execution(*) == 你只要考虑返回值 或者 不考虑访问修饰符 相当于全部不考虑了
-      - 第四位：指定包的地址
+特殊情况 不考虑 访问修饰符和返回值
 
-```Java
+execution(* * ) 这是错误语法
+
+execution(*) == 你只要考虑返回值 或者 不考虑访问修饰符 相当于全部不考虑了
+
+**第四位**：指定包的地址
+
+
+
  固定的包: com.atguigu.api | service | dao
  单层的任意命名: com.atguigu.*  = com.atguigu.api  com.atguigu.dao  * = 任意一层的任意命名
  任意层任意命名: com.. = com.atguigu.api.erdaye com.a.a.a.a.a.a.a  ..任意层,任意命名 用在包上!
  注意: ..不能用作包开头   public int .. 错误语法  com..
  找到任何包下: *..
-```
-          - 第五位：指定类名称
 
-```Java
+**第五位**：指定类名称
+
+
+
 固定名称: UserService
 任意类名: *
 部分任意: com..service.impl.*Impl
 任意包任意类: *..*
 
-```
-          - 第六位：指定方法名称
+ **第六位**：指定方法名称
 
-```Java
+
+
 语法和类名一致
 任意访问修饰符,任意类的任意方法: * *..*.*
-```
-          - 第七位：方法参数
 
-```Java
+**第七位**：方法参数
+
+
+
 第七位: 方法的参数描述
        具体值: (String,int) != (int,String) 没有参数 ()
        模糊值: 任意参数 有 或者 没有 (..)  ..任意参数的意识
@@ -4613,7 +4616,7 @@ int String void 直接描述返回值类型
          最后一个参数是字符串 (..String)
          字符串开头,int结尾 (String..int)
          包含int类型(..int..)
-```
+
 3. **切点表达式案例**
 
 ```Java
