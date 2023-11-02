@@ -3463,7 +3463,7 @@ public class JavaConfig {
 
 #### 4.4.5 实验四：高级特性：@Import扩展
 
-  `@Import` 注释允许从另一个配置类加载 `@Bean` 定义，如以下示例所示：
+  `@Import` 注释允许从另一个1`			q	qe32w2w2wr43234erfdvcgbg n,mm ,kmjnjk,54210配2541052412550784151.02.1..02置类加载 `@Bean` 定义，如以下示例所示：
 
 ```Java
 @Configuration
