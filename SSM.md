@@ -1348,7 +1348,7 @@ public class DefaultServiceLocator {
       
       
   3. **基于构造函数的依赖注入（单个构造参数）**
-      
+     
       1. 介绍
       
           基于构造函数的 DI 是通过容器调用具有多个参数的构造函数来完成的，每个参数表示一个依赖项。
@@ -1389,7 +1389,7 @@ public class UserService {
 
  - constructor-arg标签：可以引用构造参数 ref引用其他bean的标识。
   4. **基于构造函数的依赖注入（多构造参数解析）**
-      
+     
       1. 介绍
       
           基于构造函数的 DI 是通过容器调用具有多个参数的构造函数来完成的，每个参数表示一个依赖项。
@@ -2420,7 +2420,7 @@ public class SoldierController {
 }
 ```
 
-          当注解中只设置一个属性时，value属性的属性名可以省略：
+    当注解中只设置一个属性时，value属性的属性名可以省略：
 
 ```Java
 @Service("smallDog")
@@ -4559,8 +4559,8 @@ public void printLogAfterCoreException(JoinPoint joinPoint, Throwable targetMeth
 ​    
 ​          语法细节
 ​    
-          - 第一位：execution( ) 固定开头
-          - 第二位：方法访问修饰符
+​          - 第一位：execution( ) 固定开头
+​          - 第二位：方法访问修饰符
 
 ```Java
 public private 直接描述对应修饰符即可
