@@ -5146,7 +5146,7 @@ Throwable 类下有两个异常分支 Exception 和 Error，如图 1 所示。
 
 
 
-由图 2 可以知道，Throwable 类是所有异常和错误的超类，下面有 Error 和 Exception 两个子类分别表示错误和异常。其中异常类 Exception 又分为运行时异常和非运行时异常，这两种异常有很大的区别，也称为不检查异常（Unchecked Exception）和检查异常（Checked Exception）。
+由图 2 可以知道，Throwable 类是所有异常和错误的超类，下面有 Error 和 Exception 两个子类分别表示错误和异常。其中异常类 Exception 又分为**运行时异常和非运行时异常**，这两种异常有很大的区别，也称为不检查异常（Unchecked Exception）和检查异常（Checked Exception）。
 
 - Exception 类用于用户程序可能出现的异常情况，它也是用来创建自定义异常类型类的类。
 - Error 定义了在通常环境下不希望被程序捕获的异常。一般指的是 JVM 错误，如堆栈溢出。
@@ -5268,7 +5268,7 @@ java中提供了一种结构性和控制性的方式来处理程序执行期间�
 
 以下是异常处理程序的基本结构
 
-```
+```java
 try{
 	逻辑程序块
 }catch{
@@ -5295,9 +5295,9 @@ try{
 
 在以上语法中，把可能引发异常的语句封装在 try 语句块中，用以捕获可能发生的异常。catch 后的`( )`里放匹配的异常类，指明 catch 语句可以处理的异常类型，发生异常时产生异常类的实例化对象。
 
-如果 try 语句块中发生异常，那么一个相应的异常对象就会被拋出，然后 catch 语句就会依据所拋出异常对象的类型进行捕获，并处理。处理之后，程序会跳过 try 语句块中剩余的语句，转到 catch 语句块后面的第一条语句开始执行。
+如果 try 语句块中发生异常，那么一个相应的异常对象就会被拋出，然后 catch 语句就会依据所拋出异常对象的类型进行捕获，并处理。**处理之后，程序会跳过 try 语句块中剩余的语句**，转到 catch 语句块后面的第一条语句开始执行。
 
-如果 try 语句块中没有异常发生，那么 try 块正常结束，后面的 catch 语句块被跳过，程序将从 catch 语句块后的第一条语句开始执行。
+**如果 try 语句块中没有异常发生，那么 try 块正常结束，后面的 catch 语句块被跳过，程序将从 catch 语句块后的第一条语句开始执行。**
 
 
 
@@ -5430,7 +5430,7 @@ public class Test03 {
 
 **Java中的垃圾回收机制不会回收任何物理资源，只回收堆内存中对象占用的内存**
 
-finally 语句可以与前面介绍的 [try catch](http://c-local.biancheng.net/view/6732.html) 语句块匹配使用，语法格式如下：
+finally 语句可以与前面介绍的 [try catch](我是你爹) 语句块匹配使用，语法格式如下：
 
 ```java
 try {
@@ -5454,7 +5454,7 @@ try {
 
 使用try-catch-finally语句需要注意以下几点：
 
-1. 异常处理语法中只有try块是必须的，也就是说没有try后面的catch和finally也不能有
+1. 异常处理语法中只有try块是必须的，也就是说没有try块，后面的catch和finally也不能有
 2. catch块和finally块都是可选的，但是必须出现其中之一，或者同时出现
 3. 可以有多个catch块捕获父类异常，但是父类异常必须放在子类异常后面
 4. 三个出现顺序必须是先try再catch在finally
@@ -5705,7 +5705,7 @@ finally语句
 
 1. finally语句在return语句执行之后return语句返回之前执行
 2. finally块中的return语句会覆盖try块中的return返回
-3. 如果fianlly语句块中没有return语句覆盖返回值，那么原来的返回值可能因俄日finally里的修改而改变也可能不变
+3. 如果fianlly语句块中没有return语句覆盖返回值，那么原来的返回值可能因finally里的修改而改变也可能不变
 4. try块里的return语句在存在异常的情况下不会执行，具体返回哪个值看情况
 5. 当异常发生后，catch中的return执行情况与未发生异常的try中的return的执行情况完全一样
 
