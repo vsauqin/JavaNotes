@@ -287,5 +287,174 @@ public void testInsertCar(){
 
 ## 2.1insert（Create）
 
+```.xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace先随便写-->
+<mapper namespace="car">
+ <insert id="insertCar">
+ insert into t_car(car_num,brand,guide_price,produce_time,car_typ
+e) values('103', '奔驰E300L', 50.3, '2022-01-01', '燃油⻋')
+ </insert>
+</mapper>
+
+```
+
+以上代码有缺点：SQL语句中的值不能写死，值应该有用户提供，之气那的jdbc代码如下
+
+```java
+// JDBC中使⽤ ? 作为占位符。那么MyBatis中会使⽤什么作为占位符呢？
+String sql = "insert into t_car(car_num,brand,guide_price,produce_time,car_
+type) values(?,?,?,?,?)";
+// ......
+// 给 ? 传值。那么MyBatis中应该怎么传值呢？
+ps.setString(1,"103");
+ps.setString(2,"奔驰E300L");
+ps.setDouble(3,50.3);
+ps.setString(4,"2022-01-01");
+ps.setString(5,"燃油⻋");
+```
+
+在MyBatis中可以这样做：
 
 
+
+### Map集合传入数据
+
+**将数据放到Map集合中去**
+
+**在sql语句中使用#{map集合的key}来完成传播，#{}等同于jdbc中的 ？，#{}就是占位符**
+
+Java程序这样写
+
+```java
+public class CarMapperTest{
+	@Test
+ public void testInsertCar(){
+ // 准备数据
+ Map<String, Object> map = new HashMap<>();
+ map.put("k1", "103");
+ map.put("k2", "奔驰E300L");
+ map.put("k3", 50.3);
+ map.put("k4", "2020-10-01");
+ map.put("k5", "燃油⻋");
+ // 获取SqlSession对象
+ SqlSession sqlSession = SqlSessionUtil.openSession();
+ // 执⾏SQL语句（使⽤map集合给sql语句传递数据）
+ int count = sqlSession.insert("insertCar", map);
+ System.out.println("插⼊了⼏条记录：" + count);
+ }
+}
+```
+
+SQL语句这样写
+
+```java
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace先随便写-->
+<mapper namespace="car">
+ <insert id="insertCar">
+ insert into t_car(car_num,brand,guide_price,produce_time,car_typ
+e) values(#{k1},#{k2},#{k3},#{k4},#{k5})
+ </insert>
+</mapper>
+```
+
+**注意：**#{}的里面必须写map集合的key，不能随便写
+
+如果写map集合中不存在的key，那么对应的字段就不会正常获取到值而为null
+
+### pojo类传入数据
+
+- 第一步定义一个pojo类，并提供相关属性
+
+- ```java
+  package com.powernode.mybatis.pojo;
+  /**
+   * POJOs，简单普通的Java对象。封装数据⽤的。
+   * @author ⽼杜
+   * @version 1.0
+   * @since 1.0
+   */
+  public class Car {
+   private Long id;
+   private String carNum;
+   private String brand;
+   private Double guidePrice;
+   private String produceTime;
+   private String carType;
+   @Override
+   public String toString() {
+   return "Car{" +
+   "id=" + id +
+   ", carNum='" + carNum + '\'' +
+   ", brand='" + brand + '\'' +
+   ", guidePrice=" + guidePrice +
+   ", produceTime='" + produceTime + '\'' +
+   ", carType='" + carType + '\'' +
+   '}';
+   }
+   public Car() {
+   }
+   public Car(Long id, String carNum, String brand, Double guidePrice, St
+  ring produceTime, String carType) {
+   this.id = id;
+   this.carNum = carNum;
+   this.brand = brand;
+   this.guidePrice = guidePrice;
+   this.produceTime = produceTime;
+   this.carType = carType;
+   }
+   public Long getId() {
+   return id;
+   }
+   public void setId(Long id){
+   this.id= id; 
+  }
+   public String getCarNum()
+  {
+   return carNum; 
+  }
+   public void setCarNum(String carNum){
+   	this.carNum= carNum; 
+  }
+   public String getBrand(){
+   	return brand; 
+  }
+   public void setBrand(String brand)
+  {
+   this.brand= brand; 
+  }
+   public Double getGuidePrice()
+  {
+   return guidePric; 
+  }
+   public void setGuidePrice(Double guidePrice)
+  {
+   this.guidePrice= guidePrice; 
+  }
+   public String getProduceTime()
+  { return produceTime; 
+  }
+   public void setProduceTime(String produceTime)
+  {
+   this.produceTime= produceTime; 
+  }
+   public String getCarType()
+  {
+   return carType; 
+  }
+   public void setCarType(String carType)
+  {
+   this.carType= carType; 
+  }
+  }
+  
+  ```
+
+  
