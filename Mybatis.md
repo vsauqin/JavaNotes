@@ -17,7 +17,7 @@ ORM:
 
 
 
-# 1.Mybatis入门程序
+# 一.Mybatis入门程序
 
 sql语句文件
 
@@ -106,4 +106,186 @@ public class MyBatisIntroductionTest{
 ```
 
 ## 1.1mybatis的事务管理机制
+
+提供了两种事务管理机制
+
+JDBC和MANAGED
+
+- 在mybatisConfig.xml为文件中可以通过以下配置进行mybatis事务管理
+
+<transactionManager type="JDBC"/>
+
+type的属性值有两个一个是MANAGER另一个是JDBC
+
+- MANAGED事务管理器
+
+mybatis不在管理事务，交由spring等其他容器管理
+
+- JDBC事务管理器
+
+mybatis自己管理
+
+手动提交事务
+
+## 1.2引入日志框架
+
+引入日志框架的目的是为了看清mybatis执行的具体情况
+
+启用日志组件需要在mybatis-config.xml文件中添加以下配置
+
+```java
+<setting>
+	<setting name="logImpl" value="STDOUT_LOGGING">
+</setting>
+```
+
+以上是标准日志，配置不够灵活可以集成其他日志组件例如：log4j，logback等等
+
+
+
+- logback性能较好，引入步骤
+
+  - 第一步：引入logback相关依赖
+
+  ```.xml
+  <dependency>
+   <groupId>ch.qos.logback</groupId>
+   <artifactId>logback-classic</artifactId>
+   <version>1.2.11</version>
+   <scope>test</scope>
+  </dependency>
+  ```
+
+  - 第二步：引入logback相关配置文件（文件名只能叫做logback.xml或logback-test.xml，放到类路径中）
+
+    ```java
+    <?xml version="1.0" encoding="UTF-8"?>
+    <configuration debug="false">
+     <!--定义⽇志⽂件的存储地址-->
+     <property name="LOG_HOME" value="/home"/>
+     <!-- 控制台输出 -->
+     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+     <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncode
+    r">
+     <!--格式化输出：%d表示⽇期，%thread表示线程名，%-5level：级别从左显示5
+    个字符宽度%msg：⽇志消息，%n是换⾏符-->
+     <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logge
+    r{50} - %msg%n</pattern>
+     </encoder>
+     </appender>
+     <!-- 按照每天⽣成⽇志⽂件 -->
+     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAp
+    pender">
+     <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRolling
+    Policy">
+     <!--⽇志⽂件输出的⽂件名-->
+     <FileNamePattern>${LOG_HOME}/TestWeb.log.%d{yyyy-MM-dd}.log</F
+    ileNamePattern>
+     <!--⽇志⽂件保留天数-->
+     <MaxHistory>30</MaxHistory>
+     </rollingPolicy>
+     <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncode
+    r">
+     <!--格式化输出：%d表示⽇期，%thread表示线程名，%-5level：级别从左显示5
+    个字符宽度%msg：⽇志消息，%n是换⾏符-->
+     <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logge
+    r{50} - %msg%n</pattern>
+     </encoder>
+     <!--⽇志⽂件最⼤的⼤⼩-->
+     <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTrig
+    geringPolicy">
+     <MaxFileSize>100MB</MaxFileSize>
+     </triggeringPolicy>
+     </appender>
+     <!--mybatis log configure-->
+     <logger name="com.apache.ibatis" level="TRACE"/>
+     <logger name="java.sql.Connection" level="DEBUG"/>
+     <logger name="java.sql.Statement" level="DEBUG"/>
+     <logger name="java.sql.PreparedStatement" level="DEBUG"/>
+     <!-- ⽇志输出级别,logback⽇志级别包括五个：TRACE < DEBUG < INFO < WARN < ER
+    ROR -->
+     <root level="DEBUG">
+     <appender-ref ref="STDOUT"/>
+     <appender-ref ref="FILE"/>
+     </root>
+    </configuration>
+    ```
+
+    
+
+## 1.3Mybatis工具类的封装
+
+- 目的：每次获取SqlSession对象的代码太繁琐，所以封装一个工具类
+
+**具体代码如下**
+
+```java
+package com.atsias1.utils;
+
+import org.apache.ibatis.io.Resources;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+
+import java.io.IOException;
+
+/**
+ * @Author:XQ
+ * @Date:
+ */
+public class SqlSessionUtil {
+    private SqlSessionUtil(){}
+    private static SqlSessionFactory build;
+    static {
+        try {
+            build = new SqlSessionFactoryBuilder().build(Resources.getResourceAsStream("mybitaisconfig.xml"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public static SqlSession openSession(){
+
+        SqlSession sqlSession = build.openSession();
+        return sqlSession;
+    }
+}
+
+```
+
+**测试代码**
+
+```java
+@Test
+public void testInsertCar(){
+	SqlSession sqlSession = SqlSessionUtil.openSession();
+	//执行sql
+	int count = sqlSession.insert("insertCar");
+	System.out.println("插入了几条记录：" + count);
+	sqlSession.close();
+}
+```
+
+
+
+
+
+# 二.使用MyBatis完成crud
+
+**准备工作**
+
+- pom.xml
+  - 打包方式jar
+  - 依赖
+    - mybatis依赖
+    - mysql驱动依赖
+    - junit依赖
+    - logback依赖
+  - mybatis-config.xml放在类路径下
+  - CarMapper.xml放在类路径下
+  - logback.xml放在类路径下
+  - 提供SqlSessionUtil工具类
+
+## 2.1insert（Create）
+
+
 
