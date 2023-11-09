@@ -746,6 +746,61 @@ public void testNamespace(){
 
 
 
+# 三.MyBatis配置文件核心详解
+
+文件如下
+
+```java
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+ PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+ <environments default="development">
+ <environment id="development">
+ <transactionManager type="JDBC"/>
+ <dataSource type="POOLED">
+ <property name="driver" value="com.mysql.cj.jdbc.Driver"/>
+ <property name="url" value="jdbc:mysql://localhost:3306/po
+wernode"/>
+ <property name="username" value="root"/>
+ <property name="password" value="root"/>
+ </dataSource>
+ </environment>
+ </environments>
+ <mappers>
+ <mapper resource="CarMapper.xml"/>
+ <mapper resource="CarMapper2.xml"/>
+ </mappers>
+</configuration>
+```
+
+- configuration：根标签，表示配置信息
+- environments：环境，表示数据源
+  - default属性：表示默认使用的是哪一个环境，default后面写的是environment的id，default的值只需要和environment的id一致即可
+- envirment：具体的环境配置（主要包括：事务管理器的配置和数据源的配置）
+  - id：当前环境的唯一标识，
+- transactionManager：配置事务管理器
+  - type属性：指定事务管理器具体是用什么方式，两个可选
+    - JDBC：
+    - MANAGER：交给其他容器管理，如果没有事务管理容器，则执行一条DML语句就提交一次
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
