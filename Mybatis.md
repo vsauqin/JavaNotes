@@ -458,3 +458,317 @@ e) values(#{k1},#{k2},#{k3},#{k4},#{k5})
   ```
 
   
+
+- 第二步java程序
+
+```java
+@Test
+public void testInsertCarByPOJO(){
+ // 创建POJO，封装数据
+ Car car = new Car();
+ car.setCarNum("103");
+ car.setBrand("奔驰C200");
+ car.setGuidePrice(33.23);
+ car.setProduceTime("2020-10-11");
+ car.setCarType("燃油⻋");
+ // 获取SqlSession对象
+ SqlSession sqlSession = SqlSessionUtil.openSession();
+ // 执⾏SQL，传数据
+ int count = sqlSession.insert("insertCarByPOJO", car);
+ System.out.println("插⼊了⼏条记录" + count);
+}
+```
+
+- 第三步SQL语句
+
+```.xml
+<insert id="insertCarByPOJO">
+ <!--#{} ⾥写的是POJO的属性名-->
+ insert into t_car(car_num,brand,guide_price,produce_time,car_type) values
+(#{carNum},#{brand},#{guidePrice},#{produceTime},#{carType})
+</insert>
+
+```
+
+**总结：**
+
+如果使用map集合传参，#{}里面写的是map集合的key，如果key不存在不会报错，数据表中会插入null
+
+如果采用pojo传参，#{}里面写的是get方法名去掉get之后将剩下的单词首字母小写
+
+## 2.2delect（Delect）
+
+需求是根据car_num进行删除
+
+SQL语句这样写
+
+```java
+<delect id="delectByCarNum">
+	delect from t_car where car_num = #{随便写}
+</delect>
+```
+
+java程序这样写
+
+```java
+@Test
+public void testDeleteByCarNum(){
+ // 获取SqlSession对象
+ SqlSession sqlSession = SqlSessionUtil.openSession();
+ // 执⾏SQL语句
+ int count = sqlSession.delete("deleteByCarNum", "102");
+ System.out.println("删除了⼏条记录：" + count);
+}
+```
+
+**当占位符只有一个是，#{}里面可以随便写**
+
+## 2.3update(Update)
+
+需求：修改id=34的Car信息
+
+SQL语句如下
+
+```java
+<update id="updateCarByPOJO">
+ update t_car set
+ car_num = #{carNum}, brand = #{brand},
+ guide_price = #{guidePrice}, produce_time = #{produceTime},
+ car_type = #{carType}
+ where id = #{id}
+</update>
+```
+
+
+
+java代码如下
+
+```java
+@Test
+ public void testUpdateCarByPOJO(){
+ // 准备数据
+ Car car = new Car();
+ car.setId(34L);
+ car.setCarNum("102");
+ car.setBrand("⽐亚迪汉");
+ car.setGuidePrice(30.23);
+ car.setProduceTime("2018-09-10");
+ car.setCarType("电⻋");
+ // 获取SqlSession对象
+ SqlSession sqlSession = SqlSessionUtil.openSession();
+ // 执⾏SQL语句
+ int count = sqlSession.update("updateCarByPOJO", car);
+ System.out.println("更新了⼏条记录：" + count);
+ }
+```
+
+## 2.4select(Retrieve)
+
+和其他语句不一样的是，select语句查执行后会返回一个结果集
+
+### 查询一条语句
+
+SQL语句如下
+
+```java
+<select id="selectCarById">
+	select * from t_car where id = #{id}
+</select>
+```
+
+java程序如下：
+
+```java
+public void testSelectCarById(){
+	SqlSession sqlSession = SqlSessionUtil.openSession();
+	//执行sql语句
+	Object car = sqlSession.selectOne("selectCarById",1);
+	System.out.println("car");
+}
+```
+
+运行结果如下：
+
+```java
+//结果出现异常
+### Error querying database. Cause: org.apache.ibatis.executor.ExecutorExc
+eption:
+ A query was run and no Result Maps were found for the Mapped Statement
+'car.selectCarById'. 【翻译】：对于⼀个查询语句来说，没有找到查询的结果映射。
+ It's likely that neither a Result Type nor a Result Map was specified.
+【翻译】：很可能既没有指定结果类型，也没有指定结果映射。
+```
+
+以上的大致意思是是要指出一个查询语句的“结果类型“或者”结果映射“
+
+所以如果想让mybatis返回一个java对象的话，需要在<select>标签中添加resultType属性，用来指定查询要转换的类型
+
+代码如下
+
+```java
+<select id="selectCarById" resultType="com.powernode.mybatis.pojo.Car">
+	select * from t_car where id = #{id}
+</select>
+```
+
+再次运行后异常不在出现，但是有的属性值为null
+
+查询结果集的列名：id, car_num, brand, guide_price, produce_time, car_type
+
+ Car类的属性名：id, carNum, brand, guidePrice, produceTime, carType
+
+因为结果集的列名和Car类中的属性名不一致，导致无法获得返回值
+
+修改后的sql语句如下
+
+```java
+<select id="selectCarById" resultType="com.powernode.mybatis.pojo.Car">
+	 select id, car_num as carNum, brand, 
+	 guide_price as guidePrice, produce_time 
+	 as produceTime, car_type as carType
+ from t_car
+ where id = #{id}
+</select>
+```
+
+### 查询多条语句
+
+SQL语句如下
+
+```java
+<!--虽然结果是List集合，但是resultType属性需要指定的是List集合中元素的类型。-->
+<select id="selectCarAll" resultType="com.powernode.mybatis.pojo.Car">
+ <!--记得使⽤as起别名，让查询结果的字段名和java类的属性名对应上。-->
+ select
+ id, car_num as carNum, brand, guide_price as guidePrice, produce_time a
+s produceTime, car_type as carType
+ from
+ t_car
+</select>
+```
+
+java代码如下：
+
+```java
+@Test
+public void testSelectCarAll(){
+	SqlSession sqlSession = SqlSessionUtil.openSession();
+	//zhixingsql语句
+	List<Object> cars = sqlSession.selectList("selectCarAll");
+	cars.forEach(car->System.out.println(car));
+}
+```
+
+
+
+
+
+## 2.5 有关命名空间
+
+在SQL Mapper的配置文件中<mapper>标签的namespace属性可以翻译为命名空间，这个命名空间的主要作用是方式SQLid冲突
+
+示例如下
+
+创建CarMapper2.xml，代码如下
+
+```java
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="car2">
+ <select id="selectCarAll" resultType="com.powernode.mybatis.pojo.Car">
+ select
+ id, car_num as carNum, brand, guide_price as guidePrice, produ
+ce_time as produceTime, car_type as carType
+ from
+ t_car
+ </select>
+</mapper>
+```
+
+此时CarMapper.xml和CarMapper2.xml都有id=“selectCarAll”
+
+将其配置到mybatis.xml中
+
+```.xml
+<mappers>
+ <mapper resource="CarMapper.xml"/>
+ <mapper resource="CarMapper2.xml"/>
+</mappers>
+
+```
+
+编写的java代码如下
+
+```java
+@Test
+public void testNamespace(){
+ // 获取SqlSession对象
+ SqlSession sqlSession = SqlSessionUtil.openSession();
+ // 执⾏SQL语句
+ List<Object> cars = sqlSession.selectList("selectCarAll");
+ // 输出结果
+ cars.forEach(car -> System.out.println(car));
+}
+
+```
+
+运行结果
+
+```java
+org.apache.ibatis.exceptions.PersistenceException:
+### Error querying database. Cause: java.lang.IllegalArgumentException:
+ selectCarAll is ambiguous in Mapped Statements collection (try using the
+full name including the namespace, or rename one of the entries)
+ 【翻译】selectCarAll在Mapped Statements集合中不明确（请尝试使⽤包含名称空间的全
+名，或重命名其中⼀个条⽬）
+ 【⼤致意思是】selectCarAll重名了，你要么在selectCarAll前添加⼀个名称空间，要有你改
+个其它名字。
+```
+
+Java代码修改后
+
+```java
+@Test
+public void testNamespace(){
+ // 获取SqlSession对象
+ SqlSession sqlSession = SqlSessionUtil.openSession();
+ // 执⾏SQL语句
+ //List<Object> cars = sqlSession.selectList("car.selectCarAll");
+ List<Object> cars = sqlSession.selectList("car2.selectCarAll");
+ // 输出结果
+ cars.forEach(car -> System.out.println(car));
+}
+```
+
+运行正常
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
