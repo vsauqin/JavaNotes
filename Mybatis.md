@@ -1181,11 +1181,148 @@ mapper标签用来是定SQL映射文件的路径，包含多种指定方式，�
 
 
 
+## 4.1dom4j解析xml文件
+
+配置config.xml文件
+
+```java
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <environments default="development">
+        <environment id="development">
+            <transactionManager type="JDBC"/>
+            <dataSource type="POOLED">
+                <property name="driver" value="com.mysql.cj.jdbc.Driver"/>
+                <property name="url" value="jdbc:mysql://localhost:3306/sias"/>
+                <property name="username" value="root"/>
+                <property name="password" value="223515"/>
+            </dataSource>
+        </environment>
+        <environment id="mybatisDB">
+            <transactionManager type="JDBC"/>
+            <dataSource type="POOLED">
+                <property name="driver" value="com.mysql.cj.jdbc.Driver"/>
+                <property name="url" value="jdbc:mysql://localhost:3306/mybatis"/>
+                <property name="username" value="root"/>
+                <property name="password" value="223515"/>
+            </dataSource>
+        </environment>
+    </environments>
+    <mappers>
+<!--        指定Mapper文件的路径-->
+        <mapper resource="CarMapper.xml"/>
+    </mappers>
+</configuration>
+```
 
 
 
+解析config.xml
 
+```java
+public void testParseMybatisConfigXML() throws Exception{
+        //获取SAXReader对象
+        SAXReader saxReader = new SAXReader();
+        //获取输入流
+        InputStream is = ClassLoader.getSystemClassLoader().getResourceAsStream("mybatisconfig.xml");
+        //读取XML文件，返回document对象，document是文档对象代表XML文件
+        Document document = saxReader.read(is);
+        //System.out.println(document);
 
+        //获取文档中的根标签
+        Element rootElt = document.getRootElement();
+        String rootEltname = rootElt.getName();
+        System.out.println(rootEltname);
+
+        //获取enviroments标签的default属性
+        //以下的Xpath代表：从根下查找configuration标签然后找configuration标签下的environment
+        String Xpath = "/configuration/environments";
+        Element enviromentsElt = (Element) document.selectSingleNode(Xpath);
+        String defaultId = enviromentsElt.attributeValue("default");
+        //System.out.println(defaultId);
+        //获取enviroment标签
+        Xpath = "/configuration/environments/environment[@id='"+ defaultId +"']";
+        Element enviromentElt = (Element) document.selectSingleNode(Xpath);
+        System.out.println(enviromentElt);
+        //获取enviroment节点下的transactionManager节点(Element的element()方法用来获取子节点)
+        Element transactionType = enviromentElt.element("transactionManager");
+        Attribute transaction = transactionType.attribute("type");
+        System.out.println(transaction);
+        //获取datasource
+        Element dataSource = enviromentElt.element("dataSource");
+        Attribute type = dataSource.attribute("type");
+        System.out.println(type);
+        //获取datasource下的所有节点
+        List<Element> propertyElts = dataSource.elements();
+        propertyElts.forEach(propertyElt -> {
+            Attribute name = propertyElt.attribute("name");
+            Attribute value = propertyElt.attribute("value");
+            System.out.println(name + "=" + value);
+        });
+        //获取所有的mapper标签
+        //不想从根标签获取，想从任意位置获取，xpath写法如下
+        Xpath = "//mapper";
+        List<Node> mappers = document.selectNodes(Xpath);
+        mappers.forEach(mapper -> {
+            Element element = (Element) mapper;
+            Attribute resource = element.attribute("resource");
+            System.out.println(resource);
+        });
+
+    }
+```
+
+配置CarMapper.xml文件
+
+```java
+<?xml version="1.0" encoding="UTF-8" ?>
+<mapper namespace="car">
+ <insert id="insertCar">
+ insert into t_car(id,car_num,brand,guide_price,produce_time,car_ty
+pe) values(null,#{carNum},#{brand},#{guidePrice},#{produceTime},#{carTyp
+e})
+ </insert>
+ <select id="selectCarByCarNum" resultType="com.powernode.mybatis.pojo.
+Car">
+ select id,car_num carNum,brand,guide_price guidePrice,produce_tim
+e produceTime,car_type carType from t_car where car_num = #{carNum}
+ </select>
+</mapper>
+```
+
+解析CarMapper.xml文件
+
+```java
+public void testparseSqlMapperXML() throws Exception{
+        SAXReader saxReader = new SAXReader();
+        InputStream is = ClassLoader.getSystemClassLoader().getResourceAsStream("CarMapper.xml");
+        Document document = saxReader.read(is);
+        //获取namespace
+        Element mapperElt = (Element) document.selectSingleNode("/mapper");
+        String namespace = mapperElt.attributeValue("namespace");
+        System.out.println(namespace);
+        //获取SQL id
+        mapperElt.elements().forEach(statementElt ->{
+            //标签名
+            String name = statementElt.getName();
+            System.out.println(name);
+            //如果是select标签，还要获取resultType
+            String resultType = statementElt.attributeValue("resuletType");
+            System.out.println(resultType);
+            //sql id
+            String id = statementElt.attributeValue("id");
+            System.out.println(id);
+            //sql 语句
+            String sql = statementElt.getTextTrim();
+            System.out.println(sql);
+        });
+    }
+```
+
+## 4.2GodBatis
 
 
 
