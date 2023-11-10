@@ -1084,15 +1084,100 @@ poolTimeToWait：当⽆法获取到空闲连接时，每隔20秒打印⼀次⽇�
 
 此时可以使用第三方连接池接口
 
+## 3.4properties
 
+mybatis提供了灵活的配置，连接数据库的信息可以单独写到一个属性资源文件中，假设在类的根路径下创建一个jdbc.properties文件
 
+```
+jdbc.driver=com.mysql.cj.jdbc.Driver
+jdbc.url=jdbc:mysql://localhost:3306/powernode
+```
 
+ 在mybatis核心配置文件中使用：
 
+```java
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+ PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+ <!--引⼊外部属性资源⽂件-->
+ <properties resource="jdbc.properties">
+ <property name="jdbc.username" value="root"/>
+ <property name="jdbc.password" value="root"/>
+ </properties>
+ <environments default="dev">
+ <environment id="dev">
+ <transactionManager type="JDBC"/>
+ <dataSource type="POOLED">
+ <!--${key}使⽤-->
+ <property name="driver" value="${jdbc.driver}"/>
+ <property name="url" value="${jdbc.url}"/>
+ <property name="username" value="${jdbc.username}"/>
+ <property name="password" value="${jdbc.password}"/>
+ </dataSource>
+ </environment>
+ </environments>
+ <mappers>
+ <mapper resource="CarMapper.xml"/>
+ </mappers>
+</configuration>
+```
 
+编写Java程序进行测试
 
+```java
+@Test
+public void testProperties() throws Exception{
+ SqlSessionFactoryBuilder sqlSessionFactoryBuilder = new SqlSessionFacto
+ryBuilder();
+ SqlSessionFactory sqlSessionFactory = sqlSessionFactoryBuilder.build(Re
+sources.getResourceAsStream("mybatis-config4.xml"));
+ SqlSession sqlSession = sqlSessionFactory.openSession();
+ Object car = sqlSession.selectOne("selectCarByCarNum");
+ System.out.println(car);
+}
+```
 
+properties有两个属性：
 
+resouce：这个属性从类的根路径下开始加载
 
+url：从指定的url加载
+
+## 3.5mapper
+
+mapper标签用来是定SQL映射文件的路径，包含多种指定方式，其中两种为：
+
+**第一种:**resource,从类的根路径下进行加载
+
+```java
+<mappers>
+	<mapper resource="CarMapper.xml">
+</mappers>
+```
+
+如果这样写必须保证类路径下必须有Carmapper.xml文件
+
+如果类路径下有一个test包，CarMapper.xml在这个包下，配置文件应该这样写
+
+```java
+<mappers>
+	<mapper="test/CarMapper.xml">
+</mappers>
+```
+
+**第二种：**url，从指定的url位置进行加载
+
+假设CarMapper.xml文件放在D盘的根目录下，配置写法如下
+
+```java
+<mappers>
+	<mapper url="file:///d:/CarMapper.xml"
+</mappers>
+```
+
+# 四，手写mybatis基本框架 
 
 
 
