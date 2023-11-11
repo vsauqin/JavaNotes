@@ -1326,7 +1326,51 @@ public void testparseSqlMapperXML() throws Exception{
 
 
 
+# 五，在WEB中应用MyBatis
+
+## 5.1环境搭建
+
+导入依赖
+
+wed.xml配置好
+
+**相关的配置文件**
+
+mybatisconfig.xml
+
+Accountmapper.xml
+
+logback.xml
+
+jdbc.properties:密码一定要输对
+
+## 5.2创建pojo包、service包、dao包、web包、utils包
+
+具体怎么写的省略
 
 
 
+## 5.3MyBatis对象作用域
+
+### SqlSessionFactoryBuilder
+
+这个类可以被实例化、使⽤和丢弃，⼀旦创建了 SqlSessionFactory，就不再需要它了。 因此 SqlSessionFactoryBuilder 实例的最佳作⽤域是⽅法作⽤域（也就是局部⽅法变量）。 你可以重⽤SqlSessionFactoryBuilder 来创建多个 SqlSessionFactory 实例，但最好还是不要⼀直保留着它，以保证所有 的 XML 解析资源可以被释放给更重要的事情。
+
+### SqlSessionFactory
+
+SqlSessionFactory ⼀旦被创建就应该在应⽤的运⾏期间⼀直存在，没有任何理由丢弃它或重新创建另⼀个实 例。 使⽤ SqlSessionFactory 的最佳实践是在应⽤运⾏期间不要重复创建多次，多次重建 SqlSessionFactory 被视为⼀种代码“坏习惯”。因此 SqlSessionFactory 的最佳作⽤域是应⽤作⽤域。 有很多⽅法可以做到，最简 单的就是使⽤单例模式或者静态单例模式。
+
+### SqlSession
+
+每个线程都应该有它⾃⼰的 SqlSession 实例。SqlSession 的实例不是线程安全的，因此是不能被共享的，所以 它的最佳的作⽤域是请求或⽅法作⽤域。 绝对不能将 SqlSession 实例的引⽤放在⼀个类的静态域，甚⾄⼀个类 的实例变量也不⾏。 也绝不能将 SqlSession 实例的引⽤放在任何类型的托管作⽤域中，⽐如 Servlet 框架中的 HttpSession。 如果你现在正在使⽤⼀种 Web 框架，考虑将 SqlSession 放在⼀个和 HTTP 请求相似的作⽤域 中。 换句话说，每次收到 HTTP 请求，就可以打开⼀个 SqlSession，返回⼀个响应后，就关闭它。 这个关闭操 作很重要，为了确保每次都能执⾏关闭操作，你应该把这个关闭操作放到 finally 块中。 下⾯的示例就是⼀个确 保 SqlSession 关闭的标准模式：
+
+```java
+try (SqlSession session = sqlSessionFactory.openSession()) {
+ // 你的应⽤逻辑代码
+}
+```
+
+
+
+## 5.4事务问题
 
