@@ -1328,49 +1328,1076 @@ public void testparseSqlMapperXML() throws Exception{
 
 # 五，在WEB中应用MyBatis
 
-## 5.1环境搭建
+# 六、在WEB中应用MyBatis（使用MVC架构模式）
 
-导入依赖
+**目标：**
 
-wed.xml配置好
+- 掌握mybatis在web应用中怎么用
+- mybatis三大对象的作用域和生命周期
+- ThreadLocal原理及使用
+- 巩固MVC架构模式
+- 为学习MyBatis的接口代理机制做准备
 
-**相关的配置文件**
+**实现功能：**
 
-mybatisconfig.xml
+- 银行账户转账
 
-Accountmapper.xml
+**使用技术：**
 
-logback.xml
+- HTML + Servlet + MyBatis
 
-jdbc.properties:密码一定要输对
+**WEB应用的名称：**
 
-## 5.2创建pojo包、service包、dao包、web包、utils包
+- bank
 
-具体怎么写的省略
+## 6.1 需求描述
 
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660274775552-da896b17-09dd-455a-899e-eb4f36fc0ced.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_14%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
 
+## 6.2 数据库表的设计和准备数据
 
-## 5.3MyBatis对象作用域
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660275027117-dcf9ec03-01fa-4e93-8edb-7e10456ba51f.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_26%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
 
-### SqlSessionFactoryBuilder
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660275097707-2621f88d-9c21-4d4e-aa6c-c90e1c6e4e3b.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_14%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
 
-这个类可以被实例化、使⽤和丢弃，⼀旦创建了 SqlSessionFactory，就不再需要它了。 因此 SqlSessionFactoryBuilder 实例的最佳作⽤域是⽅法作⽤域（也就是局部⽅法变量）。 你可以重⽤SqlSessionFactoryBuilder 来创建多个 SqlSessionFactory 实例，但最好还是不要⼀直保留着它，以保证所有 的 XML 解析资源可以被释放给更重要的事情。
+## 6.3 实现步骤
 
-### SqlSessionFactory
+### 第一步：环境搭建
 
-SqlSessionFactory ⼀旦被创建就应该在应⽤的运⾏期间⼀直存在，没有任何理由丢弃它或重新创建另⼀个实 例。 使⽤ SqlSessionFactory 的最佳实践是在应⽤运⾏期间不要重复创建多次，多次重建 SqlSessionFactory 被视为⼀种代码“坏习惯”。因此 SqlSessionFactory 的最佳作⽤域是应⽤作⽤域。 有很多⽅法可以做到，最简 单的就是使⽤单例模式或者静态单例模式。
+- IDEA中创建Maven WEB应用（**mybatis-004-web**）
 
-### SqlSession
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660275706327-2116fb91-fe1a-449d-bd62-6f15416dba84.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_32%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
 
-每个线程都应该有它⾃⼰的 SqlSession 实例。SqlSession 的实例不是线程安全的，因此是不能被共享的，所以 它的最佳的作⽤域是请求或⽅法作⽤域。 绝对不能将 SqlSession 实例的引⽤放在⼀个类的静态域，甚⾄⼀个类 的实例变量也不⾏。 也绝不能将 SqlSession 实例的引⽤放在任何类型的托管作⽤域中，⽐如 Servlet 框架中的 HttpSession。 如果你现在正在使⽤⼀种 Web 框架，考虑将 SqlSession 放在⼀个和 HTTP 请求相似的作⽤域 中。 换句话说，每次收到 HTTP 请求，就可以打开⼀个 SqlSession，返回⼀个响应后，就关闭它。 这个关闭操 作很重要，为了确保每次都能执⾏关闭操作，你应该把这个关闭操作放到 finally 块中。 下⾯的示例就是⼀个确 保 SqlSession 关闭的标准模式：
+- IDEA配置Tomcat，这里Tomcat使用10+版本。并部署应用到tomcat。
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660296669590-e7e4932f-cdfb-4d82-9711-af0ca18bbe81.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_30%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660296712190-729ead72-375d-417f-852a-ef366c38c1c3.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_30%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+- 默认创建的maven web应用没有java和resources目录，包括两种解决方案
+
+- 第一种：自己手动加上。
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660297753549-b90c4f4c-2f8f-404d-9ff7-c350d8cd21e0.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_11%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+- 第二种：修改maven-archetype-webapp-1.4.jar中的配置文件
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660297555336-bef8649f-7e24-477c-9e0a-e55ed1b009a6.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_22%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660297620748-1062587b-feff-472a-a546-e5489aebdbdc.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_21%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660297684026-b50cdd30-80d2-488d-9632-a0a098a3518e.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_23%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+- web.xml文件的版本较低，可以从tomcat10的样例文件中复制，然后修改
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee
+                      https://jakarta.ee/xml/ns/jakartaee/web-app_5_0.xsd"
+         version="5.0"
+         metadata-complete="true">
+
+</web-app>
+```
+
+- 删除index.jsp文件，因为我们这个项目不使用JSP。只使用html。
+- 确定pom.xml文件中的打包方式是war包。
+
+- 引入相关依赖
+
+- 编译器版本修改为17
+- 引入的依赖包括：mybatis，mysql驱动，junit，logback，servlet。
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.powernode</groupId>
+    <artifactId>mybatis-004-web</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>war</packaging>
+
+    <name>mybatis-004-web</name>
+    <url>http://localhost:8080/bank</url>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+    </properties>
+
+    <dependencies>
+        <!--mybatis依赖-->
+        <dependency>
+            <groupId>org.mybatis</groupId>
+            <artifactId>mybatis</artifactId>
+            <version>3.5.10</version>
+        </dependency>
+        <!--mysql驱动依赖-->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.30</version>
+        </dependency>
+        <!--junit依赖-->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13.2</version>
+            <scope>test</scope>
+        </dependency>
+        <!--logback依赖-->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.2.11</version>
+        </dependency>
+        <!--servlet依赖-->
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <version>5.0.0</version>
+            <scope>provided</scope>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <finalName>mybatis-004-web</finalName>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <artifactId>maven-clean-plugin</artifactId>
+                    <version>3.1.0</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>3.0.2</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.8.0</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>2.22.1</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-war-plugin</artifactId>
+                    <version>3.2.2</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-install-plugin</artifactId>
+                    <version>2.5.2</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>2.8.2</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+</project>
+```
+
+- 引入相关配置文件，放到resources目录下（全部放到类的根路径下）
+
+- mybatis-config.xml
+- AccountMapper.xml
+- logback.xml
+- jdbc.properties
+
+```properties
+jdbc.driver=com.mysql.cj.jdbc.Driver
+jdbc.url=jdbc:mysql://localhost:3306/powernode
+jdbc.username=root
+jdbc.password=root
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+    <properties resource="jdbc.properties"/>
+
+    <environments default="dev">
+        <environment id="dev">
+            <transactionManager type="JDBC"/>
+            <dataSource type="POOLED">
+                <property name="driver" value="${jdbc.driver}"/>
+                <property name="url" value="${jdbc.url}"/>
+                <property name="username" value="${jdbc.username}"/>
+                <property name="password" value="${jdbc.password}"/>
+            </dataSource>
+        </environment>
+    </environments>
+    <mappers>
+        <!--一定要注意这里的路径哦！！！-->
+        <mapper resource="AccountMapper.xml"/>
+    </mappers>
+</configuration>
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="account">
+
+</mapper>
+```
+
+### 第二步：前端页面index.html
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>银行账户转账</title>
+</head>
+<body>
+<!--/bank是应用的根，部署web应用到tomcat的时候一定要注意这个名字-->
+<form action="/bank/transfer" method="post">
+    转出账户：<input type="text" name="fromActno"/><br>
+    转入账户：<input type="text" name="toActno"/><br>
+    转账金额：<input type="text" name="money"/><br>
+    <input type="submit" value="转账"/>
+</form>
+</body>
+</html>
+```
+
+### 第三步：创建pojo包、service包、dao包、web包、utils包
+
+- com.powernode.bank.pojo
+- com.powernode.bank.service
+- com.powernode.bank.service.impl
+- com.powernode.bank.dao
+- com.powernode.bank.dao.impl
+- com.powernode.bank.web.controller
+- com.powernode.bank.exception
+- com.powernode.bank.utils：**将之前编写的SqlSessionUtil工具类拷贝到该包下。**
+
+### 第四步：定义pojo类：Account
+
+```java
+package com.powernode.bank.pojo;
+
+/**
+ * 银行账户类
+ * @author 老杜
+ * @version 1.0
+ * @since 1.0
+ */
+public class Account {
+    private Long id;
+    private String actno;
+    private Double balance;
+
+    @Override
+    public String toString() {
+        return "Account{" +
+                "id=" + id +
+                ", actno='" + actno + '\'' +
+                ", balance=" + balance +
+                '}';
+    }
+
+    public Account() {
+    }
+
+    public Account(Long id, String actno, Double balance) {
+        this.id = id;
+        this.actno = actno;
+        this.balance = balance;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getActno() {
+        return actno;
+    }
+
+    public void setActno(String actno) {
+        this.actno = actno;
+    }
+
+    public Double getBalance() {
+        return balance;
+    }
+
+    public void setBalance(Double balance) {
+        this.balance = balance;
+    }
+}
+```
+
+### 第五步：编写AccountDao接口，以及AccountDaoImpl实现类
+
+分析dao中至少要提供几个方法，才能完成转账：
+
+- 转账前需要查询余额是否充足：selectByActno
+- 转账时要更新账户：update
+
+```java
+package com.powernode.bank.dao;
+
+import com.powernode.bank.pojo.Account;
+
+/**
+ * 账户数据访问对象
+ * @author 老杜
+ * @version 1.0
+ * @since 1.0
+ */
+public interface AccountDao {
+
+    /**
+     * 根据账号获取账户信息
+     * @param actno 账号
+     * @return 账户信息
+     */
+    Account selectByActno(String actno);
+
+    /**
+     * 更新账户信息
+     * @param act 账户信息
+     * @return 1表示更新成功，其他值表示失败
+     */
+    int update(Account act);
+}
+package com.powernode.bank.dao.impl;
+
+import com.powernode.bank.dao.AccountDao;
+import com.powernode.bank.pojo.Account;
+import com.powernode.bank.utils.SqlSessionUtil;
+import org.apache.ibatis.session.SqlSession;
+
+public class AccountDaoImpl implements AccountDao {
+    @Override
+    public Account selectByActno(String actno) {
+        SqlSession sqlSession = SqlSessionUtil.openSession();
+        Account act = (Account)sqlSession.selectOne("selectByActno", actno);
+        sqlSession.close();
+        return act;
+    }
+
+    @Override
+    public int update(Account act) {
+        SqlSession sqlSession = SqlSessionUtil.openSession();
+        int count = sqlSession.update("update", act);
+        sqlSession.commit();
+        sqlSession.close();
+        return count;
+    }
+}
+```
+
+### 第六步：AccountDaoImpl中编写了mybatis代码，需要编写SQL映射文件了
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="account">
+    <select id="selectByActno" resultType="com.powernode.bank.pojo.Account">
+        select * from t_act where actno = #{actno}
+    </select>
+    <update id="update">
+        update t_act set balance = #{balance} where actno = #{actno}
+    </update>
+</mapper>
+```
+
+### 第七步：编写AccountService接口以及AccountServiceImpl
+
+```java
+package com.powernode.bank.exception;
+
+/**
+ * 余额不足异常
+ * @author 老杜
+ * @version 1.0
+ * @since 1.0
+ */
+public class MoneyNotEnoughException extends Exception{
+    public MoneyNotEnoughException(){}
+    public MoneyNotEnoughException(String msg){ super(msg); }
+}
+package com.powernode.bank.exception;
+
+/**
+ * 应用异常
+ * @author 老杜
+ * @version 1.0
+ * @since 1.0
+ */
+public class AppException extends Exception{
+    public AppException(){}
+    public AppException(String msg){ super(msg); }
+}
+package com.powernode.bank.service;
+
+import com.powernode.bank.exception.AppException;
+import com.powernode.bank.exception.MoneyNotEnoughException;
+
+/**
+ * 账户业务类。
+ * @author 老杜
+ * @version 1.0
+ * @since 1.0
+ */
+public interface AccountService {
+
+    /**
+     * 银行账户转正
+     * @param fromActno 转出账户
+     * @param toActno 转入账户
+     * @param money 转账金额
+     * @throws MoneyNotEnoughException 余额不足异常
+     * @throws AppException App发生异常
+     */
+    void transfer(String fromActno, String toActno, double money) throws MoneyNotEnoughException, AppException;
+}
+package com.powernode.bank.service.impl;
+
+import com.powernode.bank.dao.AccountDao;
+import com.powernode.bank.dao.impl.AccountDaoImpl;
+import com.powernode.bank.exception.AppException;
+import com.powernode.bank.exception.MoneyNotEnoughException;
+import com.powernode.bank.pojo.Account;
+import com.powernode.bank.service.AccountService;
+
+public class AccountServiceImpl implements AccountService {
+
+    private AccountDao accountDao = new AccountDaoImpl();
+
+    @Override
+    public void transfer(String fromActno, String toActno, double money) throws MoneyNotEnoughException, AppException {
+        // 查询转出账户的余额
+        Account fromAct = accountDao.selectByActno(fromActno);
+        if (fromAct.getBalance() < money) {
+            throw new MoneyNotEnoughException("对不起，您的余额不足。");
+        }
+        try {
+            // 程序如果执行到这里说明余额充足
+            // 修改账户余额
+            Account toAct = accountDao.selectByActno(toActno);
+            fromAct.setBalance(fromAct.getBalance() - money);
+            toAct.setBalance(toAct.getBalance() + money);
+            // 更新数据库
+            accountDao.update(fromAct);
+            accountDao.update(toAct);
+        } catch (Exception e) {
+            throw new AppException("转账失败，未知原因！");
+        }
+    }
+}
+```
+
+### 第八步：编写AccountController
+
+```java
+package com.powernode.bank.web.controller;
+
+import com.powernode.bank.exception.AppException;
+import com.powernode.bank.exception.MoneyNotEnoughException;
+import com.powernode.bank.service.AccountService;
+import com.powernode.bank.service.impl.AccountServiceImpl;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
+
+/**
+ * 账户控制器
+ * @author 老杜
+ * @version 1.0
+ * @since 1.0
+ */
+@WebServlet("/transfer")
+public class AccountController extends HttpServlet {
+
+    private AccountService accountService = new AccountServiceImpl();
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        // 获取响应流
+        response.setContentType("text/html;charset=UTF-8");
+        PrintWriter out = response.getWriter();
+        // 获取账户信息
+        String fromActno = request.getParameter("fromActno");
+        String toActno = request.getParameter("toActno");
+        double money = Integer.parseInt(request.getParameter("money"));
+        // 调用业务方法完成转账
+        try {
+            accountService.transfer(fromActno, toActno, money);
+            out.print("<h1>转账成功！！！</h1>");
+        } catch (MoneyNotEnoughException e) {
+            out.print(e.getMessage());
+        } catch (AppException e) {
+            out.print(e.getMessage());
+        }
+    }
+}
+```
+
+启动服务器，打开浏览器，输入地址：http://localhost:8080/bank，测试：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660548722867-8ae16c8b-f25c-4fc7-b0bb-8c8f0c5e546a.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_10%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660551569099-4d81d8cd-35c5-418f-9de1-74ef8641a59f.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_13%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660551655159-a814927f-dba4-4d81-b6a8-93bdc8511e79.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_12%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+## 6.4 MyBatis对象作用域以及事务问题
+
+### MyBatis核心对象的作用域
+
+#### SqlSessionFactoryBuilder
+
+这个类可以被实例化、使用和丢弃，一旦创建了 SqlSessionFactory，就不再需要它了。 因此 SqlSessionFactoryBuilder 实例的最佳作用域是方法作用域（也就是局部方法变量）。 你可以重用 SqlSessionFactoryBuilder 来创建多个 SqlSessionFactory 实例，但最好还是不要一直保留着它，以保证所有的 XML 解析资源可以被释放给更重要的事情。
+
+#### SqlSessionFactory
+
+SqlSessionFactory 一旦被创建就应该在应用的运行期间一直存在，没有任何理由丢弃它或重新创建另一个实例。 使用 SqlSessionFactory 的最佳实践是在应用运行期间不要重复创建多次，多次重建 SqlSessionFactory 被视为一种代码“坏习惯”。因此 SqlSessionFactory 的最佳作用域是应用作用域。 有很多方法可以做到，最简单的就是使用单例模式或者静态单例模式。
+
+#### SqlSession
+
+每个线程都应该有它自己的 SqlSession 实例。SqlSession 的实例不是线程安全的，因此是不能被共享的，所以它的最佳的作用域是请求或方法作用域。 绝对不能将 SqlSession 实例的引用放在一个类的静态域，甚至一个类的实例变量也不行。 也绝不能将 SqlSession 实例的引用放在任何类型的托管作用域中，比如 Servlet 框架中的 HttpSession。 如果你现在正在使用一种 Web 框架，考虑将 SqlSession 放在一个和 HTTP 请求相似的作用域中。 换句话说，每次收到 HTTP 请求，就可以打开一个 SqlSession，返回一个响应后，就关闭它。 这个关闭操作很重要，为了确保每次都能执行关闭操作，你应该把这个关闭操作放到 finally 块中。 下面的示例就是一个确保 SqlSession 关闭的标准模式：
 
 ```java
 try (SqlSession session = sqlSessionFactory.openSession()) {
- // 你的应⽤逻辑代码
+  // 你的应用逻辑代码
+}
+```
+
+### 事务问题
+
+在之前的转账业务中，更新了两个账户，我们需要保证它们的同时成功或同时失败，这个时候就需要使用事务机制，在transfer方法开始执行时开启事务，直到两个更新都成功之后，再提交事务，我们尝试将transfer方法进行如下修改：
+
+```java
+package com.powernode.bank.service.impl;
+
+import com.powernode.bank.dao.AccountDao;
+import com.powernode.bank.dao.impl.AccountDaoImpl;
+import com.powernode.bank.exception.AppException;
+import com.powernode.bank.exception.MoneyNotEnoughException;
+import com.powernode.bank.pojo.Account;
+import com.powernode.bank.service.AccountService;
+import com.powernode.bank.utils.SqlSessionUtil;
+import org.apache.ibatis.session.SqlSession;
+
+public class AccountServiceImpl implements AccountService {
+
+    private AccountDao accountDao = new AccountDaoImpl();
+
+    @Override
+    public void transfer(String fromActno, String toActno, double money) throws MoneyNotEnoughException, AppException {
+        // 查询转出账户的余额
+        Account fromAct = accountDao.selectByActno(fromActno);
+        if (fromAct.getBalance() < money) {
+            throw new MoneyNotEnoughException("对不起，您的余额不足。");
+        }
+        try {
+            // 程序如果执行到这里说明余额充足
+            // 修改账户余额
+            Account toAct = accountDao.selectByActno(toActno);
+            fromAct.setBalance(fromAct.getBalance() - money);
+            toAct.setBalance(toAct.getBalance() + money);
+            // 更新数据库（添加事务）
+            SqlSession sqlSession = SqlSessionUtil.openSession();
+            accountDao.update(fromAct);
+            // 模拟异常
+            String s = null;
+            s.toString();
+            accountDao.update(toAct);
+            sqlSession.commit();
+            sqlSession.close();
+        } catch (Exception e) {
+            throw new AppException("转账失败，未知原因！");
+        }
+    }
+}
+```
+
+运行前注意看数据库表中当前的数据：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660551655159-a814927f-dba4-4d81-b6a8-93bdc8511e79.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_12%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+执行程序：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660552498799-6c617fed-b94e-4e94-a05b-5fe16a97023e.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_10%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660552525960-fb4d555f-09a1-4120-b0b3-73c3eeb2201a.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_15%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+再次查看数据库表中的数据：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660552552430-359a34ff-d869-43a9-b1e3-caa335a4a2f4.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_12%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+**傻眼了吧！！！事务出问题了，转账失败了，钱仍然是少了1万。这是什么原因呢？主要是因为service和dao中使用的SqlSession对象不是同一个。**
+
+怎么办？为了保证service和dao中使用的SqlSession对象是同一个，可以将SqlSession对象存放到ThreadLocal当中。修改SqlSessionUtil工具类：
+
+```java
+package com.powernode.bank.utils;
+
+import org.apache.ibatis.io.Resources;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+
+/**
+ * MyBatis工具类
+ *
+ * @author 老杜
+ * @version 1.0
+ * @since 1.0
+ */
+public class SqlSessionUtil {
+    private static SqlSessionFactory sqlSessionFactory;
+
+    /**
+     * 类加载时初始化sqlSessionFactory对象
+     */
+    static {
+        try {
+            SqlSessionFactoryBuilder sqlSessionFactoryBuilder = new SqlSessionFactoryBuilder();
+            sqlSessionFactory = sqlSessionFactoryBuilder.build(Resources.getResourceAsStream("mybatis-config.xml"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static ThreadLocal<SqlSession> local = new ThreadLocal<>();
+
+    /**
+     * 每调用一次openSession()可获取一个新的会话，该会话支持自动提交。
+     *
+     * @return 新的会话对象
+     */
+    public static SqlSession openSession() {
+        SqlSession sqlSession = local.get();
+        if (sqlSession == null) {
+            sqlSession = sqlSessionFactory.openSession();
+            local.set(sqlSession);
+        }
+        return sqlSession;
+    }
+
+    /**
+     * 关闭SqlSession对象
+     * @param sqlSession
+     */
+    public static void close(SqlSession sqlSession){
+        if (sqlSession != null) {
+            sqlSession.close();
+        }
+        local.remove();
+    }
+}
+```
+
+修改dao中的方法：AccountDaoImpl中所有方法中的提交commit和关闭close代码全部删除。
+
+```java
+package com.powernode.bank.dao.impl;
+
+import com.powernode.bank.dao.AccountDao;
+import com.powernode.bank.pojo.Account;
+import com.powernode.bank.utils.SqlSessionUtil;
+import org.apache.ibatis.session.SqlSession;
+
+public class AccountDaoImpl implements AccountDao {
+    @Override
+    public Account selectByActno(String actno) {
+        SqlSession sqlSession = SqlSessionUtil.openSession();
+        Account act = (Account)sqlSession.selectOne("account.selectByActno", actno);
+        return act;
+    }
+
+    @Override
+    public int update(Account act) {
+        SqlSession sqlSession = SqlSessionUtil.openSession();
+        int count = sqlSession.update("account.update", act);
+        return count;
+    }
+}
+```
+
+修改service中的方法：
+
+```java
+package com.powernode.bank.service.impl;
+
+import com.powernode.bank.dao.AccountDao;
+import com.powernode.bank.dao.impl.AccountDaoImpl;
+import com.powernode.bank.exception.AppException;
+import com.powernode.bank.exception.MoneyNotEnoughException;
+import com.powernode.bank.pojo.Account;
+import com.powernode.bank.service.AccountService;
+import com.powernode.bank.utils.SqlSessionUtil;
+import org.apache.ibatis.session.SqlSession;
+
+public class AccountServiceImpl implements AccountService {
+
+    private AccountDao accountDao = new AccountDaoImpl();
+
+    @Override
+    public void transfer(String fromActno, String toActno, double money) throws MoneyNotEnoughException, AppException {
+        // 查询转出账户的余额
+        Account fromAct = accountDao.selectByActno(fromActno);
+        if (fromAct.getBalance() < money) {
+            throw new MoneyNotEnoughException("对不起，您的余额不足。");
+        }
+        try {
+            // 程序如果执行到这里说明余额充足
+            // 修改账户余额
+            Account toAct = accountDao.selectByActno(toActno);
+            fromAct.setBalance(fromAct.getBalance() - money);
+            toAct.setBalance(toAct.getBalance() + money);
+            // 更新数据库（添加事务）
+            SqlSession sqlSession = SqlSessionUtil.openSession();
+            accountDao.update(fromAct);
+            // 模拟异常
+            String s = null;
+            s.toString();
+            accountDao.update(toAct);
+            sqlSession.commit();
+            SqlSessionUtil.close(sqlSession);  // 只修改了这一行代码。
+        } catch (Exception e) {
+            throw new AppException("转账失败，未知原因！");
+        }
+    }
+}
+```
+
+当前数据库表中的数据：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660552552430-359a34ff-d869-43a9-b1e3-caa335a4a2f4.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_12%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+再次运行程序：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660552498799-6c617fed-b94e-4e94-a05b-5fe16a97023e.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_10%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660552525960-fb4d555f-09a1-4120-b0b3-73c3eeb2201a.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_15%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+查看数据库表：没有问题。
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660552552430-359a34ff-d869-43a9-b1e3-caa335a4a2f4.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_12%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+再测试转账成功：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660552498799-6c617fed-b94e-4e94-a05b-5fe16a97023e.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_10%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660551569099-4d81d8cd-35c5-418f-9de1-74ef8641a59f.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_13%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660553732975-bdd952c5-c2c8-4cda-b9f7-810120c66485.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_11%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+如果余额不足呢：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660553844177-0db1b3c9-3663-4a96-abb0-d516f24c36b8.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_15%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660553856988-09e342be-fa3c-4467-9541-d785a08276e9.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_11%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+账户的余额依然正常：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660553732975-bdd952c5-c2c8-4cda-b9f7-810120c66485.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_11%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+## 6.5 分析当前程序存在的问题
+
+我们来看一下DaoImpl的代码
+
+```java
+package com.powernode.bank.dao.impl;
+
+import com.powernode.bank.dao.AccountDao;
+import com.powernode.bank.pojo.Account;
+import com.powernode.bank.utils.SqlSessionUtil;
+import org.apache.ibatis.session.SqlSession;
+
+public class AccountDaoImpl implements AccountDao {
+    @Override
+    public Account selectByActno(String actno) {
+        SqlSession sqlSession = SqlSessionUtil.openSession();
+        Account act = (Account)sqlSession.selectOne("account.selectByActno", actno);
+        return act;
+    }
+
+    @Override
+    public int update(Account act) {
+        SqlSession sqlSession = SqlSessionUtil.openSession();
+        int count = sqlSession.update("account.update", act);
+        return count;
+    }
 }
 ```
 
 
 
-## 5.4事务问题
+
+
+# 六.javassist生成类
+
+## 7.1 Javassist的使用
+
+我们要使用javassist，首先要引入它的依赖
+
+```xml
+<dependency>
+  <groupId>org.javassist</groupId>
+  <artifactId>javassist</artifactId>
+  <version>3.29.1-GA</version>
+</dependency>
+```
+
+样例代码：
+
+```java
+package com.powernode.javassist;
+
+import javassist.ClassPool;
+import javassist.CtClass;
+import javassist.CtMethod;
+import javassist.Modifier;
+
+import java.lang.reflect.Method;
+
+public class JavassistTest {
+    public static void main(String[] args) throws Exception {
+        // 获取类池
+        ClassPool pool = ClassPool.getDefault();
+        // 创建类
+        CtClass ctClass = pool.makeClass("com.powernode.javassist.Test");
+        // 创建方法
+        // 1.返回值类型 2.方法名 3.形式参数列表 4.所属类
+        CtMethod ctMethod = new CtMethod(CtClass.voidType, "execute", new CtClass[]{}, ctClass);
+        // 设置方法的修饰符列表
+        ctMethod.setModifiers(Modifier.PUBLIC);
+        // 设置方法体
+        ctMethod.setBody("{System.out.println(\"hello world\");}");
+        // 给类添加方法
+        ctClass.addMethod(ctMethod);
+        // 调用方法
+        Class<?> aClass = ctClass.toClass();
+        Object o = aClass.newInstance();
+        Method method = aClass.getDeclaredMethod("execute");
+        method.invoke(o);
+    }
+}
+```
+
+运行要注意：加两个参数，要不然会有异常。
+
+- --add-opens java.base/java.lang=ALL-UNNAMED
+- --add-opens java.base/sun.net.util=ALL-UNNAMED
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660559749329-9288db13-204c-4354-a5ce-1190f78cb044.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_21%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+运行结果：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660559790161-90a4cae2-67be-4827-b981-b28910d9684e.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_11%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+## 7.2 使用Javassist生成DaoImpl类
+
+使用Javassist动态生成DaoImpl类
+
+```java
+package com.powernode.bank.utils;
+
+import org.apache.ibatis.javassist.CannotCompileException;
+import org.apache.ibatis.javassist.ClassPool;
+import org.apache.ibatis.javassist.CtClass;
+import org.apache.ibatis.javassist.CtMethod;
+import org.apache.ibatis.session.SqlSession;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
+
+/**
+ * 使用javassist库动态生成dao接口的实现类
+ *
+ * @author 老杜
+ * @version 1.0
+ * @since 1.0
+ */
+public class GenerateDaoByJavassist {
+
+    /**
+     * 根据dao接口生成dao接口的代理对象
+     *
+     * @param sqlSession   sql会话
+     * @param daoInterface dao接口
+     * @return dao接口代理对象
+     */
+    public static Object getMapper(SqlSession sqlSession, Class daoInterface) {
+        ClassPool pool = ClassPool.getDefault();
+        // 生成代理类
+        CtClass ctClass = pool.makeClass(daoInterface.getPackageName() + ".impl." + daoInterface.getSimpleName() + "Impl");
+        // 接口
+        CtClass ctInterface = pool.makeInterface(daoInterface.getName());
+        // 代理类实现接口
+        ctClass.addInterface(ctInterface);
+        // 获取所有的方法
+        Method[] methods = daoInterface.getDeclaredMethods();
+        Arrays.stream(methods).forEach(method -> {
+            // 拼接方法的签名
+            StringBuilder methodStr = new StringBuilder();
+            String returnTypeName = method.getReturnType().getName();
+            methodStr.append(returnTypeName);
+            methodStr.append(" ");
+            String methodName = method.getName();
+            methodStr.append(methodName);
+            methodStr.append("(");
+            Class<?>[] parameterTypes = method.getParameterTypes();
+            for (int i = 0; i < parameterTypes.length; i++) {
+                methodStr.append(parameterTypes[i].getName());
+                methodStr.append(" arg");
+                methodStr.append(i);
+                if (i != parameterTypes.length - 1) {
+                    methodStr.append(",");
+                }
+            }
+            methodStr.append("){");
+            // 方法体当中的代码怎么写？
+            // 获取sqlId（这里非常重要：因为这行代码导致以后namespace必须是接口的全限定接口名，sqlId必须是接口中方法的方法名。）
+            String sqlId = daoInterface.getName() + "." + methodName;
+            // 获取SqlCommondType
+            String sqlCommondTypeName = sqlSession.getConfiguration().getMappedStatement(sqlId).getSqlCommandType().name();
+            if ("SELECT".equals(sqlCommondTypeName)) {
+                methodStr.append("org.apache.ibatis.session.SqlSession sqlSession = com.powernode.bank.utils.SqlSessionUtil.openSession();");
+                methodStr.append("Object obj = sqlSession.selectOne(\"" + sqlId + "\", arg0);");
+                methodStr.append("return (" + returnTypeName + ")obj;");
+            } else if ("UPDATE".equals(sqlCommondTypeName)) {
+                methodStr.append("org.apache.ibatis.session.SqlSession sqlSession = com.powernode.bank.utils.SqlSessionUtil.openSession();");
+                methodStr.append("int count = sqlSession.update(\"" + sqlId + "\", arg0);");
+                methodStr.append("return count;");
+            }
+            methodStr.append("}");
+            System.out.println(methodStr);
+            try {
+                // 创建CtMethod对象
+                CtMethod ctMethod = CtMethod.make(methodStr.toString(), ctClass);
+                ctMethod.setModifiers(Modifier.PUBLIC);
+                // 将方法添加到类
+                ctClass.addMethod(ctMethod);
+            } catch (CannotCompileException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        try {
+            // 创建代理对象
+            Class<?> aClass = ctClass.toClass();
+            Constructor<?> defaultCon = aClass.getDeclaredConstructor();
+            Object o = defaultCon.newInstance();
+            return o;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+}
+```
+
+**修改AccountMapper.xml文件：namespace必须是dao接口的全限定名称，id必须是dao接口中的方法名：**
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.powernode.bank.dao.AccountDao">
+    <select id="selectByActno" resultType="com.powernode.bank.pojo.Account">
+        select * from t_act where actno = #{actno}
+    </select>
+    <update id="update">
+        update t_act set balance = #{balance} where actno = #{actno}
+    </update>
+</mapper>
+```
+
+修改service类中获取dao对象的代码：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660610966694-3e0ab830-8cd1-41ff-aac6-d973e6b5177d.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_40%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+启动服务器：**启动过程中显示，tomcat服务器自动添加了以下的两个运行参数。所以不需要再单独配置。**
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660611357131-c6f21e3e-4c8a-4f72-b519-e635d847f1fd.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_35%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+测试前数据：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660611193608-b788a3d3-7ed2-4673-aff4-b687d5f20e71.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_10%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+打开浏览器测试：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660611220579-a56a8f6c-0416-4d7a-a9f5-cf36a6b8fc9a.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_11%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660611246094-32c692fc-597a-452f-91cf-b0233f9ce020.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_12%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660611264464-7f47cce8-0581-496a-b04a-e756eec622df.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_10%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+# 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
