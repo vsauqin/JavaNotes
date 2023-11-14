@@ -746,438 +746,478 @@ public void testNamespace(){
 
 
 
-# 三.MyBatis配置文件核心详解
+# 四、MyBatis核心配置文件详解
 
-文件如下
-
-```java
+```xml
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE configuration
- PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
- "http://mybatis.org/dtd/mybatis-3-config.dtd">
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
 <configuration>
- <environments default="development">
- <environment id="development">
- <transactionManager type="JDBC"/>
- <dataSource type="POOLED">
- <property name="driver" value="com.mysql.cj.jdbc.Driver"/>
- <property name="url" value="jdbc:mysql://localhost:3306/po
-wernode"/>
- <property name="username" value="root"/>
- <property name="password" value="root"/>
- </dataSource>
- </environment>
- </environments>
- <mappers>
- <mapper resource="CarMapper.xml"/>
- <mapper resource="CarMapper2.xml"/>
- </mappers>
+    <environments default="development">
+        <environment id="development">
+            <transactionManager type="JDBC"/>
+            <dataSource type="POOLED">
+                <property name="driver" value="com.mysql.cj.jdbc.Driver"/>
+                <property name="url" value="jdbc:mysql://localhost:3306/powernode"/>
+                <property name="username" value="root"/>
+                <property name="password" value="root"/>
+            </dataSource>
+        </environment>
+    </environments>
+    <mappers>
+        <mapper resource="CarMapper.xml"/>
+        <mapper resource="CarMapper2.xml"/>
+    </mappers>
 </configuration>
 ```
 
-- configuration：根标签，表示配置信息
+- configuration：根标签，表示配置信息。
+- environments：环境（多个），以“s”结尾表示复数，也就是说mybatis的环境可以配置多个数据源。
 
-- environments：环境，表示数据源
+- default属性：表示默认使用的是哪个环境，default后面填写的是environment的id。**default的值只需要和environment的id值一致即可**。
 
-  - default属性：表示默认使用的是哪一个环境，default后面写的是environment的id，default的值只需要和environment的id一致即可
+- environment：具体的环境配置（**主要包括：事务管理器的配置 + 数据源的配置**）
 
-- envirment：具体的环境配置（主要包括：事务管理器的配置和数据源的配置）
-
-  - id：当前环境的唯一标识，
+- id：给当前环境一个唯一标识，该标识用在environments的default后面，用来指定默认环境的选择。
 
 - transactionManager：配置事务管理器
 
-  - type属性：指定事务管理器具体是用什么方式，两个可选
-    - JDBC：
-    - MANAGER：交给其他容器管理，如果没有事务管理容器，则执行一条DML语句就提交一次
+- type属性：指定事务管理器具体使用什么方式，可选值包括两个
+
+- **JDBC**：使用JDBC原生的事务管理机制。**底层原理：事务开启conn.setAutoCommit(false); ...处理业务...事务提交conn.commit();**
+- **MANAGED**：交给其它容器来管理事务，比如WebLogic、JBOSS等。如果没有管理事务的容器，则没有事务。**没有事务的含义：只要执行一条DML语句，则提交一次**。
 
 - dataSource：指定数据源
 
-  - type：用来指定使用的数据连接池的策略，可选值有三个
+- type属性：用来指定具体使用的数据库连接池的策略，可选值包括三个
 
-    - UNPOOLED：采用传统的获取链接方式，实现了javax.sql.DataSource接口，但是没有使用池的思想
+- **UNPOOLED**：采用传统的获取连接的方式，虽然也实现Javax.sql.DataSource接口，但是并没有使用池的思想。
 
-    ```
-    driver – 这是 JDBC 驱动的 Java 类全限定名（并不是 JDBC 驱动中可能包含的数据源类）。
-    url – 这是数据库的 JDBC URL 地址。
-    username – 登录数据库的用户名。
-    password – 登录数据库的密码。
-    defaultTransactionIsolationLevel – 默认的连接事务隔离级别。
-    defaultNetworkTimeout – 等待数据库操作完成的默认网络超时时间（单位：毫秒）。查看 java.sql.Connection#setNetworkTimeout() 的 API 文档以获取更多信息。
-    作为可选项，你也可以传递属性给数据库驱动。只需在属性名加上“driver.”前缀即可，例如：
-    
-    driver.encoding=UTF8
-    这将通过 DriverManager.getConnection(url, driverProperties) 方法传递值为 UTF8 的 encoding 属性给数据库驱动
-    ```
+- property可以是：
 
-    - POOLED利用了池的概念
+- driver 这是 JDBC 驱动的 Java 类全限定名。
+- url 这是数据库的 JDBC URL 地址。
+- username 登录数据库的用户名。
+- password 登录数据库的密码。
+- defaultTransactionIsolationLevel 默认的连接事务隔离级别。
+- defaultNetworkTimeout 等待数据库操作完成的默认网络超时时间（单位：毫秒）
 
-    ```java
-    除了上述提到 UNPOOLED 下的属性外，还有更多属性用来配置 POOLED 的数据源：
-    
-    poolMaximumActiveConnections – 在任意时间可存在的活动（正在使用）连接数量，默认值：10
-    poolMaximumIdleConnections – 任意时间可能存在的空闲连接数。
-    poolMaximumCheckoutTime – 在被强制返回之前，池中连接被检出（checked out）时间，默认值：20000 毫秒（即 20 秒）
-    poolTimeToWait – 这是一个底层设置，如果获取连接花费了相当长的时间，连接池会打印状态日志并重新尝试获取一个连接（避免在误配置的情况下一直失败且不打印日志），默认值：20000 毫秒（即 20 秒）。
-    poolMaximumLocalBadConnectionTolerance – 这是一个关于坏连接容忍度的底层设置， 作用于每一个尝试从缓存池获取连接的线程。 如果这个线程获取到的是一个坏的连接，那么这个数据源允许这个线程尝试重新获取一个新的连接，但是这个重新尝试的次数不应该超过 poolMaximumIdleConnections 与 poolMaximumLocalBadConnectionTolerance 之和。 默认值：3（新增于 3.4.5）
-    poolPingQuery – 发送到数据库的侦测查询，用来检验连接是否正常工作并准备接受请求。默认是“NO PING QUERY SET”，这会导致多数数据库驱动出错时返回恰当的错误消息。
-    poolPingEnabled – 是否启用侦测查询。若开启，需要设置 poolPingQuery 属性为一个可执行的 SQL 语句（最好是一个速度非常快的 SQL 语句），默认值：false。
-    poolPingConnectionsNotUsedFor – 配置 poolPingQuery 的频率。可以被设置为和数据库连接超时时间一样，来避免不必要的侦测，默认值：0（即所有连接每一时刻都被侦测 — 当然仅当 poolPingEnabled 为 true 时适用）。
-    ```
+- **POOLED**：采用传统的javax.sql.DataSource规范中的连接池，mybatis中有针对规范的实现。
 
-    - JNDI：采用服务器提供的JNDI技术实现来获取DataSource对象，不同服务器拿到的DataSource不一样
+- property可以是（除了包含**UNPOOLED**中之外）：
 
-    property可以是以下属性，但是只能含有两个
+- poolMaximumActiveConnections 在任意时间可存在的活动（正在使用）连接数量，默认值：10
+- poolMaximumIdleConnections 任意时间可能存在的空闲连接数。
+- 其它....
 
-    ```
-    initial_context – 这个属性用来在 InitialContext 中寻找上下文（即，initialContext.lookup(initial_context)）。这是个可选属性，如果忽略，那么将会直接从 InitialContext 中寻找 data_source 属性。
-    data_source – 这是引用数据源实例位置的上下文路径。提供了 initial_context 配置时会在其返回的上下文中进行查找，没有提供时则直接在 InitialContext 中查找。
-    和其他数据源配置类似，可以通过添加前缀“env.”直接把属性传递给 InitialContext。比如：
-    
-    env.encoding=UTF8
-    ```
+- **JNDI**：采用服务器提供的JNDI技术实现，来获取DataSource对象，不同的服务器所能拿到DataSource是不一样。如果不是web或者maven的war工程，JNDI是不能使用的。
 
-    
+- property可以是（最多只包含以下两个属性）：
 
-## 3.1environment
+- initial_context 这个属性用来在 InitialContext 中寻找上下文（即，initialContext.lookup(initial_context)）这是个可选属性，如果忽略，那么将会直接从 InitialContext 中寻找 data_source 属性。
+- data_source 这是引用数据源实例位置的上下文路径。提供了 initial_context 配置时会在其返回的上下文中进行查找，没有提供时则直接在 InitialContext 中查找。
 
-核心配置文件代码如下
+- mappers：在mappers标签中可以配置多个sql映射文件的路径。
+- mapper：配置某个sql映射文件的路径
 
-```java
+- resource属性：使用相对于类路径的资源引用方式
+- url属性：使用完全限定资源定位符（URL）方式
+
+## 4.1 environment
+
+mybatis-003-configuration
+
+```xml
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE configuration
- PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
- "http://mybatis.org/dtd/mybatis-3-config.dtd">
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
 <configuration>
- 
- <environments default="production">
-    
- <!--开发环境-->
- <environment id="dev">
- <transactionManager type="JDBC"/>
- <dataSource type="POOLED">
- <property name="driver" value="com.mysql.cj.jdbc.Driver"/>
- <property name="url" value="jdbc:mysql://localhost:3306/po
-wernode"/>
- <property name="username" value="root"/>
- <property name="password" value="root"/>
- </dataSource>
- </environment>
-    
- <!--⽣产环境-->
- <environment id="production">
- <transactionManager type="JDBC" />
- <dataSource type="POOLED">
- <property name="driver" value="com.mysql.cj.jdbc.Driver"/>
- <property name="url" value="jdbc:mysql://localhost:3306/mybatis"/>
- <property name="username" value="root"/>
- <property name="password" value="root"/>
- </dataSource>
- </environment>
- </environments>
-    
- <mappers>
- <mapper resource="CarMapper.xml"/>
- </mappers>
-    
+    <!--默认使用开发环境-->
+    <!--<environments default="dev">-->
+    <!--默认使用生产环境-->
+    <environments default="production">
+        <!--开发环境-->
+        <environment id="dev">
+            <transactionManager type="JDBC"/>
+            <dataSource type="POOLED">
+                <property name="driver" value="com.mysql.cj.jdbc.Driver"/>
+                <property name="url" value="jdbc:mysql://localhost:3306/powernode"/>
+                <property name="username" value="root"/>
+                <property name="password" value="root"/>
+            </dataSource>
+        </environment>
+        <!--生产环境-->
+        <environment id="production">
+            <transactionManager type="JDBC" />
+            <dataSource type="POOLED">
+                <property name="driver" value="com.mysql.cj.jdbc.Driver"/>
+                <property name="url" value="jdbc:mysql://localhost:3306/mybatis"/>
+                <property name="username" value="root"/>
+                <property name="password" value="root"/>
+            </dataSource>
+        </environment>
+    </environments>
+    <mappers>
+        <mapper resource="CarMapper.xml"/>
+    </mappers>
 </configuration>
-```
-
-SQL配置文件如下
-
-```java
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper
- PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
- "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
 <mapper namespace="car">
- <insert id="insertCar">
- insert into t_car(id,car_num,brand,guide_price,produce_time,car_type) 
-    values(null,#{carNum},#{brand},#{guidePrice},#{produceTime},#{carType})
- </insert>
+    <insert id="insertCar">
+        insert into t_car(id,car_num,brand,guide_price,produce_time,car_type) values(null,#{carNum},#{brand},#{guidePrice},#{produceTime},#{carType})
+    </insert>
 </mapper>
-
-```
-
-测试类如下
-
-```java
 package com.powernode.mybatis;
+
 import com.powernode.mybatis.pojo.Car;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.junit.Test;
+
 public class ConfigurationTest {
- @Test
- public void testEnvironment() throws Exception{
- // 准备数据
- Car car = new Car();
- car.setCarNum("133");
- car.setBrand("丰⽥霸道");
- car.setGuidePrice(50.3);
- car.setProduceTime("2020-01-10");
- car.setCarType("燃油⻋");
- // ⼀个数据库对应⼀个SqlSessionFactory对象
- // 两个数据库对应两个SqlSessionFactory对象，以此类推
- SqlSessionFactoryBuilder sqlSessionFactoryBuilder = new SqlSession
-FactoryBuilder();
- // 使⽤默认数据库
- SqlSessionFactory sqlSessionFactory = sqlSessionFactoryBuilder.bui
-ld(Resources.getResourceAsStream("mybatis-config.xml"));
- SqlSession sqlSession = sqlSessionFactory.openSession(true);
- int count = sqlSession.insert("insertCar", car);
- System.out.println("插⼊了⼏条记录：" + count);
- // 使⽤指定数据库
- SqlSessionFactory sqlSessionFactory1 = sqlSessionFactoryBuilder.bu
-ild(Resources.getResourceAsStream("mybatis-config.xml"), "dev");
- SqlSession sqlSession1 = sqlSessionFactory1.openSession(true);
- int count1 = sqlSession1.insert("insertCar", car);
- System.out.println("插⼊了⼏条记录：" + count1);
- }
+
+    @Test
+    public void testEnvironment() throws Exception{
+        // 准备数据
+        Car car = new Car();
+        car.setCarNum("133");
+        car.setBrand("丰田霸道");
+        car.setGuidePrice(50.3);
+        car.setProduceTime("2020-01-10");
+        car.setCarType("燃油车");
+
+        // 一个数据库对应一个SqlSessionFactory对象
+        // 两个数据库对应两个SqlSessionFactory对象，以此类推
+        SqlSessionFactoryBuilder sqlSessionFactoryBuilder = new SqlSessionFactoryBuilder();
+
+        // 使用默认数据库
+        SqlSessionFactory sqlSessionFactory = sqlSessionFactoryBuilder.build(Resources.getResourceAsStream("mybatis-config.xml"));
+        SqlSession sqlSession = sqlSessionFactory.openSession(true);
+        int count = sqlSession.insert("insertCar", car);
+        System.out.println("插入了几条记录：" + count);
+
+        // 使用指定数据库
+        SqlSessionFactory sqlSessionFactory1 = sqlSessionFactoryBuilder.build(Resources.getResourceAsStream("mybatis-config.xml"), "dev");
+        SqlSession sqlSession1 = sqlSessionFactory1.openSession(true);
+        int count1 = sqlSession1.insert("insertCar", car);
+        System.out.println("插入了几条记录：" + count1);
+    }
 }
 ```
 
+执行结果：
 
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660117624656-64973cf7-6700-43da-96fa-5960dfc5045b.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_46%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
 
-## 3.2transactionManager
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660117692466-ecd6317f-5868-4858-a33c-0c7ec68044ac.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_22%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
 
-核心配置文件如下
+## 4.2 transactionManager
 
-```java
+```xml
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE configuration
- PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
- "http://mybatis.org/dtd/mybatis-3-config.dtd">
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
 <configuration>
- <environments default="dev">
-    
- <environment id="dev">
- <transactionManager type="MANAGED"/>
- <dataSource type="POOLED">
- <property name="driver" value="com.mysql.cj.jdbc.Driver"/>
- <property name="url" value="jdbc:mysql://localhost:3306/powernode"/>
- <property name="username" value="root"/>
- <property name="password" value="root"/>
- </dataSource>
- </environment>
-    
- </environments>
-    
- <mappers>
- <mapper resource="CarMapper.xml"/>
- </mappers>
+    <environments default="dev">
+        <environment id="dev">
+            <transactionManager type="MANAGED"/>
+            <dataSource type="POOLED">
+                <property name="driver" value="com.mysql.cj.jdbc.Driver"/>
+                <property name="url" value="jdbc:mysql://localhost:3306/powernode"/>
+                <property name="username" value="root"/>
+                <property name="password" value="root"/>
+            </dataSource>
+        </environment>
+    </environments>
+    <mappers>
+        <mapper resource="CarMapper.xml"/>
+    </mappers>
 </configuration>
-```
-
-测试类如下
-
-```java
 @Test
 public void testTransactionManager() throws Exception{
- // 准备数据
- Car car = new Car();
- car.setCarNum("133");
- car.setBrand("丰⽥霸道");
- car.setGuidePrice(50.3);
- car.setProduceTime("2020-01-10");
- car.setCarType("燃油⻋");
- // 获取SqlSessionFactory对象
- SqlSessionFactoryBuilder sqlSessionFactoryBuilder = new SqlSessionFact
-oryBuilder();
- SqlSessionFactory sqlSessionFactory = sqlSessionFactoryBuilder.build(R
-esources.getResourceAsStream("mybatis-config2.xml"));
- // 获取SqlSession对象
- SqlSession sqlSession = sqlSessionFactory.openSession();
- // 执⾏SQL
- int count = sqlSession.insert("insertCar", car);
- System.out.println("插⼊了⼏条记录：" + count);
+    // 准备数据
+    Car car = new Car();
+    car.setCarNum("133");
+    car.setBrand("丰田霸道");
+    car.setGuidePrice(50.3);
+    car.setProduceTime("2020-01-10");
+    car.setCarType("燃油车");
+    // 获取SqlSessionFactory对象
+    SqlSessionFactoryBuilder sqlSessionFactoryBuilder = new SqlSessionFactoryBuilder();
+    SqlSessionFactory sqlSessionFactory = sqlSessionFactoryBuilder.build(Resources.getResourceAsStream("mybatis-config2.xml"));
+    // 获取SqlSession对象
+    SqlSession sqlSession = sqlSessionFactory.openSession();
+    // 执行SQL
+    int count = sqlSession.insert("insertCar", car);
+    System.out.println("插入了几条记录：" + count);
 }
 ```
 
-当事务管理器是：JDBC 
+当事务管理器是：JDBC
 
-采⽤JDBC的原⽣事务机制：
+- 采用JDBC的原生事务机制：
 
- 开启事务：conn.setAutoCommit(false);
-
- 处理业务...... 
-
-提交事务：conn.commit(); 
+- 开启事务：conn.setAutoCommit(false);
+- 处理业务......
+- 提交事务：conn.commit();
 
 当事务管理器是：MANAGED
 
- 交给容器去管理事务，但⽬前使⽤的是本地程序，没有容器的⽀持，当mybatis找不到容器的⽀持 时：没有事务。也就是说只要执⾏⼀条DML语句，则提交⼀次。
+- 交给容器去管理事务，但目前使用的是本地程序，没有容器的支持，**当mybatis找不到容器的支持时：没有事务**。也就是说只要执行一条DML语句，则提交一次。
 
+## 4.3 dataSource
 
-
-
-
-## 3.3dataSource
-
-- 当数据源类型是UNPOOLED
-
-每次创建链接对象都是不一样的
-
-
-
-- 当type是POOLED
-
-会使用mybatis自己的连接池
-
-核心配置文件如下
-
-```java
+```xml
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE configuration
- PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
- "http://mybatis.org/dtd/mybatis-3-config.dtd">
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
 <configuration>
- <environments default="dev">
-    
- <environment id="dev">
- <transactionManager type="JDBC"/>
- <dataSource type="POOLED">
- <property name="driver" value="com.mysql.cj.jdbc.Driver"/>
- <property name="url" value="jdbc:mysql://localhost:3306/po
-wernode"/>
- <property name="username" value="root"/>
- <property name="password" value="root"/>
- <!--最⼤连接数-->
- <property name="poolMaximumActiveConnections" value="3"/>
- <!--最多空闲数量-->
- <property name="poolMaximumIdleConnections" value="1"/>
- <!--强⾏回归池的时间-->
- <property name="poolMaximumCheckoutTime" value="20000"/>
- <!--这是⼀个底层设置，如果获取连接花费了相当⻓的时间，连接池会打印状
-态⽇志并重新尝试获取⼀个连接（避免在误配置的情况下⼀直失败且不打印⽇志），默认值：20000
-毫秒（即 20 秒）。-->
- <property name="poolTimeToWait" value="20000"/>
- </dataSource>
- </environment>
-    
- </environments>
-    
- <mappers>
- <mapper resource="CarMapper.xml"/>
- </mappers>
-    
+    <environments default="dev">
+        <environment id="dev">
+            <transactionManager type="JDBC"/>
+            <dataSource type="UNPOOLED">
+                <property name="driver" value="com.mysql.cj.jdbc.Driver"/>
+                <property name="url" value="jdbc:mysql://localhost:3306/powernode"/>
+                <property name="username" value="root"/>
+                <property name="password" value="root"/>
+            </dataSource>
+        </environment>
+    </environments>
+    <mappers>
+        <mapper resource="CarMapper.xml"/>
+    </mappers>
+</configuration>
+@Test
+public void testDataSource() throws Exception{
+    // 准备数据
+    Car car = new Car();
+    car.setCarNum("133");
+    car.setBrand("丰田霸道");
+    car.setGuidePrice(50.3);
+    car.setProduceTime("2020-01-10");
+    car.setCarType("燃油车");
+    // 获取SqlSessionFactory对象
+    SqlSessionFactoryBuilder sqlSessionFactoryBuilder = new SqlSessionFactoryBuilder();
+    SqlSessionFactory sqlSessionFactory = sqlSessionFactoryBuilder.build(Resources.getResourceAsStream("mybatis-config3.xml"));
+    // 获取SqlSession对象
+    SqlSession sqlSession = sqlSessionFactory.openSession(true);
+    // 执行SQL
+    int count = sqlSession.insert("insertCar", car);
+    System.out.println("插入了几条记录：" + count);
+    // 关闭会话
+    sqlSession.close();
+}
+```
+
+当type是UNPOOLED，控制台输出：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660125487038-29390827-4e20-431a-8d62-f56a40bf0349.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_47%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+修改配置文件mybatis-config3.xml中的配置：
+
+```xml
+<dataSource type="POOLED">
+```
+
+Java测试程序不需要修改，直接执行，看控制台输出：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660125701333-b14f63d8-c442-4211-ad77-884f21162357.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_46%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+通过测试得出：UNPOOLED不会使用连接池，每一次都会新建JDBC连接对象。POOLED会使用数据库连接池。【这个连接池是mybatis自己实现的。】
+
+```xml
+<dataSource type="JNDI">
+```
+
+JNDI的方式：表示对接JNDI服务器中的连接池。这种方式给了我们可以使用第三方连接池的接口。如果想使用dbcp、c3p0、druid（德鲁伊）等，需要使用这种方式。
+
+这种再重点说一下type="POOLED"的时候，它的属性有哪些？
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <environments default="dev">
+        <environment id="dev">
+            <transactionManager type="JDBC"/>
+            <dataSource type="POOLED">
+                <property name="driver" value="com.mysql.cj.jdbc.Driver"/>
+                <property name="url" value="jdbc:mysql://localhost:3306/powernode"/>
+                <property name="username" value="root"/>
+                <property name="password" value="root"/>
+                <!--最大连接数-->
+                <property name="poolMaximumActiveConnections" value="3"/>
+                <!--这是一个底层设置，如果获取连接花费了相当长的时间，连接池会打印状态日志并重新尝试获取一个连接（避免在误配置的情况下一直失败且不打印日志），默认值：20000 毫秒（即 20 秒）。-->
+                <property name="poolTimeToWait" value="20000"/>
+                <!--强行回归池的时间-->
+                <property name="poolMaximumCheckoutTime" value="20000"/>
+                <!--最多空闲数量-->
+                <property name="poolMaximumIdleConnections" value="1"/>
+            </dataSource>
+        </environment>
+    </environments>
+    <mappers>
+        <mapper resource="CarMapper.xml"/>
+    </mappers>
 </configuration>
 ```
 
-poolMaximumActiveConnections：最⼤的活动的连接数量。默认值10
+poolMaximumActiveConnections：最大的活动的连接数量。默认值10
 
- poolMaximumIdleConnections：最⼤的空闲连接数量。默认值5
+poolMaximumIdleConnections：最大的空闲连接数量。默认值5
 
- poolMaximumCheckoutTime：强⾏回归池的时间。默认值20秒。 
+poolMaximumCheckoutTime：强行回归池的时间。默认值20秒。
 
-poolTimeToWait：当⽆法获取到空闲连接时，每隔20秒打印⼀次⽇志，避免因代码配置有误，导致傻 等。（时⻓是可以配置的）
+poolTimeToWait：当无法获取到空闲连接时，每隔20秒打印一次日志，避免因代码配置有误，导致傻等。（时长是可以配置的）
 
-当然，还有其他属性。对于连接池来说，以上⼏个属性⽐较重要。 
+当然，还有其他属性。对于连接池来说，以上几个属性比较重要。
 
-最⼤的活动的连接数量就是连接池连接数量的上限。默认值10，如果有10个请求正在使⽤这10个连接， 第11个请求只能等待空闲连接。
+最大的活动的连接数量就是连接池连接数量的上限。默认值10，如果有10个请求正在使用这10个连接，第11个请求只能等待空闲连接。
 
-最大的空闲连接数量。默认值5，如果已经有了5个空闲连接，当地六个连接要空闲下来的时候，连接池就会关闭该链接对象
+最大的空闲连接数量。默认值5，如何已经有了5个空闲连接，当第6个连接要空闲下来的时候，连接池会选择关闭该连接对象。来减少数据库的开销。
 
-- 当type是JNDI
+需要根据系统的并发情况，来合理调整连接池最大连接数以及最多空闲数量。充分发挥数据库连接池的性能。【可以根据实际情况进行测试，然后调整一个合理的数量。】
 
-此时可以使用第三方连接池接口
+下图是默认配置：
 
-## 3.4properties
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660126871013-88f83ea4-94e9-4088-bdb4-06a4fd73866a.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_18%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
 
-mybatis提供了灵活的配置，连接数据库的信息可以单独写到一个属性资源文件中，假设在类的根路径下创建一个jdbc.properties文件
+在以上配置的基础之上，可以编写java程序测试：
 
+```java
+@Test
+public void testPool() throws Exception{
+    SqlSessionFactoryBuilder sqlSessionFactoryBuilder = new SqlSessionFactoryBuilder();
+    SqlSessionFactory sqlSessionFactory = sqlSessionFactoryBuilder.build(Resources.getResourceAsStream("mybatis-config3.xml"));
+    for (int i = 0; i < 4; i++) {
+        SqlSession sqlSession = sqlSessionFactory.openSession();
+        Object selectCarByCarNum = sqlSession.selectOne("selectCarByCarNum");
+    }
+}
+<select id="selectCarByCarNum" resultType="com.powernode.mybatis.pojo.Car">
+  select id,car_num carNum,brand,guide_price guidePrice,produce_time produceTime,car_type carType from t_car where car_num = '100'
+</select>
 ```
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660128646511-8df1006a-dd85-48d1-9b88-ce7969d9b546.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_43%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+## 4.4 properties
+
+mybatis提供了更加灵活的配置，连接数据库的信息可以单独写到一个属性资源文件中，假设在类的根路径下创建jdbc.properties文件，配置如下：
+
+```properties
 jdbc.driver=com.mysql.cj.jdbc.Driver
 jdbc.url=jdbc:mysql://localhost:3306/powernode
 ```
 
- 在mybatis核心配置文件中使用：
+在mybatis核心配置文件中引入并使用：
 
-```java
+```xml
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE configuration
- PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
- "http://mybatis.org/dtd/mybatis-3-config.dtd">
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
 <configuration>
- <!--引⼊外部属性资源⽂件-->
- <properties resource="jdbc.properties">
- <property name="jdbc.username" value="root"/>
- <property name="jdbc.password" value="root"/>
- </properties>
- <environments default="dev">
- <environment id="dev">
- <transactionManager type="JDBC"/>
- <dataSource type="POOLED">
- <!--${key}使⽤-->
- <property name="driver" value="${jdbc.driver}"/>
- <property name="url" value="${jdbc.url}"/>
- <property name="username" value="${jdbc.username}"/>
- <property name="password" value="${jdbc.password}"/>
- </dataSource>
- </environment>
- </environments>
- <mappers>
- <mapper resource="CarMapper.xml"/>
- </mappers>
+
+    <!--引入外部属性资源文件-->
+    <properties resource="jdbc.properties">
+        <property name="jdbc.username" value="root"/>
+        <property name="jdbc.password" value="root"/>
+    </properties>
+
+    <environments default="dev">
+        <environment id="dev">
+            <transactionManager type="JDBC"/>
+            <dataSource type="POOLED">
+                <!--${key}使用-->
+                <property name="driver" value="${jdbc.driver}"/>
+                <property name="url" value="${jdbc.url}"/>
+                <property name="username" value="${jdbc.username}"/>
+                <property name="password" value="${jdbc.password}"/>
+            </dataSource>
+        </environment>
+    </environments>
+    <mappers>
+        <mapper resource="CarMapper.xml"/>
+    </mappers>
 </configuration>
 ```
 
-编写Java程序进行测试
+编写Java程序进行测试：
 
 ```java
 @Test
 public void testProperties() throws Exception{
- SqlSessionFactoryBuilder sqlSessionFactoryBuilder = new SqlSessionFacto
-ryBuilder();
- SqlSessionFactory sqlSessionFactory = sqlSessionFactoryBuilder.build(Re
-sources.getResourceAsStream("mybatis-config4.xml"));
- SqlSession sqlSession = sqlSessionFactory.openSession();
- Object car = sqlSession.selectOne("selectCarByCarNum");
- System.out.println(car);
+    SqlSessionFactoryBuilder sqlSessionFactoryBuilder = new SqlSessionFactoryBuilder();
+    SqlSessionFactory sqlSessionFactory = sqlSessionFactoryBuilder.build(Resources.getResourceAsStream("mybatis-config4.xml"));
+    SqlSession sqlSession = sqlSessionFactory.openSession();
+    Object car = sqlSession.selectOne("selectCarByCarNum");
+    System.out.println(car);
 }
 ```
 
-properties有两个属性：
+**properties两个属性：**
 
-resouce：这个属性从类的根路径下开始加载
+**resource：这个属性从类的根路径下开始加载。【常用的。】**
 
-url：从指定的url加载
+**url：从指定的url加载，假设文件放在d:/jdbc.properties，这个url可以写成：file:///d:/jdbc.properties。注意是三个斜杠哦。**
 
-## 3.5mapper
+注意：如果不知道mybatis-config.xml文件中标签的编写顺序的话，可以有两种方式知道它的顺序：
 
-mapper标签用来是定SQL映射文件的路径，包含多种指定方式，其中两种为：
+- 第一种方式：查看dtd约束文件。
+- 第二种方式：通过idea的报错提示信息。【一般采用这种方式】
 
-**第一种:**resource,从类的根路径下进行加载
+## 4.5 mapper
 
-```java
+mapper标签用来指定SQL映射文件的路径，包含多种指定方式，这里先主要看其中两种：
+
+第一种：resource，从类的根路径下开始加载【比url常用】
+
+```xml
 <mappers>
-	<mapper resource="CarMapper.xml">
+  <mapper resource="CarMapper.xml"/>
 </mappers>
 ```
 
-如果这样写必须保证类路径下必须有Carmapper.xml文件
+如果是这样写的话，必须保证类的根下有CarMapper.xml文件。
 
-如果类路径下有一个test包，CarMapper.xml在这个包下，配置文件应该这样写
+如果类的根路径下有一个包叫做test，CarMapper.xml如果放在test包下的话，这个配置应该是这样写：
 
-```java
+```xml
 <mappers>
-	<mapper="test/CarMapper.xml">
+  <mapper resource="test/CarMapper.xml"/>
 </mappers>
 ```
 
-**第二种：**url，从指定的url位置进行加载
+第二种：url，从指定的url位置加载
 
-假设CarMapper.xml文件放在D盘的根目录下，配置写法如下
+假设CarMapper.xml文件放在d盘的根下，这个配置就需要这样写：
 
-```java
+```xml
 <mappers>
-	<mapper url="file:///d:/CarMapper.xml"
+  <mapper url="file:///d:/CarMapper.xml"/>
 </mappers>
 ```
 
-# 四，手写mybatis基本框架 
+**mapper还有其他的指定方式，后面再看！！！**
+
+
+
+
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1659578619308-ceb8077a-94a7-4f64-b41d-e54b3c14e7fb.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_34%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)四，手写mybatis基本框架 
 
 
 
@@ -2355,11 +2395,774 @@ public class GenerateDaoByJavassist {
 
 ![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660611264464-7f47cce8-0581-496a-b04a-e756eec622df.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_10%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
 
-# 
 
 
+# 九、MyBatis小技巧
 
+## 9.1 #{}和${}
 
+\#{}：先编译sql语句，再给占位符传值，底层是PreparedStatement实现。可以防止sql注入，比较常用。
+
+${}：先进行sql语句拼接，然后再编译sql语句，底层是Statement实现。存在sql注入现象。只有在需要进行sql语句关键字拼接的情况下才会用到。
+
+需求：根据car_type查询汽车
+
+模块名：mybatis-005-antic
+
+### 使用#{}
+
+依赖
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.powernode</groupId>
+    <artifactId>mybatis-005-antic</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <dependencies>
+        <!--mybatis依赖-->
+        <dependency>
+            <groupId>org.mybatis</groupId>
+            <artifactId>mybatis</artifactId>
+            <version>3.5.10</version>
+        </dependency>
+        <!--mysql驱动依赖-->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.30</version>
+        </dependency>
+        <!--junit依赖-->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13.2</version>
+            <scope>test</scope>
+        </dependency>
+        <!--logback依赖-->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.2.11</version>
+        </dependency>
+    </dependencies>
+
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+    </properties>
+
+</project>
+```
+
+jdbc.properties放在类的根路径下
+
+```properties
+jdbc.driver=com.mysql.cj.jdbc.Driver
+jdbc.url=jdbc:mysql://localhost:3306/powernode
+jdbc.username=root
+jdbc.password=root
+```
+
+logback.xml，可以拷贝之前的，放到类的根路径下
+
+utils
+
+```java
+package com.powernode.mybatis.utils;
+
+import org.apache.ibatis.io.Resources;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+
+/**
+ * MyBatis工具类
+ *
+ * @author 老杜
+ * @version 1.0
+ * @since 1.0
+ */
+public class SqlSessionUtil {
+    private static SqlSessionFactory sqlSessionFactory;
+
+    /**
+     * 类加载时初始化sqlSessionFactory对象
+     */
+    static {
+        try {
+            SqlSessionFactoryBuilder sqlSessionFactoryBuilder = new SqlSessionFactoryBuilder();
+            sqlSessionFactory = sqlSessionFactoryBuilder.build(Resources.getResourceAsStream("mybatis-config.xml"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static ThreadLocal<SqlSession> local = new ThreadLocal<>();
+
+    /**
+     * 每调用一次openSession()可获取一个新的会话，该会话支持自动提交。
+     *
+     * @return 新的会话对象
+     */
+    public static SqlSession openSession() {
+        SqlSession sqlSession = local.get();
+        if (sqlSession == null) {
+            sqlSession = sqlSessionFactory.openSession();
+            local.set(sqlSession);
+        }
+        return sqlSession;
+    }
+
+    /**
+     * 关闭SqlSession对象
+     * @param sqlSession
+     */
+    public static void close(SqlSession sqlSession){
+        if (sqlSession != null) {
+            sqlSession.close();
+        }
+        local.remove();
+    }
+}
+```
+
+pojo
+
+```java
+package com.powernode.mybatis.pojo;
+/**
+ * 普通实体类：汽车
+ * @author 老杜
+ * @version 1.0
+ * @since 1.0
+ */
+public class Car {
+    private Long id;
+    private String carNum;
+    private String brand;
+    private Double guidePrice;
+    private String produceTime;
+    private String carType;
+    // 构造方法
+    // set get方法
+    // toString方法
+}
+```
+
+mapper接口
+
+```java
+package com.powernode.mybatis.mapper;
+
+import com.powernode.mybatis.pojo.Car;
+
+import java.util.List;
+
+/**
+ * Car的sql映射对象
+ * @author 老杜
+ * @version 1.0
+ * @since 1.0
+ */
+public interface CarMapper {
+
+    /**
+     * 根据car_num获取Car
+     * @param carType
+     * @return
+     */
+    List<Car> selectByCarType(String carType);
+
+}
+```
+
+mybatis-config.xml，放在类的根路径下
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <properties resource="jdbc.properties"/>
+    <environments default="dev">
+        <environment id="dev">
+            <transactionManager type="JDBC"/>
+            <dataSource type="POOLED">
+                <property name="driver" value="${jdbc.driver}"/>
+                <property name="url" value="${jdbc.url}"/>
+                <property name="username" value="${jdbc.username}"/>
+                <property name="password" value="${jdbc.password}"/>
+            </dataSource>
+        </environment>
+    </environments>
+    <mappers>
+        <mapper resource="CarMapper.xml"/>
+    </mappers>
+</configuration>
+```
+
+CarMapper.xml，放在类的根路径下：**注意namespace必须和接口名一致。id必须和接口中方法名一致**。
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.powernode.mybatis.mapper.CarMapper">
+    <select id="selectByCarType" resultType="com.powernode.mybatis.pojo.Car">
+        select
+            id,car_num as carNum,brand,guide_price as guidePrice,produce_time as produceTime,car_type as carType
+        from
+            t_car
+        where
+            car_type = #{carType}
+    </select>
+</mapper>
+```
+
+测试程序
+
+```java
+package com.powernode.mybatis.test;
+
+import com.powernode.mybatis.mapper.CarMapper;
+import com.powernode.mybatis.pojo.Car;
+import com.powernode.mybatis.utils.SqlSessionUtil;
+import org.junit.Test;
+
+import java.util.List;
+
+/**
+ * CarMapper测试类
+ * @author 老杜
+ * @version 1.0
+ * @since 1.0
+ */
+public class CarMapperTest {
+
+    @Test
+    public void testSelectByCarType(){
+        CarMapper mapper = (CarMapper) SqlSessionUtil.openSession().getMapper(CarMapper.class);
+        List<Car> cars = mapper.selectByCarType("燃油车");
+        cars.forEach(car -> System.out.println(car));
+    }
+}
+```
+
+执行结果：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660617419624-9c151df7-6c1e-469b-8489-2694009e68b6.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_47%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+通过执行可以清楚的看到，sql语句中是带有 ? 的，这个 ? 就是大家在JDBC中所学的占位符，专门用来接收值的。
+
+把“燃油车”以String类型的值，传递给 ? 
+
+这就是 #{}，它会先进行sql语句的预编译，然后再给占位符传值
+
+### 使用${}
+
+同样的需求，我们使用${}来完成
+
+CarMapper.xml文件修改如下：
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.powernode.mybatis.mapper.CarMapper">
+    <select id="selectByCarType" resultType="com.powernode.mybatis.pojo.Car">
+        select
+            id,car_num as carNum,brand,guide_price as guidePrice,produce_time as produceTime,car_type as carType
+        from
+            t_car
+        where
+            <!--car_type = #{carType}-->
+            car_type = ${carType}
+    </select>
+</mapper>
+```
+
+再次运行测试程序：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660617746157-bdb389c7-5752-42f7-a023-c0b8792cf604.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_33%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+出现异常了，这是为什么呢？看看生成的sql语句：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660617813209-5e0d9395-452b-42ed-bee2-816d41f17c30.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_47%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+很显然，${} 是先进行sql语句的拼接，然后再编译，出现语法错误是正常的，因为 燃油车 是一个字符串，在sql语句中应该添加单引号
+
+修改：
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.powernode.mybatis.mapper.CarMapper">
+    <select id="selectByCarType" resultType="com.powernode.mybatis.pojo.Car">
+        select
+            id,car_num as carNum,brand,guide_price as guidePrice,produce_time as produceTime,car_type as carType
+        from
+            t_car
+        where
+            <!--car_type = #{carType}-->
+            <!--car_type = ${carType}-->
+            car_type = '${carType}'
+    </select>
+</mapper>
+```
+
+再执行测试程序：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660618019174-42718d2b-7cdd-4c70-8a44-055258d5ad29.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_46%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+通过以上测试，可以看出，对于以上这种需求来说，还是建议使用 #{} 的方式。
+
+原则：能用 #{} 就不用 ${}
+
+### 什么情况下必须使用${}
+
+当需要进行sql语句关键字拼接的时候。必须使用${}
+
+需求：通过向sql语句中注入asc或desc关键字，来完成数据的升序或降序排列。
+
+- **先使用#{}尝试：**
+
+CarMapper接口：
+
+```java
+/**
+ * 查询所有的Car
+ * @param ascOrDesc asc或desc
+ * @return
+ */
+List<Car> selectAll(String ascOrDesc);
+```
+
+CarMapper.xml文件：
+
+```xml
+<select id="selectAll" resultType="com.powernode.mybatis.pojo.Car">
+  select
+  id,car_num as carNum,brand,guide_price as guidePrice,produce_time as produceTime,car_type as carType
+  from
+  t_car
+  order by carNum #{key}
+</select>
+```
+
+测试程序
+
+```java
+@Test
+public void testSelectAll(){
+    CarMapper mapper = (CarMapper) SqlSessionUtil.openSession().getMapper(CarMapper.class);
+    List<Car> cars = mapper.selectAll("desc");
+    cars.forEach(car -> System.out.println(car));
+}
+```
+
+运行：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660619431786-c9ac3a1d-c9f7-494f-bfe3-496ce4beb914.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_47%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+报错的原因是sql语句不合法，因为采用这种方式传值，最终sql语句会是这样：
+
+select id,car_num as carNum,brand,guide_price as guidePrice,produce_time as produceTime,car_type as carType from t_car order by carNum 'desc'
+
+desc是一个关键字，不能带单引号的，所以在进行sql语句关键字拼接的时候，必须使用${}
+
+- **使用${} 改造**
+
+```xml
+<select id="selectAll" resultType="com.powernode.mybatis.pojo.Car">
+  select
+  id,car_num as carNum,brand,guide_price as guidePrice,produce_time as produceTime,car_type as carType
+  from
+  t_car
+  <!--order by carNum #{key}-->
+  order by carNum ${key}
+</select>
+```
+
+再次执行测试程序：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660619635336-168c3097-fe96-49aa-b855-d111f5f6e66d.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_47%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+### 拼接表名
+
+业务背景：实际开发中，有的表数据量非常庞大，可能会采用分表方式进行存储，比如每天生成一张表，表的名字与日期挂钩，例如：2022年8月1日生成的表：t_user20220108。2000年1月1日生成的表：t_user20000101。此时前端在进行查询的时候会提交一个具体的日期，比如前端提交的日期为：2000年1月1日，那么后端就会根据这个日期动态拼接表名为：t_user20000101。有了这个表名之后，将表名拼接到sql语句当中，返回查询结果。那么大家思考一下，拼接表名到sql语句当中应该使用#{} 还是 ${} 呢？
+
+使用#{}会是这样：select * from 't_car'
+
+使用${}会是这样：select * from t_car
+
+```xml
+<select id="selectAllByTableName" resultType="car">
+  select
+  id,car_num as carNum,brand,guide_price as guidePrice,produce_time as produceTime,car_type as carType
+  from
+  ${tableName}
+</select>
+/**
+ * 根据表名查询所有的Car
+ * @param tableName
+ * @return
+ */
+List<Car> selectAllByTableName(String tableName);
+@Test
+public void testSelectAllByTableName(){
+    CarMapper mapper = SqlSessionUtil.openSession().getMapper(CarMapper.class);
+    List<Car> cars = mapper.selectAllByTableName("t_car");
+    cars.forEach(car -> System.out.println(car));
+}
+```
+
+执行结果：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660798482963-16baeed4-cd22-4a0e-a631-6f49ee9f101b.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_41%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+### 批量删除
+
+业务背景：一次删除多条记录。
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660799087155-ec264d4c-cafa-458d-85b9-f18b4c34bafd.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_10%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+对应的sql语句：
+
+- delete from t_user where id = 1 or id = 2 or id = 3;
+- delete from t_user where id in(1, 2, 3);
+
+假设现在使用in的方式处理，前端传过来的字符串：1, 2, 3
+
+如果使用mybatis处理，应该使用#{} 还是 ${}
+
+使用#{} ：delete from t_user where id in('1,2,3') **执行错误：1292 - Truncated incorrect DOUBLE value: '1,2,3'**
+
+使用${} ：delete from t_user where id in(1, 2, 3)
+
+```java
+/**
+     * 根据id批量删除
+     * @param ids
+     * @return
+     */
+int deleteBatch(String ids);
+<delete id="deleteBatch">
+  delete from t_car where id in(${ids})
+</delete>
+@Test
+public void testDeleteBatch(){
+    CarMapper mapper = SqlSessionUtil.openSession().getMapper(CarMapper.class);
+    int count = mapper.deleteBatch("1,2,3");
+    System.out.println("删除了几条记录：" + count);
+    SqlSessionUtil.openSession().commit();
+}
+```
+
+执行结果：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660803646232-44b4c7ca-119d-45ce-83c1-aefa2e3c6255.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_26%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+### 模糊查询
+
+需求：查询奔驰系列的汽车。【只要品牌brand中含有奔驰两个字的都查询出来。】
+
+#### 使用${}
+
+```java
+/**
+     * 根据品牌进行模糊查询
+     * @param likeBrank
+     * @return
+     */
+List<Car> selectLikeByBrand(String likeBrank);
+<select id="selectLikeByBrand" resultType="Car">
+  select
+  id,car_num as carNum,brand,guide_price as guidePrice,produce_time as produceTime,car_type as carType
+  from
+  t_car
+  where
+  brand like '%${brand}%'
+</select>
+@Test
+public void testSelectLikeByBrand(){
+    CarMapper mapper = SqlSessionUtil.openSession().getMapper(CarMapper.class);
+    List<Car> cars = mapper.selectLikeByBrand("奔驰");
+    cars.forEach(car -> System.out.println(car));
+}
+```
+
+执行结果：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660804429027-895f9a7b-5a1d-4ecd-b5b4-81dbca8ee101.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_45%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+#### 使用#{}
+
+第一种：concat函数
+
+```xml
+<select id="selectLikeByBrand" resultType="Car">
+  select
+  id,car_num as carNum,brand,guide_price as guidePrice,produce_time as produceTime,car_type as carType
+  from
+  t_car
+  where
+  brand like concat('%',#{brand},'%')
+</select>
+```
+
+执行结果：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660804562331-8febb980-24d8-4e18-8e4b-6416f28aa251.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_45%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+第二种：双引号方式
+
+```xml
+<select id="selectLikeByBrand" resultType="Car">
+  select
+  id,car_num as carNum,brand,guide_price as guidePrice,produce_time as produceTime,car_type as carType
+  from
+  t_car
+  where
+  brand like "%"#{brand}"%"
+</select>
+```
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660804873326-12cbff35-f4fe-4019-90a4-7b758d7c4e39.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_44%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+## 9.2 typeAliases
+
+我们来观察一下CarMapper.xml中的配置信息：
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.powernode.mybatis.mapper.CarMapper">
+
+    <select id="selectAll" resultType="com.powernode.mybatis.pojo.Car">
+        select
+            id,car_num as carNum,brand,guide_price as guidePrice,produce_time as produceTime,car_type as carType
+        from
+            t_car
+        order by carNum ${key}
+    </select>
+
+    <select id="selectByCarType" resultType="com.powernode.mybatis.pojo.Car">
+        select
+            id,car_num as carNum,brand,guide_price as guidePrice,produce_time as produceTime,car_type as carType
+        from
+            t_car
+        where
+            car_type = '${carType}'
+    </select>
+</mapper>
+```
+
+resultType属性用来指定查询结果集的封装类型，这个名字太长，可以起别名吗？可以。
+
+在mybatis-config.xml文件中使用typeAliases标签来起别名，包括两种方式：
+
+### 第一种方式：typeAlias
+
+```xml
+<typeAliases>
+  <typeAlias type="com.powernode.mybatis.pojo.Car" alias="Car"/>
+</typeAliases>
+```
+
+- 首先要注意typeAliases标签的放置位置，如果不清楚的话，可以看看错误提示信息。
+- typeAliases标签中的typeAlias可以写多个。
+- typeAlias：
+
+- type属性：指定给哪个类起别名
+- alias属性：别名。
+
+- alias属性不是必须的，如果缺省的话，type属性指定的类型名的简类名作为别名。
+- alias是大小写不敏感的。也就是说假设alias="Car"，再用的时候，可以CAR，也可以car，也可以Car，都行。
+
+### 第二种方式：package
+
+如果一个包下的类太多，每个类都要起别名，会导致typeAlias标签配置较多，所以mybatis用提供package的配置方式，只需要指定包名，该包下的所有类都自动起别名，别名就是简类名。并且别名不区分大小写。
+
+```xml
+<typeAliases>
+  <package name="com.powernode.mybatis.pojo"/>
+</typeAliases>
+```
+
+package也可以配置多个的。
+
+### 在SQL映射文件中用一下
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.powernode.mybatis.mapper.CarMapper">
+
+    <select id="selectAll" resultType="CAR">
+        select
+            id,car_num as carNum,brand,guide_price as guidePrice,produce_time as produceTime,car_type as carType
+        from
+            t_car
+        order by carNum ${key}
+    </select>
+
+    <select id="selectByCarType" resultType="car">
+        select
+            id,car_num as carNum,brand,guide_price as guidePrice,produce_time as produceTime,car_type as carType
+        from
+            t_car
+        where
+            car_type = '${carType}'
+    </select>
+</mapper>
+```
+
+运行测试程序：正常。
+
+## 9.3 mappers
+
+SQL映射文件的配置方式包括四种：
+
+- resource：从类路径中加载
+- url：从指定的全限定资源路径中加载
+- class：使用映射器接口实现类的完全限定类名
+- package：将包内的映射器接口实现全部注册为映射器
+
+### resource
+
+这种方式是从类路径中加载配置文件，所以这种方式要求SQL映射文件必须放在resources目录下或其子目录下。
+
+```xml
+<mappers>
+  <mapper resource="org/mybatis/builder/AuthorMapper.xml"/>
+  <mapper resource="org/mybatis/builder/BlogMapper.xml"/>
+  <mapper resource="org/mybatis/builder/PostMapper.xml"/>
+</mappers>
+```
+
+### url
+
+这种方式显然使用了绝对路径的方式，这种配置对SQL映射文件存放的位置没有要求，随意。
+
+但是使用极少，因为移植性极差
+
+```xml
+<mappers>
+  <mapper url="file:///var/mappers/AuthorMapper.xml"/>
+  <mapper url="file:///var/mappers/BlogMapper.xml"/>
+  <mapper url="file:///var/mappers/PostMapper.xml"/>
+</mappers>
+```
+
+### class
+
+如果使用这种方式必须满足以下条件：
+
+- SQL映射文件和mapper接口放在同一个目录下。
+- SQL映射文件的名字也必须和mapper接口名一致。
+
+```xml
+<!-- 使用映射器接口实现类的完全限定类名 -->
+<mappers>
+  <mapper class="org.mybatis.builder.AuthorMapper"/>
+  <mapper class="org.mybatis.builder.BlogMapper"/>
+  <mapper class="org.mybatis.builder.PostMapper"/>
+</mappers>
+```
+
+将CarMapper.xml文件移动到和mapper接口同一个目录下：
+
+- 在resources目录下新建：com/powernode/mybatis/mapper【这里千万要注意：**不能这样新建 com.powernode.mybatis.dao**】
+- 将CarMapper.xml文件移动到mapper目录下
+- 修改mybatis-config.xml文件
+
+```xml
+<mappers>
+  <mapper class="com.powernode.mybatis.mapper.CarMapper"/>
+</mappers>
+```
+
+运行程序：正常！！！
+
+### package
+
+如果class较多，可以使用这种package的方式，但前提条件和上一种方式一样。
+
+```xml
+<!-- 将包内的映射器接口实现全部注册为映射器 -->
+<mappers>
+  <package name="com.powernode.mybatis.mapper"/>
+</mappers>
+```
+
+## 9.4 idea配置文件模板
+
+mybatis-config.xml和SqlMapper.xml文件可以在IDEA中提前创建好模板，以后通过模板创建配置文件。
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660629382298-df2d0e70-d8ce-4ae6-9f19-e74923adf121.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_28%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+## 9.5 插入数据时获取自动生成的主键
+
+前提是：主键是自动生成的。
+
+业务背景：一个用户有多个角色。
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660808179627-69b14158-fbd4-4189-83cf-aa944fe26fa1.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_13%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+插入一条新的记录之后，自动生成了主键，而这个主键需要在其他表中使用时。
+
+插入一个用户数据的同时需要给该用户分配角色：需要将生成的用户的id插入到角色表的user_id字段上。
+
+第一种方式：可以先插入用户数据，再写一条查询语句获取id，然后再插入user_id字段。【比较麻烦】
+
+第二种方式：mybatis提供了一种方式更加便捷。
+
+```java
+/**
+     * 获取自动生成的主键
+     * @param car
+     */
+void insertUseGeneratedKeys(Car car);
+<insert id="insertUseGeneratedKeys" useGeneratedKeys="true" keyProperty="id">
+  insert into t_car(id,car_num,brand,guide_price,produce_time,car_type) values(null,#{carNum},#{brand},#{guidePrice},#{produceTime},#{carType})
+</insert>
+@Test
+public void testInsertUseGeneratedKeys(){
+    CarMapper mapper = SqlSessionUtil.openSession().getMapper(CarMapper.class);
+    Car car = new Car();
+    car.setCarNum("5262");
+    car.setBrand("BYD汉");
+    car.setGuidePrice(30.3);
+    car.setProduceTime("2020-10-11");
+    car.setCarType("新能源");
+    mapper.insertUseGeneratedKeys(car);
+    SqlSessionUtil.openSession().commit();
+    System.out.println(car.getId());
+}
+```
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1659578619308-ceb8077a-94a7-4f64-b41d-e54b3c14e7fb.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_34%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
 
 
 
