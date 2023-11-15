@@ -828,7 +828,7 @@ public void testNamespace(){
 
 mybatis-003-configuration
 
-```xml
+```java
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE configuration
         PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
@@ -997,6 +997,9 @@ public void testTransactionManager() throws Exception{
         <mapper resource="CarMapper.xml"/>
     </mappers>
 </configuration>
+```
+
+```java
 @Test
 public void testDataSource() throws Exception{
     // 准备数据
@@ -1215,11 +1218,7 @@ mapper标签用来指定SQL映射文件的路径，包含多种指定方式，�
 
 
 
-
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1659578619308-ceb8077a-94a7-4f64-b41d-e54b3c14e7fb.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_34%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)四，手写mybatis基本框架 
-
-
+# 五，手写MyBatis框架
 
 ## 4.1dom4j解析xml文件
 
@@ -1362,11 +1361,7 @@ public void testparseSqlMapperXML() throws Exception{
     }
 ```
 
-## 4.2GodBatis
-
-
-
-# 五，在WEB中应用MyBatis
+## 
 
 # 六、在WEB中应用MyBatis（使用MVC架构模式）
 
@@ -2194,7 +2189,7 @@ public class AccountDaoImpl implements AccountDao {
 
 
 
-# 六.javassist生成类
+# 七.javassist生成类
 
 ## 7.1 Javassist的使用
 
@@ -2397,7 +2392,7 @@ public class GenerateDaoByJavassist {
 
 
 
-# 九、MyBatis小技巧
+# 八、MyBatis小技巧
 
 ## 9.1 #{}和${}
 
@@ -3164,9 +3159,722 @@ public void testInsertUseGeneratedKeys(){
 
 
 
+# 九、MyBatis参数处理
+
+模块名：mybatis-006-param
+
+表：t_student
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660634643604-17c32925-3d16-4477-84be-296ef44509a0.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_20%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+表中现有数据：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660635212357-e422625b-d176-4189-ad30-7b9dad1b5dd9.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_16%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+pojo类：
+
+```java
+package com.powernode.mybatis.pojo;
+
+import java.util.Date;
+
+/**
+ * 学生类
+ * @author 老杜
+ * @version 1.0
+ * @since 1.0
+ */
+public class Student {
+    private Long id;
+    private String name;
+    private Integer age;
+    private Double height;
+    private Character sex;
+    private Date birth;
+    // constructor
+    // setter and getter
+    // toString
+}
+```
+
+## 10.1 单个简单类型参数
+
+简单类型包括：
+
+- byte short int long float double char
+- Byte Short Integer Long Float Double Character
+- String
+- java.util.Date
+- java.sql.Date
+
+需求：根据name查、根据id查、根据birth查、根据sex查
+
+```java
+package com.powernode.mybatis.mapper;
+
+import com.powernode.mybatis.pojo.Student;
+
+import java.util.Date;
+import java.util.List;
+
+/**
+ * 学生数据Sql映射器
+ * @author 老杜
+ * @version 1.0
+ * @since 1.0
+ */
+public interface StudentMapper {
+    /**
+     * 根据name查询
+     * @param name
+     * @return
+     */
+    List<Student> selectByName(String name);
+
+    /**
+     * 根据id查询
+     * @param id
+     * @return
+     */
+    Student selectById(Long id);
+
+    /**
+     * 根据birth查询
+     * @param birth
+     * @return
+     */
+    List<Student> selectByBirth(Date birth);
+
+    /**
+     * 根据sex查询
+     * @param sex
+     * @return
+     */
+    List<Student> selectBySex(Character sex);
+}
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.powernode.mybatis.mapper.StudentMapper">
+    <select id="selectByName" resultType="student">
+        select * from t_student where name = #{name}
+    </select>
+    <select id="selectById" resultType="student">
+        select * from t_student where id = #{id}
+    </select>
+    <select id="selectByBirth" resultType="student">
+        select * from t_student where birth = #{birth}
+    </select>
+    <select id="selectBySex" resultType="student">
+        select * from t_student where sex = #{sex}
+    </select>
+</mapper>
+package com.powernode.mybatis.test;
+
+import com.powernode.mybatis.mapper.StudentMapper;
+import com.powernode.mybatis.pojo.Student;
+import com.powernode.mybatis.utils.SqlSessionUtil;
+import org.junit.Test;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+
+public class StudentMapperTest {
+
+    StudentMapper mapper = SqlSessionUtil.openSession().getMapper(StudentMapper.class);
+
+    @Test
+    public void testSelectByName(){
+        List<Student> students = mapper.selectByName("张三");
+        students.forEach(student -> System.out.println(student));
+    }
+    @Test
+    public void testSelectById(){
+        Student student = mapper.selectById(2L);
+        System.out.println(student);
+    }
+    @Test
+    public void testSelectByBirth(){
+        try {
+            Date birth = new SimpleDateFormat("yyyy-MM-dd").parse("2022-08-16");
+            List<Student> students = mapper.selectByBirth(birth);
+            students.forEach(student -> System.out.println(student));
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+    @Test
+    public void testSelectBySex(){
+        List<Student> students = mapper.selectBySex('男');
+        students.forEach(student -> System.out.println(student));
+    }
+}
+```
+
+通过测试得知，简单类型对于mybatis来说都是可以自动类型识别的：
+
+- 也就是说对于mybatis来说，它是可以自动推断出ps.setXxxx()方法的。ps.setString()还是ps.setInt()。它可以自动推断。
+
+其实SQL映射文件中的配置比较完整的写法是：
+
+```xml
+<select id="selectByName" resultType="student" parameterType="java.lang.String">
+  select * from t_student where name = #{name, javaType=String, jdbcType=VARCHAR}
+</select>
+```
+
+其中sql语句中的javaType，jdbcType，以及select标签中的parameterType属性，都是用来帮助mybatis进行类型确定的。不过这些配置多数是可以省略的。因为mybatis它有强大的自动类型推断机制。
+
+- javaType：可以省略
+- jdbcType：可以省略
+- parameterType：可以省略
+
+**如果参数只有一个的话，#{} 里面的内容就随便写了。对于 ${} 来说，注意加单引号。**
+
+## 10.2 Map参数
+
+需求：根据name和age查询
+
+```java
+/**
+* 根据name和age查询
+* @param paramMap
+* @return
+*/
+List<Student> selectByParamMap(Map<String,Object> paramMap);
+@Test
+public void testSelectByParamMap(){
+    // 准备Map
+    Map<String,Object> paramMap = new HashMap<>();
+    paramMap.put("nameKey", "张三");
+    paramMap.put("ageKey", 20);
+
+    List<Student> students = mapper.selectByParamMap(paramMap);
+    students.forEach(student -> System.out.println(student));
+}
+<select id="selectByParamMap" resultType="student">
+  select * from t_student where name = #{nameKey} and age = #{ageKey}
+</select>
+```
+
+测试运行正常。
+
+**这种方式是手动封装Map集合，将每个条件以key和value的形式存放到集合中。然后在使用的时候通过#{map集合的key}来取值。**
+
+## 10.3 实体类参数
+
+需求：插入一条Student数据
+
+```java
+/**
+ * 保存学生数据
+ * @param student
+ * @return
+ */
+int insert(Student student);
+<insert id="insert">
+  insert into t_student values(null,#{name},#{age},#{height},#{birth},#{sex})
+</insert>
+@Test
+public void testInsert(){
+    Student student = new Student();
+    student.setName("李四");
+    student.setAge(30);
+    student.setHeight(1.70);
+    student.setSex('男');
+    student.setBirth(new Date());
+    int count = mapper.insert(student);
+    SqlSessionUtil.openSession().commit();
+}
+```
+
+运行正常，数据库中成功添加一条数据。
+
+**这里需要注意的是：#{} 里面写的是属性名字。这个属性名其本质上是：set/get方法名去掉set/get之后的名字。**
+
+## 10.4 多参数
+
+需求：通过name和sex查询
+
+```java
+    /**
+     * 根据name和sex查询
+     * @param name
+     * @param sex
+     * @return
+     */
+    List<Student> selectByNameAndSex(String name, Character sex);
+@Test
+public void testSelectByNameAndSex(){
+    List<Student> students = mapper.selectByNameAndSex("张三", '女');
+    students.forEach(student -> System.out.println(student));
+}
+<select id="selectByNameAndSex" resultType="student">
+  select * from t_student where name = #{name} and sex = #{sex}
+</select>
+```
+
+执行结果：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660641021618-ce3ac913-fe10-45f5-9760-3e51ef2dd864.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_47%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+异常信息描述了：name参数找不到，可用的参数包括[arg1, arg0, param1, param2]
+
+修改StudentMapper.xml配置文件：尝试使用[arg1, arg0, param1, param2]去参数
+
+```xml
+<select id="selectByNameAndSex" resultType="student">
+  <!--select * from t_student where name = #{name} and sex = #{sex}-->
+  select * from t_student where name = #{arg0} and sex = #{arg1}
+</select>
+```
+
+运行结果：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660641284279-64a7312a-d036-448f-aaef-a1bcde8abba2.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_27%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+再次尝试修改StudentMapper.xml文件
+
+```xml
+<select id="selectByNameAndSex" resultType="student">
+  <!--select * from t_student where name = #{name} and sex = #{sex}-->
+  <!--select * from t_student where name = #{arg0} and sex = #{arg1}-->
+  <!--select * from t_student where name = #{param1} and sex = #{param2}-->
+  select * from t_student where name = #{arg0} and sex = #{param2}
+</select>
+```
+
+通过测试可以看到：
+
+- arg0 是第一个参数
+- param1是第一个参数
+- arg1 是第二个参数
+- param2是第二个参数
+
+实现原理：**实际上在mybatis底层会创建一个map集合，以arg0/param1为key，以方法上的参数为value**，例如以下代码：
+
+```java
+Map<String,Object> map = new HashMap<>();
+map.put("arg0", name);
+map.put("arg1", sex);
+map.put("param1", name);
+map.put("param2", sex);
+
+// 所以可以这样取值：#{arg0} #{arg1} #{param1} #{param2}
+// 其本质就是#{map集合的key}
+```
+
+注意：**使用mybatis****3.4.2之前的版本时：要用#{0}和#{1}这种形式。**
+
+## 10.5 @Param注解（命名参数）
+
+可以不用arg0 arg1 param1 param2吗？这个map集合的key我们自定义可以吗？当然可以。使用@Param注解即可。这样可以增强可读性。
+
+需求：根据name和age查询
+
+```java
+    /**
+     * 根据name和age查询
+     * @param name
+     * @param age
+     * @return
+     */
+    List<Student> selectByNameAndAge(@Param(value="name") String name, @Param("age") int age);
+    @Test
+    public void testSelectByNameAndAge(){
+        List<Student> stus = mapper.selectByNameAndAge("张三", 20);
+        stus.forEach(student -> System.out.println(student));
+    }
+<select id="selectByNameAndAge" resultType="student">
+  select * from t_student where name = #{name} and age = #{age}
+</select>
+```
+
+通过测试，一切正常。
+
+核心：@Param("**这里填写的其实就是map集合的key**")
+
+## 10.6 @Param源码分析
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660643136419-5851b57a-ae96-4488-bb0c-8864c92771f3.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_28%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
 
 
 
+
+
+# 十、MyBatis查询语句专题
+
+模块名：mybatis-007-select
+
+打包方式：jar
+
+引入依赖：mysql驱动依赖、mybatis依赖、logback依赖、junit依赖。
+
+引入配置文件：jdbc.properties、mybatis-config.xml、logback.xml
+
+创建pojo类：Car
+
+创建Mapper接口：CarMapper
+
+创建Mapper接口对应的映射文件：com/powernode/mybatis/mapper/CarMapper.xml
+
+创建单元测试：CarMapperTest
+
+拷贝工具类：SqlSessionUtil
+
+## 11.1 返回Car
+
+当查询的结果，有对应的实体类，并且查询结果只有一条时：
+
+```java
+package com.powernode.mybatis.mapper;
+
+import com.powernode.mybatis.pojo.Car;
+
+/**
+ * Car SQL映射器
+ * @author 老杜
+ * @version 1.0
+ * @since 1.0
+ */
+public interface CarMapper {
+
+    /**
+     * 根据id主键查询：结果最多只有一条
+     * @param id
+     * @return
+     */
+    Car selectById(Long id);
+}
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.powernode.mybatis.mapper.CarMapper">
+    <select id="selectById" resultType="Car">
+        select id,car_num carNum,brand,guide_price guidePrice,produce_time produceTime,car_type carType from t_car where id = #{id}
+    </select>
+</mapper>
+package com.powernode.mybatis.test;
+
+import com.powernode.mybatis.mapper.CarMapper;
+import com.powernode.mybatis.pojo.Car;
+import com.powernode.mybatis.utils.SqlSessionUtil;
+import org.junit.Test;
+
+public class CarMapperTest {
+
+    @Test
+    public void testSelectById(){
+        CarMapper mapper = SqlSessionUtil.openSession().getMapper(CarMapper.class);
+        Car car = mapper.selectById(35L);
+        System.out.println(car);
+    }
+}
+```
+
+执行结果：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660810312287-ddfb6d00-1e96-425b-b4e6-fd6cdb8a9593.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_34%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+**查询结果是一条的话可以使用List集合接收吗？当然可以**。
+
+```java
+/**
+* 根据id主键查询：结果最多只有一条，可以放到List集合中吗？
+* @return
+*/
+List<Car> selectByIdToList(Long id);
+<select id="selectByIdToList" resultType="Car">
+  select id,car_num carNum,brand,guide_price guidePrice,produce_time produceTime,car_type carType from t_car where id = #{id}
+</select>
+@Test
+public void testSelectByIdToList(){
+    CarMapper mapper = SqlSessionUtil.openSession().getMapper(CarMapper.class);
+    List<Car> cars = mapper.selectByIdToList(35L);
+    System.out.println(cars);
+}
+```
+
+执行结果：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660810652140-a438fba7-c21c-488a-9d18-c0383262f1dc.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_33%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+## 11.2 返回List<Car>
+
+当查询的记录条数是多条的时候，必须使用集合接收。如果使用单个实体类接收会出现异常。
+
+```java
+/**
+* 查询所有的Car
+* @return
+*/
+List<Car> selectAll();
+<select id="selectAll" resultType="Car">
+  select id,car_num carNum,brand,guide_price guidePrice,produce_time produceTime,car_type carType from t_car
+</select>
+@Test
+public void testSelectAll(){
+    CarMapper mapper = SqlSessionUtil.openSession().getMapper(CarMapper.class);
+    List<Car> cars = mapper.selectAll();
+    cars.forEach(car -> System.out.println(car));
+}
+```
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660816141237-79a6a966-d3ec-4f7b-bc38-b1adb5df8fee.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_36%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+如果返回多条记录，采用单个实体类接收会怎样？
+
+```java
+/**
+* 查询多条记录，采用单个实体类接收会怎样？
+* @return
+*/
+Car selectAll2();
+<select id="selectAll2" resultType="Car">
+  select id,car_num carNum,brand,guide_price guidePrice,produce_time produceTime,car_type carType from t_car
+</select>
+@Test
+public void testSelectAll2(){
+    CarMapper mapper = SqlSessionUtil.openSession().getMapper(CarMapper.class);
+    Car car = mapper.selectAll2();
+    System.out.println(car);
+}
+```
+
+执行结果：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660816549528-b600f5a9-81b4-4725-87c7-b933ee60ca39.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_39%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+## 11.3 返回Map
+
+当返回的数据，没有合适的实体类对应的话，可以采用Map集合接收。字段名做key，字段值做value。
+
+查询如果可以保证只有一条数据，则返回一个Map集合即可。
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660816974662-61782965-88fb-466e-a5ff-5af02ab614df.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_12%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+```java
+/**
+ * 通过id查询一条记录，返回Map集合
+ * @param id
+ * @return
+ */
+Map<String, Object> selectByIdRetMap(Long id);
+<select id="selectByIdRetMap" resultType="map">
+  select id,car_num carNum,brand,guide_price guidePrice,produce_time produceTime,car_type carType from t_car where id = #{id}
+</select>
+```
+
+**resultMap="map"，这是因为mybatis内置了很多别名。【参见mybatis开发手册】**
+
+```java
+@Test
+public void testSelectByIdRetMap(){
+    CarMapper mapper = SqlSessionUtil.openSession().getMapper(CarMapper.class);
+    Map<String,Object> car = mapper.selectByIdRetMap(35L);
+    System.out.println(car);
+}
+```
+
+执行结果：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660817561293-68e25ddd-ed72-4121-99f6-35617d2ae0b0.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_36%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+当然，如果返回一个Map集合，可以将Map集合放到List集合中吗？当然可以，这里就不再测试了。
+
+反过来，如果返回的不是一条记录，是多条记录的话，只采用单个Map集合接收，这样同样会出现之前的异常：**TooManyResultsException**
+
+## 11.4 返回List<Map>
+
+查询结果条数大于等于1条数据，则可以返回一个存储Map集合的List集合。List<Map>等同于List<Car>
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660817896708-0f3d0b44-4a0e-40ed-b609-b4d0e5fce1b6.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_15%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+```java
+/**
+     * 查询所有的Car，返回一个List集合。List集合中存储的是Map集合。
+     * @return
+     */
+List<Map<String,Object>> selectAllRetListMap();
+<select id="selectAllRetListMap" resultType="map">
+  select id,car_num carNum,brand,guide_price guidePrice,produce_time produceTime,car_type carType from t_car
+</select>
+@Test
+public void testSelectAllRetListMap(){
+    CarMapper mapper = SqlSessionUtil.openSession().getMapper(CarMapper.class);
+    List<Map<String,Object>> cars = mapper.selectAllRetListMap();
+    System.out.println(cars);
+}
+```
+
+执行结果：
+
+```json
+[
+  {carType=燃油车, carNum=103, guidePrice=50.30, produceTime=2020-10-01, id=33, brand=奔驰E300L}, 
+  {carType=电车, carNum=102, guidePrice=30.23, produceTime=2018-09-10, id=34, brand=比亚迪汉}, 
+  {carType=燃油车, carNum=103, guidePrice=50.30, produceTime=2020-10-01, id=35, brand=奔驰E300L}, 
+  {carType=燃油车, carNum=103, guidePrice=33.23, produceTime=2020-10-11, id=36, brand=奔驰C200},
+  ......
+]
+```
+
+## 11.5 返回Map<String,Map>
+
+**拿Car的id做key，以后取出对应的Map集合时更方便。**
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660818043977-d5c56423-c5db-43ca-9c0c-eaa3f22a8f21.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_23%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+```java
+/**
+     * 获取所有的Car，返回一个Map集合。
+     * Map集合的key是Car的id。
+     * Map集合的value是对应Car。
+     * @return
+     */
+@MapKey("id")
+Map<Long,Map<String,Object>> selectAllRetMap();
+<select id="selectAllRetMap" resultType="map">
+  select id,car_num carNum,brand,guide_price guidePrice,produce_time produceTime,car_type carType from t_car
+</select>
+@Test
+public void testSelectAllRetMap(){
+    CarMapper mapper = SqlSessionUtil.openSession().getMapper(CarMapper.class);
+    Map<Long,Map<String,Object>> cars = mapper.selectAllRetMap();
+    System.out.println(cars);
+}
+```
+
+执行结果：
+
+```json
+{
+64={carType=燃油车, carNum=133, guidePrice=50.30, produceTime=2020-01-10, id=64, brand=丰田霸道}, 
+66={carType=燃油车, carNum=133, guidePrice=50.30, produceTime=2020-01-10, id=66, brand=丰田霸道}, 
+67={carType=燃油车, carNum=133, guidePrice=50.30, produceTime=2020-01-10, id=67, brand=丰田霸道}, 
+69={carType=燃油车, carNum=133, guidePrice=50.30, produceTime=2020-01-10, id=69, brand=丰田霸道},
+......
+}
+```
+
+## 11.6 resultMap结果映射
+
+查询结果的列名和java对象的属性名对应不上怎么办？
+
+- 第一种方式：as 给列起别名
+- 第二种方式：使用resultMap进行结果映射
+- 第三种方式：是否开启驼峰命名自动映射（配置settings）
+
+### 使用resultMap进行结果映射
+
+```java
+/**
+     * 查询所有Car，使用resultMap进行结果映射
+     * @return
+     */
+List<Car> selectAllByResultMap();
+<!--
+        resultMap:
+            id：这个结果映射的标识，作为select标签的resultMap属性的值。
+            type：结果集要映射的类。可以使用别名。
+-->
+<resultMap id="carResultMap" type="car">
+  <!--对象的唯一标识，官方解释是：为了提高mybatis的性能。建议写上。-->
+  <id property="id" column="id"/>
+  <result property="carNum" column="car_num"/>
+  <!--当属性名和数据库列名一致时，可以省略。但建议都写上。-->
+  <!--javaType用来指定属性类型。jdbcType用来指定列类型。一般可以省略。-->
+  <result property="brand" column="brand" javaType="string" jdbcType="VARCHAR"/>
+  <result property="guidePrice" column="guide_price"/>
+  <result property="produceTime" column="produce_time"/>
+  <result property="carType" column="car_type"/>
+</resultMap>
+
+<!--resultMap属性的值必须和resultMap标签中id属性值一致。-->
+<select id="selectAllByResultMap" resultMap="carResultMap">
+  select * from t_car
+</select>
+@Test
+public void testSelectAllByResultMap(){
+    CarMapper carMapper = SqlSessionUtil.openSession().getMapper(CarMapper.class);
+    List<Car> cars = carMapper.selectAllByResultMap();
+    System.out.println(cars);
+}
+```
+
+执行结果正常。
+
+### 是否开启驼峰命名自动映射
+
+使用这种方式的前提是：属性名遵循Java的命名规范，数据库表的列名遵循SQL的命名规范。
+
+Java命名规范：首字母小写，后面每个单词首字母大写，遵循驼峰命名方式。
+
+SQL命名规范：全部小写，单词之间采用下划线分割。
+
+比如以下的对应关系：
+
+| **实体类中的属性名** | **数据库表的列名** |
+| -------------------- | ------------------ |
+| carNum               | car_num            |
+| carType              | car_type           |
+| produceTime          | produce_time       |
+
+如何启用该功能，在mybatis-config.xml文件中进行配置：
+
+```xml
+<!--放在properties标签后面-->
+<settings>
+  <setting name="mapUnderscoreToCamelCase" value="true"/>
+</settings>
+/**
+* 查询所有Car，启用驼峰命名自动映射
+* @return
+*/
+List<Car> selectAllByMapUnderscoreToCamelCase();
+<select id="selectAllByMapUnderscoreToCamelCase" resultType="Car">
+  select * from t_car
+</select>
+@Test
+public void testSelectAllByMapUnderscoreToCamelCase(){
+    CarMapper carMapper = SqlSessionUtil.openSession().getMapper(CarMapper.class);
+    List<Car> cars = carMapper.selectAllByMapUnderscoreToCamelCase();
+    System.out.println(cars);
+}
+```
+
+执行结果正常。
+
+## 11.7 返回总记录条数
+
+需求：查询总记录条数
+
+```java
+/**
+     * 获取总记录条数
+     * @return
+     */
+Long selectTotal();
+<!--long是别名，可参考mybatis开发手册。-->
+<select id="selectTotal" resultType="long">
+  select count(*) from t_car
+</select>
+@Test
+public void testSelectTotal(){
+    CarMapper carMapper = SqlSessionUtil.openSession().getMapper(CarMapper.class);
+    Long total = carMapper.selectTotal();
+    System.out.println(total);
+}
+```
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660874705835-bd2767b1-c547-4a72-b7d7-229a3c89d74a.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_39%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
 
 
 
