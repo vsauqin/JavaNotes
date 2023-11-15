@@ -1552,6 +1552,7 @@ jdbc.driver=com.mysql.cj.jdbc.Driver
 jdbc.url=jdbc:mysql://localhost:3306/powernode
 jdbc.username=root
 jdbc.password=root
+
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE configuration
         PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
@@ -1576,6 +1577,7 @@ jdbc.password=root
         <mapper resource="AccountMapper.xml"/>
     </mappers>
 </configuration>
+
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
@@ -3527,7 +3529,7 @@ map.put("param2", sex);
 
 拷贝工具类：SqlSessionUtil
 
-## 11.1 返回Car
+## 10.1 返回Car
 
 当查询的结果，有对应的实体类，并且查询结果只有一条时：
 
@@ -3606,7 +3608,7 @@ public void testSelectByIdToList(){
 
 ![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660810652140-a438fba7-c21c-488a-9d18-c0383262f1dc.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_33%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
 
-## 11.2 返回List<Car>
+## 10.2 返回List<Car>
 
 当查询的记录条数是多条的时候，必须使用集合接收。如果使用单个实体类接收会出现异常。
 
@@ -3652,7 +3654,7 @@ public void testSelectAll2(){
 
 ![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660816549528-b600f5a9-81b4-4725-87c7-b933ee60ca39.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_39%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
 
-## 11.3 返回Map
+## 10.3 返回Map
 
 当返回的数据，没有合适的实体类对应的话，可以采用Map集合接收。字段名做key，字段值做value。
 
@@ -3691,7 +3693,7 @@ public void testSelectByIdRetMap(){
 
 反过来，如果返回的不是一条记录，是多条记录的话，只采用单个Map集合接收，这样同样会出现之前的异常：**TooManyResultsException**
 
-## 11.4 返回List<Map>
+## 10.4 返回List<Map>
 
 查询结果条数大于等于1条数据，则可以返回一个存储Map集合的List集合。List<Map>等同于List<Car>
 
@@ -3726,7 +3728,7 @@ public void testSelectAllRetListMap(){
 ]
 ```
 
-## 11.5 返回Map<String,Map>
+## 10.5 返回Map<String,Map>
 
 **拿Car的id做key，以后取出对应的Map集合时更方便。**
 
@@ -3764,7 +3766,7 @@ public void testSelectAllRetMap(){
 }
 ```
 
-## 11.6 resultMap结果映射
+## 10.6 resultMap结果映射
 
 查询结果的列名和java对象的属性名对应不上怎么办？
 
@@ -3852,7 +3854,7 @@ public void testSelectAllByMapUnderscoreToCamelCase(){
 
 执行结果正常。
 
-## 11.7 返回总记录条数
+## 10.7 返回总记录条数
 
 需求：查询总记录条数
 
@@ -3878,7 +3880,1315 @@ public void testSelectTotal(){
 
 
 
+# 十一、动态SQL
 
+有的业务场景，也需要SQL语句进行动态拼接，例如：
+
+- 批量删除
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660799087155-ec264d4c-cafa-458d-85b9-f18b4c34bafd.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_10%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+```sql
+delete from t_car where id in(1,2,3,4,5,6,......这里的值是动态的，根据用户选择的id不同，值是不同的);
+```
+
+- 多条件查询
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660876082121-d5ea8e08-e642-4716-b201-79cfe3849624.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_26%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+```sql
+select * from t_car where brand like '丰田%' and guide_price > 30 and .....;
+```
+
+创建模块：mybatis-008-dynamic-sql
+
+打包方式：jar
+
+引入依赖：mysql驱动依赖、mybatis依赖、junit依赖、logback依赖
+
+pojo：com.powernode.mybatis.pojo.Car
+
+mapper接口：com.powernode.mybatis.mapper.CarMapper
+
+引入配置文件：mybatis-config.xml、jdbc.properties、logback.xml
+
+mapper配置文件：com/powernode/mybatis/mapper/CarMapper.xml
+
+编写测试类：com.powernode.mybatis.test.CarMapperTest
+
+拷贝工具类：SqlSessionUtil
+
+## 12.1 if标签
+
+需求：多条件查询。
+
+可能的条件包括：品牌（brand）、指导价格（guide_price）、汽车类型（car_type）
+
+```java
+package com.powernode.mybatis.mapper;
+
+import com.powernode.mybatis.pojo.Car;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
+
+public interface CarMapper {
+
+
+    /**
+     * 根据多条件查询Car
+     * @param brand
+     * @param guidePrice
+     * @param carType
+     * @return
+     */
+    List<Car> selectByMultiCondition(@Param("brand") String brand, @Param("guidePrice") Double guidePrice, @Param("carType") String carType);
+}
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.powernode.mybatis.mapper.CarMapper">
+
+    <select id="selectByMultiCondition" resultType="car">
+        select * from t_car where
+        <if test="brand != null and brand != ''">
+            brand like #{brand}"%"
+        </if>
+        <if test="guidePrice != null and guidePrice != ''">
+            and guide_price >= #{guidePrice}
+        </if>
+        <if test="carType != null and carType != ''">
+            and car_type = #{carType}
+        </if>
+    </select>
+
+</mapper>
+package com.powernode.mybatis.test;
+
+import com.powernode.mybatis.mapper.CarMapper;
+import com.powernode.mybatis.pojo.Car;
+import com.powernode.mybatis.utils.SqlSessionUtil;
+import org.junit.Test;
+
+import java.util.List;
+
+public class CarMapperTest {
+    @Test
+    public void testSelectByMultiCondition(){
+        CarMapper mapper = SqlSessionUtil.openSession().getMapper(CarMapper.class);
+        List<Car> cars = mapper.selectByMultiCondition("丰田", 20.0, "燃油车");
+        System.out.println(cars);
+    }
+}
+```
+
+执行结果：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660889544842-34404e94-66f2-48e5-b58a-784d6b91ee27.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_30%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+如果第一个条件为空，剩下两个条件不为空，会是怎样呢？
+
+```java
+List<Car> cars = mapper.selectByMultiCondition("", 20.0, "燃油车");
+```
+
+执行结果：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660889738193-d5023b6c-13a9-447f-a128-45b36663c8f1.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_27%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+报错了，SQL语法有问题，where后面出现了and。这该怎么解决呢？
+
+- 可以where后面添加一个恒成立的条件。
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660889965103-5e519823-a741-4ebf-b930-e10ffc9a4129.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_20%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+执行结果：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660890083737-c8716d78-9e2d-4a22-bf56-12ff94b688f5.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_28%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+如果三个条件都是空，有影响吗？
+
+```java
+List<Car> cars = mapper.selectByMultiCondition("", null, "");
+```
+
+执行结果：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660890238928-6f889bdf-9702-4cd7-a0ef-b875977f42f9.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_18%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+三个条件都不为空呢？
+
+```java
+List<Car> cars = mapper.selectByMultiCondition("丰田", 20.0, "燃油车");
+```
+
+执行结果：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660890374052-89bc29a1-3aeb-4941-b33f-fbbbe4fbbd39.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_29%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+## 12.2 where标签
+
+where标签的作用：让where子句更加动态智能。
+
+- 所有条件都为空时，where标签保证不会生成where子句。
+- 自动去除某些条件**前面**多余的and或or。
+
+继续使用if标签中的需求。
+
+```java
+/**
+* 根据多条件查询Car，使用where标签
+* @param brand
+* @param guidePrice
+* @param carType
+* @return
+*/
+List<Car> selectByMultiConditionWithWhere(@Param("brand") String brand, @Param("guidePrice") Double guidePrice, @Param("carType") String carType);
+<select id="selectByMultiConditionWithWhere" resultType="car">
+  select * from t_car
+  <where>
+    <if test="brand != null and brand != ''">
+      and brand like #{brand}"%"
+    </if>
+    <if test="guidePrice != null and guidePrice != ''">
+      and guide_price >= #{guidePrice}
+    </if>
+    <if test="carType != null and carType != ''">
+      and car_type = #{carType}
+    </if>
+  </where>
+</select>
+@Test
+public void testSelectByMultiConditionWithWhere(){
+    CarMapper mapper = SqlSessionUtil.openSession().getMapper(CarMapper.class);
+    List<Car> cars = mapper.selectByMultiConditionWithWhere("丰田", 20.0, "燃油车");
+    System.out.println(cars);
+}
+```
+
+运行结果：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660891031758-ce20585a-6bad-452e-b186-09cf465fecc6.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_28%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+如果所有条件都是空呢？
+
+```java
+List<Car> cars = mapper.selectByMultiConditionWithWhere("", null, "");
+```
+
+运行结果：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660891127310-9847b1b5-2bf4-42f9-8e73-38b051b398de.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_14%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+它可以自动去掉前面多余的and，那可以自动去掉前面多余的or吗？
+
+```java
+List<Car> cars = mapper.selectByMultiConditionWithWhere("丰田", 20.0, "燃油车");
+<select id="selectByMultiConditionWithWhere" resultType="car">
+  select * from t_car
+  <where>
+    <if test="brand != null and brand != ''">
+      or brand like #{brand}"%"
+    </if>
+    <if test="guidePrice != null and guidePrice != ''">
+      and guide_price >= #{guidePrice}
+    </if>
+    <if test="carType != null and carType != ''">
+      and car_type = #{carType}
+    </if>
+  </where>
+</select>
+```
+
+执行结果：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660891540196-f2e055dd-74a7-40f9-a883-c78a5e2d28b7.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_25%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+它可以自动去掉前面多余的and，那可以自动去掉后面多余的and吗？
+
+```xml
+<select id="selectByMultiConditionWithWhere" resultType="car">
+  select * from t_car
+  <where>
+    <if test="brand != null and brand != ''">
+      brand like #{brand}"%" and
+    </if>
+    <if test="guidePrice != null and guidePrice != ''">
+      guide_price >= #{guidePrice} and
+    </if>
+    <if test="carType != null and carType != ''">
+      car_type = #{carType}
+    </if>
+  </where>
+</select>
+// 让最后一个条件为空
+List<Car> cars = mapper.selectByMultiConditionWithWhere("丰田", 20.0, "");
+```
+
+运行结果：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660891786608-272a3ab9-96f8-42bc-b5df-4d275cfe9cfe.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_27%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+很显然，后面多余的and是不会被去除的。
+
+## 12.3 trim标签
+
+trim标签的属性：
+
+- prefix：在trim标签中的语句前**添加**内容
+- suffix：在trim标签中的语句后**添加**内容
+- prefixOverrides：前缀**覆盖掉（去掉）**
+- suffixOverrides：后缀**覆盖掉（去掉）**
+
+```java
+/**
+* 根据多条件查询Car，使用trim标签
+* @param brand
+* @param guidePrice
+* @param carType
+* @return
+*/
+List<Car> selectByMultiConditionWithTrim(@Param("brand") String brand, @Param("guidePrice") Double guidePrice, @Param("carType") String carType);
+<select id="selectByMultiConditionWithTrim" resultType="car">
+  select * from t_car
+  <trim prefix="where" suffixOverrides="and|or">
+    <if test="brand != null and brand != ''">
+      brand like #{brand}"%" and
+    </if>
+    <if test="guidePrice != null and guidePrice != ''">
+      guide_price >= #{guidePrice} and
+    </if>
+    <if test="carType != null and carType != ''">
+      car_type = #{carType}
+    </if>
+  </trim>
+</select>
+@Test
+public void testSelectByMultiConditionWithTrim(){
+    CarMapper mapper = SqlSessionUtil.openSession().getMapper(CarMapper.class);
+    List<Car> cars = mapper.selectByMultiConditionWithTrim("丰田", 20.0, "");
+    System.out.println(cars);
+}
+```
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660894051788-34d9dd44-612e-424e-bf0a-143bea4b36bd.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_27%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+如果所有条件为空，where会被加上吗？
+
+```java
+List<Car> cars = mapper.selectByMultiConditionWithTrim("", null, "");
+```
+
+执行结果：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660894220001-e789ea6b-a219-4f3d-8670-b9612d1d8274.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_13%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+## 12.4 set标签
+
+主要使用在update语句当中，用来生成set关键字，同时去掉最后多余的“,”
+
+比如我们只更新提交的不为空的字段，如果提交的数据是空或者""，那么这个字段我们将不更新。
+
+```java
+/**
+* 更新信息，使用set标签
+* @param car
+* @return
+*/
+int updateWithSet(Car car);
+<update id="updateWithSet">
+  update t_car
+  <set>
+    <if test="carNum != null and carNum != ''">car_num = #{carNum},</if>
+    <if test="brand != null and brand != ''">brand = #{brand},</if>
+    <if test="guidePrice != null and guidePrice != ''">guide_price = #{guidePrice},</if>
+    <if test="produceTime != null and produceTime != ''">produce_time = #{produceTime},</if>
+    <if test="carType != null and carType != ''">car_type = #{carType},</if>
+  </set>
+  where id = #{id}
+</update>
+@Test
+public void testUpdateWithSet(){
+    CarMapper mapper = SqlSessionUtil.openSession().getMapper(CarMapper.class);
+    Car car = new Car(38L,"1001","丰田霸道2",10.0,"",null);
+    int count = mapper.updateWithSet(car);
+    System.out.println(count);
+    SqlSessionUtil.openSession().commit();
+}
+```
+
+执行结果：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660895330743-edd9f2e6-8cd0-4cbe-9c73-adf009466e38.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_26%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+## 12.5 choose when otherwise
+
+这三个标签是在一起使用的：
+
+```xml
+<choose>
+  <when></when>
+  <when></when>
+  <when></when>
+  <otherwise></otherwise>
+</choose>
+```
+
+等同于：
+
+```java
+if(){
+    
+}else if(){
+    
+}else if(){
+    
+}else if(){
+    
+}else{
+
+}
+```
+
+只有一个分支会被选择！！！！
+
+需求：先根据品牌查询，如果没有提供品牌，再根据指导价格查询，如果没有提供指导价格，就根据生产日期查询。
+
+```java
+/**
+* 使用choose when otherwise标签查询
+* @param brand
+* @param guidePrice
+* @param produceTime
+* @return
+*/
+List<Car> selectWithChoose(@Param("brand") String brand, @Param("guidePrice") Double guidePrice, @Param("produceTime") String produceTime);
+<select id="selectWithChoose" resultType="car">
+  select * from t_car
+  <where>
+    <choose>
+      <when test="brand != null and brand != ''">
+        brand like #{brand}"%"
+      </when>
+      <when test="guidePrice != null and guidePrice != ''">
+        guide_price >= #{guidePrice}
+      </when>
+      <otherwise>
+        produce_time >= #{produceTime}
+      </otherwise>
+    </choose>
+  </where>
+</select>
+@Test
+public void testSelectWithChoose(){
+    CarMapper mapper = SqlSessionUtil.openSession().getMapper(CarMapper.class);
+    //List<Car> cars = mapper.selectWithChoose("丰田霸道", 20.0, "2000-10-10");
+    //List<Car> cars = mapper.selectWithChoose("", 20.0, "2000-10-10");
+    //List<Car> cars = mapper.selectWithChoose("", null, "2000-10-10");
+    List<Car> cars = mapper.selectWithChoose("", null, "");
+    System.out.println(cars);
+}
+```
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660896273467-9ba1d6c0-9cc3-4deb-92e5-0f54b4ade614.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_20%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+## 12.6 foreach标签
+
+循环数组或集合，动态生成sql，比如这样的SQL：
+
+```sql
+delete from t_car where id in(1,2,3);
+delete from t_car where id = 1 or id = 2 or id = 3;
+insert into t_car values
+  (null,'1001','凯美瑞',35.0,'2010-10-11','燃油车'),
+  (null,'1002','比亚迪唐',31.0,'2020-11-11','新能源'),
+  (null,'1003','比亚迪宋',32.0,'2020-10-11','新能源')
+```
+
+### 批量删除
+
+- 用in来删除
+
+```java
+/**
+* 通过foreach完成批量删除
+* @param ids
+* @return
+*/
+int deleteBatchByForeach(@Param("ids") Long[] ids);
+<!--
+collection：集合或数组
+item：集合或数组中的元素
+separator：分隔符
+open：foreach标签中所有内容的开始
+close：foreach标签中所有内容的结束
+-->
+<delete id="deleteBatchByForeach">
+  delete from t_car where id in
+  <foreach collection="ids" item="id" separator="," open="(" close=")">
+    #{id}
+  </foreach>
+</delete>
+@Test
+public void testDeleteBatchByForeach(){
+    CarMapper mapper = SqlSessionUtil.openSession().getMapper(CarMapper.class);
+    int count = mapper.deleteBatchByForeach(new Long[]{40L, 41L, 42L});
+    System.out.println("删除了几条记录：" + count);
+    SqlSessionUtil.openSession().commit();
+}
+```
+
+执行结果：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660899240200-ab225394-27f1-4ec1-94e0-b2b3d3a9b16e.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_21%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+- 用or来删除
+
+```java
+/**
+* 通过foreach完成批量删除
+* @param ids
+* @return
+*/
+int deleteBatchByForeach2(@Param("ids") Long[] ids);
+<delete id="deleteBatchByForeach2">
+  delete from t_car where
+  <foreach collection="ids" item="id" separator="or">
+    id = #{id}
+  </foreach>
+</delete>
+@Test
+public void testDeleteBatchByForeach2(){
+    CarMapper mapper = SqlSessionUtil.openSession().getMapper(CarMapper.class);
+    int count = mapper.deleteBatchByForeach2(new Long[]{40L, 41L, 42L});
+    System.out.println("删除了几条记录：" + count);
+    SqlSessionUtil.openSession().commit();
+}
+```
+
+执行结果：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660899667194-f150bf6b-b54f-432a-8455-4c819bac0c58.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_19%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+### 批量添加
+
+```java
+/**
+* 批量添加，使用foreach标签
+* @param cars
+* @return
+*/
+int insertBatchByForeach(@Param("cars") List<Car> cars);
+<insert id="insertBatchByForeach">
+  insert into t_car values 
+  <foreach collection="cars" item="car" separator=",">
+    (null,#{car.carNum},#{car.brand},#{car.guidePrice},#{car.produceTime},#{car.carType})
+  </foreach>
+</insert>
+@Test
+public void testInsertBatchByForeach(){
+    CarMapper mapper = SqlSessionUtil.openSession().getMapper(CarMapper.class);
+    Car car1 = new Car(null, "2001", "兰博基尼", 100.0, "1998-10-11", "燃油车");
+    Car car2 = new Car(null, "2001", "兰博基尼", 100.0, "1998-10-11", "燃油车");
+    Car car3 = new Car(null, "2001", "兰博基尼", 100.0, "1998-10-11", "燃油车");
+    List<Car> cars = Arrays.asList(car1, car2, car3);
+    int count = mapper.insertBatchByForeach(cars);
+    System.out.println("插入了几条记录" + count);
+    SqlSessionUtil.openSession().commit();
+}
+```
+
+执行结果：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660900226070-90533bde-4129-49b5-9fa7-639aa07c3b03.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_26%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+## 12.7 sql标签与include标签
+
+sql标签用来声明sql片段
+
+include标签用来将声明的sql片段包含到某个sql语句当中
+
+作用：代码复用。易维护。
+
+```xml
+<sql id="carCols">id,car_num carNum,brand,guide_price guidePrice,produce_time produceTime,car_type carType</sql>
+
+<select id="selectAllRetMap" resultType="map">
+  select <include refid="carCols"/> from t_car
+</select>
+
+<select id="selectAllRetListMap" resultType="map">
+  select <include refid="carCols"/> carType from t_car
+</select>
+
+<select id="selectByIdRetMap" resultType="map">
+  select <include refid="carCols"/> from t_car where id = #{id}
+</select>
+```
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1659578619308-ceb8077a-94a7-4f64-b41d-e54b3c14e7fb.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_34%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+# 十二、MyBatis的高级映射及延迟加载
+
+模块名：mybatis-009-advanced-mapping
+
+打包方式：jar
+
+依赖：mybatis依赖、mysql驱动依赖、junit依赖、logback依赖
+
+配置文件：mybatis-config.xml、logback.xml、jdbc.properties
+
+拷贝工具类：SqlSessionUtil
+
+准备数据库表：一个班级对应多个学生。班级表：t_clazz。学生表：t_student
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1661132819754-23adfa1c-b325-41bc-8520-0355fe4c41cc.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_11%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1661132610940-7d55793b-df68-48f4-924f-99db58220da9.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_10%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+创建pojo：Student、Clazz
+
+```java
+package com.powernode.mybatis.pojo;
+
+/**
+ * 学生类
+ * @author 老杜
+ * @version 1.0
+ * @since 1.0
+ */
+public class Student {
+    private Integer sid;
+    private String sname;
+    //......
+}
+package com.powernode.mybatis.pojo;
+
+/**
+ * 班级类
+ * @author 老杜
+ * @version 1.0
+ * @since 1.0
+ */
+public class Clazz {
+    private Integer cid;
+    private String cname;
+    //......
+}
+```
+
+创建mapper接口：StudentMapper、ClazzMapper
+
+创建mapper映射文件：StudentMapper.xml、ClazzMapper.xml
+
+## 13.1 多对一
+
+多种方式，常见的包括三种：
+
+- 第一种方式：一条SQL语句，级联属性映射。
+- 第二种方式：一条SQL语句，association。
+- 第三种方式：两条SQL语句，分步查询。（这种方式常用：优点一是可复用。优点二是支持懒加载。）
+
+### 第一种方式：级联属性映射
+
+pojo类Student中添加一个属性：Clazz clazz; 表示学生关联的班级对象。
+
+```java
+package com.powernode.mybatis.pojo;
+
+/**
+ * 学生类
+ * @author 老杜
+ * @version 1.0
+ * @since 1.0
+ */
+public class Student {
+    private Integer sid;
+    private String sname;
+    private Clazz clazz;
+
+    public Clazz getClazz() {
+        return clazz;
+    }
+
+    public void setClazz(Clazz clazz) {
+        this.clazz = clazz;
+    }
+
+    @Override
+    public String toString() {
+        return "Student{" +
+                "sid=" + sid +
+                ", sname='" + sname + '\'' +
+                ", clazz=" + clazz +
+                '}';
+    }
+
+    public Student() {
+    }
+
+    public Student(Integer sid, String sname) {
+        this.sid = sid;
+        this.sname = sname;
+    }
+
+    public Integer getSid() {
+        return sid;
+    }
+
+    public void setSid(Integer sid) {
+        this.sid = sid;
+    }
+
+    public String getSname() {
+        return sname;
+    }
+
+    public void setSname(String sname) {
+        this.sname = sname;
+    }
+}
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.powernode.mybatis.mapper.StudentMapper">
+
+    <resultMap id="studentResultMap" type="Student">
+        <id property="sid" column="sid"/>
+        <result property="sname" column="sname"/>
+        <result property="clazz.cid" column="cid"/>
+        <result property="clazz.cname" column="cname"/>
+    </resultMap>
+
+    <select id="selectBySid" resultMap="studentResultMap">
+        select s.*, c.* from t_student s join t_clazz c on s.cid = c.cid where sid = #{sid}
+    </select>
+
+</mapper>
+package com.powernode.mybatis.test;
+
+import com.powernode.mybatis.mapper.StudentMapper;
+import com.powernode.mybatis.pojo.Student;
+import com.powernode.mybatis.utils.SqlSessionUtil;
+import org.junit.Test;
+
+public class StudentMapperTest {
+    @Test
+    public void testSelectBySid(){
+        StudentMapper mapper = SqlSessionUtil.openSession().getMapper(StudentMapper.class);
+        Student student = mapper.selectBySid(1);
+        System.out.println(student);
+    }
+}
+```
+
+执行结果：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1661134833921-9452c17c-3461-4c7f-8807-55aa3e089506.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_33%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+### 第二种方式：association
+
+其他位置都不需要修改，只需要修改resultMap中的配置：association即可。
+
+```xml
+<resultMap id="studentResultMap" type="Student">
+  <id property="sid" column="sid"/>
+  <result property="sname" column="sname"/>
+  <association property="clazz" javaType="Clazz">
+    <id property="cid" column="cid"/>
+    <result property="cname" column="cname"/>
+  </association>
+</resultMap>
+```
+
+association翻译为：关联。
+
+学生对象关联一个班级对象。
+
+### 第三种方式：分步查询
+
+其他位置不需要修改，只需要修改以及添加以下三处：
+
+第一处：association中select位置填写sqlId。sqlId=namespace+id。其中column属性作为这条子sql语句的条件。
+
+```xml
+<resultMap id="studentResultMap" type="Student">
+  <id property="sid" column="sid"/>
+  <result property="sname" column="sname"/>
+  <association property="clazz"
+               select="com.powernode.mybatis.mapper.ClazzMapper.selectByCid"
+               column="cid"/>
+</resultMap>
+
+<select id="selectBySid" resultMap="studentResultMap">
+  select s.* from t_student s where sid = #{sid}
+</select>
+```
+
+第二处：在ClazzMapper接口中添加方法
+
+```java
+package com.powernode.mybatis.mapper;
+
+import com.powernode.mybatis.pojo.Clazz;
+
+/**
+ * Clazz映射器接口
+ * @author 老杜
+ * @version 1.0
+ * @since 1.0
+ */
+public interface ClazzMapper {
+
+    /**
+     * 根据cid获取Clazz信息
+     * @param cid
+     * @return
+     */
+    Clazz selectByCid(Integer cid);
+}
+```
+
+第三处：在ClazzMapper.xml文件中进行配置
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.powernode.mybatis.mapper.ClazzMapper">
+    <select id="selectByCid" resultType="Clazz">
+        select * from t_clazz where cid = #{cid}
+    </select>
+</mapper>
+```
+
+执行结果，可以很明显看到先后有两条sql语句执行：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1661151746372-e3c91810-bb5f-4308-8dd5-e421e11bff50.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_22%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+分步优点：
+
+- 第一个优点：代码复用性增强。
+- 第二个优点：支持延迟加载。【暂时访问不到的数据可以先不查询。提高程序的执行效率。】
+
+## 13.2 多对一延迟加载
+
+要想支持延迟加载，非常简单，只需要在association标签中添加fetchType="lazy"即可。
+
+修改StudentMapper.xml文件：
+
+```xml
+<resultMap id="studentResultMap" type="Student">
+  <id property="sid" column="sid"/>
+  <result property="sname" column="sname"/>
+  <association property="clazz"
+               select="com.powernode.mybatis.mapper.ClazzMapper.selectByCid"
+               column="cid"
+               fetchType="lazy"/>
+</resultMap>
+```
+
+我们现在只查询学生名字，修改测试程序：
+
+```java
+public class StudentMapperTest {
+    @Test
+    public void testSelectBySid(){
+        StudentMapper mapper = SqlSessionUtil.openSession().getMapper(StudentMapper.class);
+        Student student = mapper.selectBySid(1);
+        //System.out.println(student);
+        // 只获取学生姓名
+        String sname = student.getSname();
+        System.out.println("学生姓名：" + sname);
+    }
+}
+```
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1661151882965-633f8039-c309-4657-8ed1-44f836d5b1e4.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_23%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+如果后续需要使用到学生所在班级的名称，这个时候才会执行关联的sql语句，修改测试程序：
+
+```java
+public class StudentMapperTest {
+    @Test
+    public void testSelectBySid(){
+        StudentMapper mapper = SqlSessionUtil.openSession().getMapper(StudentMapper.class);
+        Student student = mapper.selectBySid(1);
+        //System.out.println(student);
+        // 只获取学生姓名
+        String sname = student.getSname();
+        System.out.println("学生姓名：" + sname);
+        // 到这里之后，想获取班级名字了
+        String cname = student.getClazz().getCname();
+        System.out.println("学生的班级名称：" + cname);
+    }
+}
+```
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1661151926961-a0affa2d-2d89-4b67-8cc0-bf8604ded4fc.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_22%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+通过以上的执行结果可以看到，只有当使用到班级名称之后，才会执行关联的sql语句，这就是延迟加载。
+
+在mybatis中如何开启全局的延迟加载呢？需要setting配置，如下：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1661136161612-a7c3cc7f-fe89-4245-a297-1572d8384566.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_43%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+```xml
+<settings>
+  <setting name="lazyLoadingEnabled" value="true"/>
+</settings>
+```
+
+**把fetchType="lazy"去掉。**
+
+执行以下程序：
+
+```java
+public class StudentMapperTest {
+    @Test
+    public void testSelectBySid(){
+        StudentMapper mapper = SqlSessionUtil.openSession().getMapper(StudentMapper.class);
+        Student student = mapper.selectBySid(1);
+        //System.out.println(student);
+        // 只获取学生姓名
+        String sname = student.getSname();
+        System.out.println("学生姓名：" + sname);
+        // 到这里之后，想获取班级名字了
+        String cname = student.getClazz().getCname();
+        System.out.println("学生的班级名称：" + cname);
+    }
+}
+```
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1661151954051-4b5b94f7-a69d-4d21-b220-1a840862fb85.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_22%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+通过以上的测试可以看出，我们已经开启了全局延迟加载策略。
+
+开启全局延迟加载之后，所有的sql都会支持延迟加载，如果某个sql你不希望它支持延迟加载怎么办呢？将fetchType设置为eager：
+
+```xml
+<resultMap id="studentResultMap" type="Student">
+  <id property="sid" column="sid"/>
+  <result property="sname" column="sname"/>
+  <association property="clazz"
+               select="com.powernode.mybatis.mapper.ClazzMapper.selectByCid"
+               column="cid"
+               fetchType="eager"/>
+</resultMap>
+```
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1661151998854-a31c19fb-0af9-4d69-894d-e8086d9c0333.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_22%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+这样的话，针对某个特定的sql，你就关闭了延迟加载机制。
+
+后期我们要不要开启延迟加载机制，主要看实际的业务需求是怎样的。
+
+## 13.3 一对多
+
+一对多的实现，通常是在一的一方中有List集合属性。
+
+在Clazz类中添加List<Student> stus; 属性。
+
+```java
+public class Clazz {
+    private Integer cid;
+    private String cname;
+    private List<Student> stus;
+    // set get方法
+    // 构造方法
+    // toString方法
+}
+```
+
+一对多的实现通常包括两种实现方式：
+
+- 第一种方式：collection
+- 第二种方式：分步查询
+
+### 第一种方式：collection
+
+```java
+package com.powernode.mybatis.mapper;
+
+import com.powernode.mybatis.pojo.Clazz;
+
+/**
+ * Clazz映射器接口
+ * @author 老杜
+ * @version 1.0
+ * @since 1.0
+ */
+public interface ClazzMapper {
+
+    /**
+     * 根据cid获取Clazz信息
+     * @param cid
+     * @return
+     */
+    Clazz selectByCid(Integer cid);
+
+    /**
+     * 根据班级编号查询班级信息。同时班级中所有的学生信息也要查询。
+     * @param cid
+     * @return
+     */
+    Clazz selectClazzAndStusByCid(Integer cid);
+}
+<resultMap id="clazzResultMap" type="Clazz">
+  <id property="cid" column="cid"/>
+  <result property="cname" column="cname"/>
+  <collection property="stus" ofType="Student">
+    <id property="sid" column="sid"/>
+    <result property="sname" column="sname"/>
+  </collection>
+</resultMap>
+
+<select id="selectClazzAndStusByCid" resultMap="clazzResultMap">
+  select * from t_clazz c join t_student s on c.cid = s.cid where c.cid = #{cid}
+</select>
+```
+
+注意是ofType，表示“集合中的类型”。
+
+```java
+package com.powernode.mybatis.test;
+
+import com.powernode.mybatis.mapper.ClazzMapper;
+import com.powernode.mybatis.pojo.Clazz;
+import com.powernode.mybatis.utils.SqlSessionUtil;
+import org.junit.Test;
+
+public class ClazzMapperTest {
+    @Test
+    public void testSelectClazzAndStusByCid() {
+        ClazzMapper mapper = SqlSessionUtil.openSession().getMapper(ClazzMapper.class);
+        Clazz clazz = mapper.selectClazzAndStusByCid(1001);
+        System.out.println(clazz);
+    }
+}
+```
+
+执行结果：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1661149977323-90515301-4b5b-4e3e-a17f-04d5473766e7.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_46%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+### 第二种方式：分步查询
+
+修改以下三个位置即可：
+
+```xml
+<resultMap id="clazzResultMap" type="Clazz">
+  <id property="cid" column="cid"/>
+  <result property="cname" column="cname"/>
+  <!--主要看这里-->
+  <collection property="stus"
+              select="com.powernode.mybatis.mapper.StudentMapper.selectByCid"
+              column="cid"/>
+</resultMap>
+
+<!--sql语句也变化了-->
+<select id="selectClazzAndStusByCid" resultMap="clazzResultMap">
+  select * from t_clazz c where c.cid = #{cid}
+</select>
+/**
+* 根据班级编号获取所有的学生。
+* @param cid
+* @return
+*/
+List<Student> selectByCid(Integer cid);
+<select id="selectByCid" resultType="Student">
+  select * from t_student where cid = #{cid}
+</select>
+```
+
+执行结果：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1661151398803-0c0e196e-6c0a-42fb-b9ee-abd42fea2026.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_47%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+## 13.4 一对多延迟加载
+
+一对多延迟加载机制和多对一是一样的。同样是通过两种方式：
+
+- 第一种：fetchType="lazy"
+- 第二种：修改全局的配置setting，**lazyLoadingEnabled=true，**如果开启全局延迟加载，想让某个sql不使用延迟加载：fetchType="eager"
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1659578619308-ceb8077a-94a7-4f64-b41d-e54b3c14e7fb.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_34%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+# 十三、MyBatis的缓存
+
+缓存：cache
+
+缓存的作用：通过减少IO的方式，来提高程序的执行效率。
+
+mybatis的缓存：将select语句的查询结果放到缓存（内存）当中，下一次还是这条select语句的话，直接从缓存中取，不再查数据库。一方面是减少了IO。另一方面不再执行繁琐的查找算法。效率大大提升。
+
+mybatis缓存包括：
+
+- 一级缓存：将查询到的数据存储到SqlSession中。
+- 二级缓存：将查询到的数据存储到SqlSessionFactory中。
+- 或者集成其它第三方的缓存：比如EhCache【Java语言开发的】、Memcache【C语言开发的】等。
+
+**缓存只针对于DQL语句，也就是说缓存机制只对应select语句。**
+
+## 13.1 一级缓存
+
+一级缓存默认是开启的。不需要做任何配置。
+
+原理：只要使用同一个SqlSession对象执行同一条SQL语句，就会走缓存。
+
+模块名：mybatis-010-cache
+
+```java
+package com.powernode.mybatis.mapper;
+
+import com.powernode.mybatis.pojo.Car;
+
+public interface CarMapper {
+
+    /**
+     * 根据id获取Car信息。
+     * @param id
+     * @return
+     */
+    Car selectById(Long id);
+}
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.powernode.mybatis.mapper.CarMapper">
+
+  <select id="selectById" resultType="Car">
+    select * from t_car where id = #{id}
+  </select>
+
+</mapper>
+package com.powernode.mybatis.test;
+
+import com.powernode.mybatis.mapper.CarMapper;
+import com.powernode.mybatis.pojo.Car;
+import com.powernode.mybatis.utils.SqlSessionUtil;
+import org.apache.ibatis.io.Resources;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+import org.junit.Test;
+
+public class CarMapperTest {
+
+    @Test
+    public void testSelectById() throws Exception{
+        // 注意：不能使用我们封装的SqlSessionUtil工具类。
+        SqlSessionFactoryBuilder builder = new SqlSessionFactoryBuilder();
+        SqlSessionFactory sqlSessionFactory = builder.build(Resources.getResourceAsStream("mybatis-config.xml"));
+
+        SqlSession sqlSession1 = sqlSessionFactory.openSession();
+
+        CarMapper mapper1 = sqlSession1.getMapper(CarMapper.class);
+        Car car1 = mapper1.selectById(83L);
+        System.out.println(car1);
+
+        CarMapper mapper2 = sqlSession1.getMapper(CarMapper.class);
+        Car car2 = mapper2.selectById(83L);
+        System.out.println(car2);
+
+        SqlSession sqlSession2 = sqlSessionFactory.openSession();
+
+        CarMapper mapper3 = sqlSession2.getMapper(CarMapper.class);
+        Car car3 = mapper3.selectById(83L);
+        System.out.println(car3);
+
+        CarMapper mapper4 = sqlSession2.getMapper(CarMapper.class);
+        Car car4 = mapper4.selectById(83L);
+        System.out.println(car4);
+
+    }
+}
+```
+
+执行结果：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1661154607492-3eba8947-5dda-4562-b156-2d3fe63b12a0.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_31%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+什么情况下不走缓存？
+
+- 第一种：不同的SqlSession对象。
+- 第二种：查询条件变化了。
+
+一级缓存失效情况包括两种：
+
+- 第一种：第一次查询和第二次查询之间，手动清空了一级缓存。
+
+```java
+sqlSession.clearCache();
+```
+
+- 第二种：第一次查询和第二次查询之间，执行了增删改操作。【这个增删改和哪张表没有关系，只要有insert delete update操作，一级缓存就失效。】
+
+```java
+/**
+* 保存账户信息
+*/
+void insertAccount();
+<insert id="insertAccount">
+  insert into t_act values(3, 'act003', 10000)
+</insert>
+```
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1661155578490-1b1d260d-991a-44ef-8c94-ba68796c7f03.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_32%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+执行结果：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1661155640234-bdba6b74-80cf-4604-8185-fd504994150d.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_30%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+## 14.2 二级缓存
+
+二级缓存的范围是SqlSessionFactory。
+
+使用二级缓存需要具备以下几个条件：
+
+1. <setting name="cacheEnabled" value="true"> 全局性地开启或关闭所有映射器配置文件中已配置的任何缓存。默认就是true，无需设置。
+2. 在需要使用二级缓存的SqlMapper.xml文件中添加配置：<cache />
+3. 使用二级缓存的实体类对象必须是可序列化的，也就是必须实现java.io.Serializable接口
+4. SqlSession对象关闭或提交之后，一级缓存中的数据才会被写入到二级缓存当中。此时二级缓存才可用。
+
+测试二级缓存：
+
+```xml
+<cache/>
+public class Car implements Serializable {
+//......
+}
+@Test
+public void testSelectById2() throws Exception{
+    SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(Resources.getResourceAsStream("mybatis-config.xml"));
+
+    SqlSession sqlSession1 = sqlSessionFactory.openSession();
+    CarMapper mapper1 = sqlSession1.getMapper(CarMapper.class);
+    Car car1 = mapper1.selectById(83L);
+    System.out.println(car1);
+
+    // 关键一步
+    sqlSession1.close();
+
+    SqlSession sqlSession2 = sqlSessionFactory.openSession();
+    CarMapper mapper2 = sqlSession2.getMapper(CarMapper.class);
+    Car car2 = mapper2.selectById(83L);
+    System.out.println(car2);
+}
+```
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1661157492039-a04066a4-a824-4125-8533-e323bfd8bfdb.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_34%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+**二级缓存的失效：只要两次查询之间出现了增删改操作。二级缓存就会失效。【一级缓存也会失效】**
+
+**二级缓存的相关配置：**
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1661158385819-8074adeb-f769-48f5-8519-a79a515e8631.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_19%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+1. eviction：指定从缓存中移除某个对象的淘汰算法。默认采用LRU策略。
+
+1. LRU：Least Recently Used。最近最少使用。优先淘汰在间隔时间内使用频率最低的对象。(其实还有一种淘汰算法LFU，最不常用。)
+2. FIFO：First In First Out。一种先进先出的数据缓存器。先进入二级缓存的对象最先被淘汰。
+3. SOFT：软引用。淘汰软引用指向的对象。具体算法和JVM的垃圾回收算法有关。
+4. WEAK：弱引用。淘汰弱引用指向的对象。具体算法和JVM的垃圾回收算法有关。
+
+1. flushInterval：
+
+1. 二级缓存的刷新时间间隔。单位毫秒。如果没有设置。就代表不刷新缓存，只要内存足够大，一直会向二级缓存中缓存数据。除非执行了增删改。
+
+1. readOnly：
+
+1. true：多条相同的sql语句执行之后返回的对象是共享的同一个。性能好。但是多线程并发可能会存在安全问题。
+2. false：多条相同的sql语句执行之后返回的对象是副本，调用了clone方法。性能一般。但安全。
+
+1. size：
+
+1. 设置二级缓存中最多可存储的java对象数量。默认值1024。
+
+## 14.3 MyBatis集成EhCache
+
+集成EhCache是为了代替mybatis自带的二级缓存。一级缓存是无法替代的。
+
+mybatis对外提供了接口，也可以集成第三方的缓存组件。比如EhCache、Memcache等。都可以。
+
+EhCache是Java写的。Memcache是C语言写的。所以mybatis集成EhCache较为常见，按照以下步骤操作，就可以完成集成：
+
+第一步：引入mybatis整合ehcache的依赖。
+
+```xml
+<!--mybatis集成ehcache的组件-->
+<dependency>
+  <groupId>org.mybatis.caches</groupId>
+  <artifactId>mybatis-ehcache</artifactId>
+  <version>1.2.2</version>
+</dependency>
+```
+
+第二步：在类的根路径下新建echcache.xml文件，并提供以下配置信息。
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="http://ehcache.org/ehcache.xsd"
+         updateCheck="false">
+    <!--磁盘存储:将缓存中暂时不使用的对象,转移到硬盘,类似于Windows系统的虚拟内存-->
+    <diskStore path="e:/ehcache"/>
+  
+    <!--defaultCache：默认的管理策略-->
+    <!--eternal：设定缓存的elements是否永远不过期。如果为true，则缓存的数据始终有效，如果为false那么还要根据timeToIdleSeconds，timeToLiveSeconds判断-->
+    <!--maxElementsInMemory：在内存中缓存的element的最大数目-->
+    <!--overflowToDisk：如果内存中数据超过内存限制，是否要缓存到磁盘上-->
+    <!--diskPersistent：是否在磁盘上持久化。指重启jvm后，数据是否有效。默认为false-->
+    <!--timeToIdleSeconds：对象空闲时间(单位：秒)，指对象在多长时间没有被访问就会失效。只对eternal为false的有效。默认值0，表示一直可以访问-->
+    <!--timeToLiveSeconds：对象存活时间(单位：秒)，指对象从创建到失效所需要的时间。只对eternal为false的有效。默认值0，表示一直可以访问-->
+    <!--memoryStoreEvictionPolicy：缓存的3 种清空策略-->
+    <!--FIFO：first in first out (先进先出)-->
+    <!--LFU：Less Frequently Used (最少使用).意思是一直以来最少被使用的。缓存的元素有一个hit 属性，hit 值最小的将会被清出缓存-->
+    <!--LRU：Least Recently Used(最近最少使用). (ehcache 默认值).缓存的元素有一个时间戳，当缓存容量满了，而又需要腾出地方来缓存新的元素的时候，那么现有缓存元素中时间戳离当前时间最远的元素将被清出缓存-->
+    <defaultCache eternal="false" maxElementsInMemory="1000" overflowToDisk="false" diskPersistent="false"
+                  timeToIdleSeconds="0" timeToLiveSeconds="600" memoryStoreEvictionPolicy="LRU"/>
+
+</ehcache>
+```
+
+第三步：修改SqlMapper.xml文件中的<cache/>标签，添加type属性。
+
+```xml
+<cache type="org.mybatis.caches.ehcache.EhcacheCache"/>
+```
+
+第四步：编写测试程序使用。
+
+```java
+@Test
+public void testSelectById2() throws Exception{
+    SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(Resources.getResourceAsStream("mybatis-config.xml"));
+    
+    SqlSession sqlSession1 = sqlSessionFactory.openSession();
+    CarMapper mapper1 = sqlSession1.getMapper(CarMapper.class);
+    Car car1 = mapper1.selectById(83L);
+    System.out.println(car1);
+    
+    sqlSession1.close();
+    
+    SqlSession sqlSession2 = sqlSessionFactory.openSession();
+    CarMapper mapper2 = sqlSession2.getMapper(CarMapper.class);
+    Car car2 = mapper2.selectById(83L);
+    System.out.println(car2);
+}
+```
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1661162595603-3aeecedf-d1f5-4b53-bd76-ee3c52f014fd.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_32%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1659578619308-ceb8077a-94a7-4f64-b41d-e54b3c14e7fb.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_34%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
 
 
 
