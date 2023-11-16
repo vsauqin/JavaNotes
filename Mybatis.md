@@ -5188,7 +5188,516 @@ public void testSelectById2() throws Exception{
 
 ![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1661162595603-3aeecedf-d1f5-4b53-bd76-ee3c52f014fd.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_32%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
 
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1659578619308-ceb8077a-94a7-4f64-b41d-e54b3c14e7fb.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_34%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+
+
+
+# 十五、MyBatis的逆向工程
+
+所谓的逆向工程是：根据数据库表逆向生成Java的pojo类，SqlMapper.xml文件，以及Mapper接口类等。
+
+要完成这个工作，需要借助别人写好的逆向工程插件。
+
+思考：使用这个插件的话，需要给这个插件配置哪些信息？
+
+- pojo类名、包名以及生成位置。
+- SqlMapper.xml文件名以及生成位置。
+- Mapper接口名以及生成位置。
+- 连接数据库的信息。
+- 指定哪些表参与逆向工程。
+- ......
+
+## 15.1 逆向工程配置与生成
+
+### 第一步：基础环境准备
+
+新建模块：mybatis-011-generator
+
+打包方式：jar
+
+### 第二步：在pom中添加逆向工程插件
+
+```xml
+<!--定制构建过程-->
+<build>
+  <!--可配置多个插件-->
+  <plugins>
+    <!--其中的一个插件：mybatis逆向工程插件-->
+    <plugin>
+      <!--插件的GAV坐标-->
+      <groupId>org.mybatis.generator</groupId>
+      <artifactId>mybatis-generator-maven-plugin</artifactId>
+      <version>1.4.1</version>
+      <!--允许覆盖-->
+      <configuration>
+        <overwrite>true</overwrite>
+      </configuration>
+      <!--插件的依赖-->
+      <dependencies>
+        <!--mysql驱动依赖-->
+        <dependency>
+          <groupId>mysql</groupId>
+          <artifactId>mysql-connector-java</artifactId>
+          <version>8.0.30</version>
+        </dependency>
+      </dependencies>
+    </plugin>
+  </plugins>
+</build>
+```
+
+### 第三步：配置generatorConfig.xml
+
+该文件名必须叫做：generatorConfig.xml
+
+该文件必须放在类的根路径下。
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+        PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+        "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+
+<generatorConfiguration>
+    <!--
+        targetRuntime有两个值：
+            MyBatis3Simple：生成的是基础版，只有基本的增删改查。
+            MyBatis3：生成的是增强版，除了基本的增删改查之外还有复杂的增删改查。
+    -->
+    <context id="DB2Tables" targetRuntime="MyBatis3">
+        <!--防止生成重复代码-->
+        <plugin type="org.mybatis.generator.plugins.UnmergeableXmlMappersPlugin"/>
+      
+        <commentGenerator>
+            <!--是否去掉生成日期-->
+            <property name="suppressDate" value="true"/>
+            <!--是否去除注释-->
+            <property name="suppressAllComments" value="true"/>
+        </commentGenerator>
+
+        <!--连接数据库信息-->
+        <jdbcConnection driverClass="com.mysql.cj.jdbc.Driver"
+                        connectionURL="jdbc:mysql://localhost:3306/powernode"
+                        userId="root"
+                        password="root">
+        </jdbcConnection>
+
+        <!-- 生成pojo包名和位置 -->
+        <javaModelGenerator targetPackage="com.powernode.mybatis.pojo" targetProject="src/main/java">
+            <!--是否开启子包-->
+            <property name="enableSubPackages" value="true"/>
+            <!--是否去除字段名的前后空白-->
+            <property name="trimStrings" value="true"/>
+        </javaModelGenerator>
+
+        <!-- 生成SQL映射文件的包名和位置 -->
+        <sqlMapGenerator targetPackage="com.powernode.mybatis.mapper" targetProject="src/main/resources">
+            <!--是否开启子包-->
+            <property name="enableSubPackages" value="true"/>
+        </sqlMapGenerator>
+
+        <!-- 生成Mapper接口的包名和位置 -->
+        <javaClientGenerator
+                type="xmlMapper"
+                targetPackage="com.powernode.mybatis.mapper"
+                targetProject="src/main/java">
+            <property name="enableSubPackages" value="true"/>
+        </javaClientGenerator>
+
+        <!-- 表名和对应的实体类名-->
+        <table tableName="t_car" domainObjectName="Car"/>
+
+    </context>
+</generatorConfiguration>
+```
+
+### 第四步：运行插件
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1661220807303-79730f99-9a3c-4394-a29f-910eccd698cc.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_15%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+## 15.2 测试逆向工程生成的是否好用
+
+### 第一步：环境准备
+
+- 依赖：mybatis依赖、mysql驱动依赖、junit依赖、logback依赖
+- jdbc.properties
+- mybatis-config.xml
+- logback.xml
+
+### 第二步：编写测试程序
+
+```java
+package com.powernode.mybatis.test;
+
+import com.powernode.mybatis.mapper.CarMapper;
+import com.powernode.mybatis.pojo.Car;
+import com.powernode.mybatis.pojo.CarExample;
+import org.apache.ibatis.io.Resources;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+import org.junit.Test;
+
+import java.math.BigDecimal;
+import java.util.List;
+
+public class GeneratorTest {
+    @Test
+    public void testGenerator() throws Exception{
+        SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(Resources.getResourceAsStream("mybatis-config.xml"));
+        SqlSession sqlSession = sqlSessionFactory.openSession();
+        CarMapper mapper = sqlSession.getMapper(CarMapper.class);
+        // 增
+        /*Car car = new Car();
+        car.setCarNum("1111");
+        car.setBrand("比亚迪唐");
+        car.setGuidePrice(new BigDecimal(30.0));
+        car.setProduceTime("2010-10-12");
+        car.setCarType("燃油车");
+        int count = mapper.insert(car);
+        System.out.println("插入了几条记录：" + count);*/
+        // 删
+        /*int count = mapper.deleteByPrimaryKey(83L);
+        System.out.println("删除了几条记录：" + count);*/
+        // 改
+        // 根据主键修改
+        /*Car car = new Car();
+        car.setId(89L);
+        car.setGuidePrice(new BigDecimal(20.0));
+        car.setCarType("新能源");
+        int count = mapper.updateByPrimaryKey(car);
+        System.out.println("更新了几条记录：" + count);*/
+        // 根据主键选择性修改
+        /*car = new Car();
+        car.setId(89L);
+        car.setCarNum("3333");
+        car.setBrand("宝马520Li");
+        car.setProduceTime("1999-01-10");
+        count = mapper.updateByPrimaryKeySelective(car);
+        System.out.println("更新了几条记录：" + count);*/
+
+        // 查一个
+        Car car = mapper.selectByPrimaryKey(89L);
+        System.out.println(car);
+        // 查所有
+        List<Car> cars = mapper.selectByExample(null);
+        cars.forEach(c -> System.out.println(c));
+        // 多条件查询
+        // QBC 风格：Query By Criteria 一种查询方式，比较面向对象，看不到sql语句。
+        CarExample carExample = new CarExample();
+        carExample.createCriteria()
+                .andBrandEqualTo("丰田霸道")
+                .andGuidePriceGreaterThan(new BigDecimal(60.0));
+        carExample.or().andProduceTimeBetween("2000-10-11", "2022-10-11");
+
+        mapper.selectByExample(carExample);
+        sqlSession.commit();
+    }
+}
+```
+
+
+
+# 十六、MyBatis使用PageHelper
+
+## 16.1 limit分页
+
+mysql的limit后面两个数字：
+
+- 第一个数字：startIndex（起始下标。下标从0开始。）
+- 第二个数字：pageSize（每页显示的记录条数）
+
+假设已知页码pageNum，还有每页显示的记录条数pageSize，第一个数字可以动态的获取吗？
+
+- startIndex = (pageNum - 1) * pageSize
+
+所以，标准通用的mysql分页SQL：
+
+```sql
+select 
+  * 
+from 
+  tableName ...... 
+limit 
+  (pageNum - 1) * pageSize, pageSize
+```
+
+使用mybatis应该怎么做？
+
+模块名：mybatis-012-page
+
+```java
+package com.powernode.mybatis.mapper;
+
+import com.powernode.mybatis.pojo.Car;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
+
+public interface CarMapper {
+    
+    /**
+    * 通过分页的方式获取Car列表
+    * @param startIndex 页码
+    * @param pageSize 每页显示记录条数
+    * @return
+    */
+    List<Car> selectAllByPage(@Param("startIndex") Integer startIndex, @Param("pageSize") Integer pageSize);
+}
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.powernode.mybatis.mapper.CarMapper">
+
+    <select id="selectAllByPage" resultType="Car">
+        select * from t_car limit #{startIndex},#{pageSize}
+    </select>
+</mapper>
+package com.powernode.mybatis.test;
+
+import com.powernode.mybatis.mapper.CarMapper;
+import com.powernode.mybatis.pojo.Car;
+import org.apache.ibatis.io.Resources;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+import org.junit.Test;
+
+import java.util.List;
+
+public class PageTest {
+    @Test
+    public void testPage()throws Exception{
+        SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(Resources.getResourceAsStream("mybatis-config.xml"));
+        SqlSession sqlSession = sqlSessionFactory.openSession();
+        CarMapper mapper = sqlSession.getMapper(CarMapper.class);
+
+        // 页码
+        Integer pageNum = 2;
+        // 每页显示记录条数
+        Integer pageSize = 3;
+        // 起始下标
+        Integer startIndex = (pageNum - 1) * pageSize;
+
+        List<Car> cars = mapper.selectAllByPage(startIndex, pageSize);
+        cars.forEach(car -> System.out.println(car));
+
+        sqlSession.commit();
+        sqlSession.close();
+    }
+}
+```
+
+执行结果：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1661239750003-ff5657d8-9d9a-4c96-b908-eb5a644525bd.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_31%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+获取数据不难，难的是获取分页相关的数据比较难。可以借助mybatis的PageHelper插件。
+
+## 16.3 PageHelper插件
+
+使用PageHelper插件进行分页，更加的便捷。
+
+### 第一步：引入依赖
+
+```xml
+<dependency>
+  <groupId>com.github.pagehelper</groupId>
+  <artifactId>pagehelper</artifactId>
+  <version>5.3.1</version>
+</dependency>
+```
+
+### 第二步：在mybatis-config.xml文件中配置插件
+
+typeAliases标签下面进行配置：
+
+```xml
+<plugins>
+  <plugin interceptor="com.github.pagehelper.PageInterceptor"></plugin>
+</plugins>
+```
+
+### 第三步：编写Java代码
+
+```java
+List<Car> selectAll();
+<select id="selectAll" resultType="Car">
+  select * from t_car
+</select>
+```
+
+关键点：
+
+- 在查询语句之前开启分页功能。
+- 在查询语句之后封装PageInfo对象。（PageInfo对象将来会存储到request域当中。在页面上展示。）
+
+```java
+@Test
+public void testPageHelper() throws Exception{
+    SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(Resources.getResourceAsStream("mybatis-config.xml"));
+    SqlSession sqlSession = sqlSessionFactory.openSession();
+    CarMapper mapper = sqlSession.getMapper(CarMapper.class);
+
+    // 开启分页
+    PageHelper.startPage(2, 2);
+
+    // 执行查询语句
+    List<Car> cars = mapper.selectAll();
+
+    // 获取分页信息对象
+    PageInfo<Car> pageInfo = new PageInfo<>(cars, 5);
+
+    System.out.println(pageInfo);
+}
+```
+
+执行结果：
+
+PageInfo{pageNum=2, pageSize=2, size=2, startRow=3, endRow=4, total=6, pages=3, list=Page{count=true, pageNum=2, pageSize=2, startRow=2, endRow=4, total=6, pages=3, reasonable=false, pageSizeZero=false}[Car{id=86, carNum='1234', brand='丰田霸道', guidePrice=50.5, produceTime='2020-10-11', carType='燃油车'}, Car{id=87, carNum='1234', brand='丰田霸道', guidePrice=50.5, produceTime='2020-10-11', carType='燃油车'}], prePage=1, nextPage=3, isFirstPage=false, isLastPage=false, hasPreviousPage=true, hasNextPage=true, navigatePages=5, navigateFirstPage=1, navigateLastPage=3, navigatepageNums=[1, 2, 3]}
+
+对执行结果进行格式化：
+
+```plain
+PageInfo{
+  pageNum=2, pageSize=2, size=2, startRow=3, endRow=4, total=6, pages=3, 
+  list=Page{count=true, pageNum=2, pageSize=2, startRow=2, endRow=4, total=6, pages=3, reasonable=false, pageSizeZero=false}
+  [Car{id=86, carNum='1234', brand='丰田霸道', guidePrice=50.5, produceTime='2020-10-11', carType='燃油车'}, 
+  Car{id=87, carNum='1234', brand='丰田霸道', guidePrice=50.5, produceTime='2020-10-11', carType='燃油车'}], 
+  prePage=1, nextPage=3, isFirstPage=false, isLastPage=false, hasPreviousPage=true, hasNextPage=true, 
+  navigatePages=5, navigateFirstPage=1, navigateLastPage=3, navigatepageNums=[1, 2, 3]
+}
+```
+
+
+
+# 十七、MyBatis的注解式开发
+
+mybatis中也提供了注解式开发方式，采用注解可以减少Sql映射文件的配置。
+
+当然，使用注解式开发的话，sql语句是写在java程序中的，这种方式也会给sql语句的维护带来成本。
+
+官方是这么说的：
+
+使用注解来映射简单语句会使代码显得更加简洁，但对于稍微复杂一点的语句，Java 注解不仅力不从心，还会让你本就复杂的 SQL 语句更加混乱不堪。 因此，如果你需要做一些很复杂的操作，最好用 XML 来映射语句。
+
+使用注解编写复杂的SQL是这样的：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1661243511174-55bc0ee4-9561-448d-ad21-f02591d88798.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_16%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+原则：简单sql可以注解。复杂sql使用xml。
+
+模块名：mybatis-013-annotation
+
+打包方式：jar
+
+依赖：mybatis，mysql驱动，junit，logback
+
+配置文件：jdbc.properties、mybatis-config.xml、logback.xml
+
+pojo：com.powernode.mybatis.pojo.Car
+
+mapper接口：com.powernode.mybatis.mapper.CarMapper
+
+## 17.1 @Insert
+
+```java
+package com.powernode.mybatis.mapper;
+
+import com.powernode.mybatis.pojo.Car;
+import org.apache.ibatis.annotations.Insert;
+
+public interface CarMapper {
+
+    @Insert(value="insert into t_car values(null,#{carNum},#{brand},#{guidePrice},#{produceTime},#{carType})")
+    int insert(Car car);
+}
+package com.powernode.mybatis.test;
+
+import com.powernode.mybatis.mapper.CarMapper;
+import com.powernode.mybatis.pojo.Car;
+import org.apache.ibatis.io.Resources;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+import org.junit.Test;
+
+public class AnnotationTest {
+    @Test
+    public void testInsert() throws Exception{
+        SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(Resources.getResourceAsStream("mybatis-config.xml"));
+        SqlSession sqlSession = sqlSessionFactory.openSession();
+        CarMapper mapper = sqlSession.getMapper(CarMapper.class);
+        Car car = new Car(null, "1112", "卡罗拉", 30.0, "2000-10-10", "燃油车");
+        int count = mapper.insert(car);
+        System.out.println("插入了几条记录：" + count);
+        sqlSession.commit();
+        sqlSession.close();
+    }
+}
+```
+
+## 17.2 @Delete
+
+```java
+@Delete("delete from t_car where id = #{id}")
+int deleteById(Long id);
+@Test
+public void testDelete() throws Exception{
+    SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(Resources.getResourceAsStream("mybatis-config.xml"));
+    SqlSession sqlSession = sqlSessionFactory.openSession();
+    CarMapper mapper = sqlSession.getMapper(CarMapper.class);
+    mapper.deleteById(89L);
+    sqlSession.commit();
+    sqlSession.close();
+}
+```
+
+## 17.3 @Update
+
+```java
+@Update("update t_car set car_num=#{carNum},brand=#{brand},guide_price=#{guidePrice},produce_time=#{produceTime},car_type=#{carType} where id=#{id}")
+int update(Car car);
+@Test
+public void testUpdate() throws Exception{
+    SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(Resources.getResourceAsStream("mybatis-config.xml"));
+    SqlSession sqlSession = sqlSessionFactory.openSession();
+    CarMapper mapper = sqlSession.getMapper(CarMapper.class);
+    Car car = new Car(88L,"1001", "凯美瑞", 30.0,"2000-11-11", "新能源");
+    mapper.update(car);
+    sqlSession.commit();
+    sqlSession.close();
+}
+```
+
+## 17.4 @Select
+
+```java
+@Select("select * from t_car where id = #{id}")
+@Results({
+    @Result(column = "id", property = "id", id = true),
+    @Result(column = "car_num", property = "carNum"),
+    @Result(column = "brand", property = "brand"),
+    @Result(column = "guide_price", property = "guidePrice"),
+    @Result(column = "produce_time", property = "produceTime"),
+    @Result(column = "car_type", property = "carType")
+})
+Car selectById(Long id);
+@Test
+public void testSelectById() throws Exception{
+    SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(Resources.getResourceAsStream("mybatis-config.xml"));
+    SqlSession sqlSession = sqlSessionFactory.openSession();
+    CarMapper carMapper = sqlSession.getMapper(CarMapper.class);
+    Car car = carMapper.selectById(88L);
+    System.out.println(car);
+}
+```
+
+执行结果：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1661245790082-b0ae21de-bdc7-41ba-a937-31bad62d1ade.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_30%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
 
 
 
