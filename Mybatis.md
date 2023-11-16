@@ -3918,7 +3918,7 @@ mapper配置文件：com/powernode/mybatis/mapper/CarMapper.xml
 
 拷贝工具类：SqlSessionUtil
 
-## 12.1 if标签
+## 11.1 if标签
 
 需求：多条件查询。
 
@@ -4028,7 +4028,7 @@ List<Car> cars = mapper.selectByMultiCondition("丰田", 20.0, "燃油车");
 
 ![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660890374052-89bc29a1-3aeb-4941-b33f-fbbbe4fbbd39.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_29%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
 
-## 12.2 where标签
+## 11.2 where标签
 
 where标签的作用：让where子句更加动态智能。
 
@@ -4133,7 +4133,7 @@ List<Car> cars = mapper.selectByMultiConditionWithWhere("丰田", 20.0, "");
 
 很显然，后面多余的and是不会被去除的。
 
-## 12.3 trim标签
+## 11.3 trim标签
 
 trim标签的属性：
 
@@ -4185,7 +4185,7 @@ List<Car> cars = mapper.selectByMultiConditionWithTrim("", null, "");
 
 ![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660894220001-e789ea6b-a219-4f3d-8670-b9612d1d8274.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_13%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
 
-## 12.4 set标签
+## 11.4 set标签
 
 主要使用在update语句当中，用来生成set关键字，同时去掉最后多余的“,”
 
@@ -4223,7 +4223,7 @@ public void testUpdateWithSet(){
 
 ![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660895330743-edd9f2e6-8cd0-4cbe-9c73-adf009466e38.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_26%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
 
-## 12.5 choose when otherwise
+## 11.5 choose when otherwise
 
 这三个标签是在一起使用的：
 
@@ -4294,7 +4294,7 @@ public void testSelectWithChoose(){
 
 ![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660896273467-9ba1d6c0-9cc3-4deb-92e5-0f54b4ade614.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_20%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
 
-## 12.6 foreach标签
+## 11.6 foreach标签
 
 循环数组或集合，动态生成sql，比如这样的SQL：
 
@@ -4404,7 +4404,7 @@ public void testInsertBatchByForeach(){
 
 ![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1660900226070-90533bde-4129-49b5-9fa7-639aa07c3b03.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_26%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
 
-## 12.7 sql标签与include标签
+## 11.7 sql标签与include标签
 
 sql标签用来声明sql片段
 
@@ -4428,7 +4428,7 @@ include标签用来将声明的sql片段包含到某个sql语句当中
 </select>
 ```
 
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1659578619308-ceb8077a-94a7-4f64-b41d-e54b3c14e7fb.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_34%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
 
 # 十二、MyBatis的高级映射及延迟加载
 
@@ -4483,7 +4483,7 @@ public class Clazz {
 
 创建mapper映射文件：StudentMapper.xml、ClazzMapper.xml
 
-## 13.1 多对一
+## 12.1 多对一
 
 多种方式，常见的包括三种：
 
@@ -4677,7 +4677,7 @@ public interface ClazzMapper {
 - 第一个优点：代码复用性增强。
 - 第二个优点：支持延迟加载。【暂时访问不到的数据可以先不查询。提高程序的执行效率。】
 
-## 13.2 多对一延迟加载
+## 12.2 多对一延迟加载
 
 要想支持延迟加载，非常简单，只需要在association标签中添加fetchType="lazy"即可。
 
@@ -4789,7 +4789,7 @@ public class StudentMapperTest {
 
 后期我们要不要开启延迟加载机制，主要看实际的业务需求是怎样的。
 
-## 13.3 一对多
+## 12.3 一对多
 
 一对多的实现，通常是在一的一方中有List集合属性。
 
@@ -4911,14 +4911,14 @@ List<Student> selectByCid(Integer cid);
 
 ![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1661151398803-0c0e196e-6c0a-42fb-b9ee-abd42fea2026.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_47%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
 
-## 13.4 一对多延迟加载
+## 12.4 一对多延迟加载
 
 一对多延迟加载机制和多对一是一样的。同样是通过两种方式：
 
 - 第一种：fetchType="lazy"
 - 第二种：修改全局的配置setting，**lazyLoadingEnabled=true，**如果开启全局延迟加载，想让某个sql不使用延迟加载：fetchType="eager"
 
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1659578619308-ceb8077a-94a7-4f64-b41d-e54b3c14e7fb.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_34%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
 
 # 十三、MyBatis的缓存
 
@@ -5048,7 +5048,7 @@ void insertAccount();
 
 ![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1661155640234-bdba6b74-80cf-4604-8185-fd504994150d.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_30%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
 
-## 14.2 二级缓存
+## 13.2 二级缓存
 
 二级缓存的范围是SqlSessionFactory。
 
@@ -5113,7 +5113,7 @@ public void testSelectById2() throws Exception{
 
 1. 设置二级缓存中最多可存储的java对象数量。默认值1024。
 
-## 14.3 MyBatis集成EhCache
+## 13.3 MyBatis集成EhCache
 
 集成EhCache是为了代替mybatis自带的二级缓存。一级缓存是无法替代的。
 
