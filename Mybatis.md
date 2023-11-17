@@ -5115,7 +5115,7 @@ public void testSelectById2() throws Exception{
 
 ## 13.3 MyBatis集成EhCache
 
-集成EhCache是为了代替mybatis自带的二级缓存。一级缓存是无法替代的。
+**集成EhCache是为了代替mybatis自带的二级缓存。一级缓存是无法替代的。**
 
 mybatis对外提供了接口，也可以集成第三方的缓存组件。比如EhCache、Memcache等。都可以。
 
