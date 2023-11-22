@@ -221,7 +221,7 @@
     - ip地址是什么？端口号我知道，是8080
     - 本机的IP地址是：127.0.0.1，或者是localhost，都行。
 
-## 实现一个最基本的web应用（这个web应用中没有java小程序）
+## 1.4 实现一个最基本的web应用（这个web应用中没有java小程序）
 
 - 第一步：找到CATALINA_HOME\webapps目录
   
@@ -255,9 +255,9 @@
   - 访问这个地址，可以展示一个用户列表页面。但是这个用户列表页面是写死在HTML文件当中的。这种资源我们称为静态资源。怎么能变成动态资源。显然需要连接数据库。
   - 连接数据库需要JDBC程序，也就是说需要编写Java程序连接数据库，数据库中有多少条记录，页面上就显示多少条记录，这种技术被称为动态网页技术。（动态网页技术并不是说页面中有flash动画。动态网页技术是说页面中的数据是动态的，根据数据库中数据的变化而变化。）
 
-## 对于一个动态的web应用来说，一个请求和响应的过程有多少个角色参与，角色和角色之间有多少个协议
+## 1.5 对于一个动态的web应用来说，一个请求和响应的过程有多少个角色参与，角色和角色之间有多少个协议
 
-![BS结构系统的通信原理2](D:\course\01-Servlet\文档\BS结构系统的通信原理2.png)
+
 
 - 有哪些角色（在整个BS结构的系统当中，有哪些人参与进去了）
   - 浏览器软件的开发团队（浏览器软件太多了：谷歌浏览器、火狐浏览器、IE浏览器....）
@@ -271,7 +271,7 @@
   - Browser  和   WebServer之间有一套传输协议：HTTP协议。（超文本传输协议。）
   - webapp开发团队  和  DB Server的开发团队之间有一套规范：JDBC规范。
 
-![BS结构系统的角色和协议](D:\course\01-Servlet\文档\BS结构系统的角色和协议.png)
+
 
 - Servlet规范是一个什么规范？
   - 遵循Servlet规范的webapp，这个webapp就可以放在不同的WEB服务器中运行。（因为这个webapp是遵循Servlet规范的。）
@@ -285,7 +285,7 @@
     - 规范了一个合法有效的web应用它的目录结构应该是怎样的。
     - .....
 
-## 开发一个带有Servlet（Java小程序）的webapp（重点）
+## 1.6 开发一个带有Servlet（Java小程序）的webapp（重点）
 
 - 开发步骤是怎样的？
 
@@ -421,26 +421,15 @@
     - Tomcat服务器通过反射机制，创建com.bjpowernode.servlet.HelloServlet的对象。
     - Tomcat服务器调用com.bjpowernode.servlet.HelloServlet对象的service方法。
 
-## 关于JavaEE的版本
+## 1.7 小技巧
 
-- JavaEE目前最高版本是 JavaEE8
-- JavaEE被Oracle捐献了，Oracle将JavaEE规范捐献给Apache了。
-- Apache把JavaEE换名了，以后不叫JavaEE了，以后叫做 jakarta EE。
-- 以后没有JavaEE了。以后都叫做Jakarta EE。
-- JavaEE8版本升级之后的"JavaEE 9"，不再是"JavaEE9"这个名字了，叫做JakartaEE9
-- JavaEE8的时候对应的Servlet类名是：javax.servlet.Servlet
-- JakartaEE9的时候对应的Servlet类名是：jakarta.servlet.Servlet （包名都换了）
-- 如果你之前的项目还是在使用javax.servlet.Servlet，那么你的项目无法直接部署到Tomcat10+版本上。你只能部署到Tomcat9-版本上。在Tomcat9以及Tomcat9之前的版本中还是能够识别javax.servlet这个包。
-
-
-
-## 解决Tomcat服务器在DOS命令窗口中的乱码问题（控制台乱码）
+### 解决Tomcat服务器在DOS命令窗口中的乱码问题（控制台乱码）
 
 将CATALINA_HOME/conf/logging.properties文件中的内容修改如下：
 
 java.util.logging.ConsoleHandler.encoding = GBK
 
-## 向浏览器响应一段HTML代码
+### 向浏览器响应一段HTML代码
 
 ```java
 public void service(ServletRequest request, ServletResponse response){
@@ -450,12 +439,14 @@ public void service(ServletRequest request, ServletResponse response){
 }
 ```
 
-## 在Servlet中连接数据库，怎么做？
+### 在Servlet中连接数据库，怎么做？
 
 - Servlet是Java程序，所以在Servlet中完全可以编写JDBC代码连接数据库。
 - 在一个webapp中去连接数据库，需要将驱动jar包放到WEB-INF/lib目录下。（com.mysql.cj.jdbc.Driver 这个类就在驱动jar包当中。）
 
-## 在集成开发环境当中开发Servlet程序
+## 
+
+## 1.8 在集成开发环境当中开发Servlet程序
 
 - 集成开发工具很多，其中目前使用比较多的是：
 
@@ -544,7 +535,7 @@ public void service(ServletRequest request, ServletResponse response){
 
   - 第十二步：打开浏览器，在浏览器地址栏上输入：http://localhost:8080/xmm/student.html
 
-## Servlet对象的生命周期
+## 1.9 Servlet对象的生命周期
 
 - 什么是Servlet对象生命周期？
 
@@ -563,9 +554,12 @@ public void service(ServletRequest request, ServletResponse response){
 - 思考：我们自己new的Servlet对象受WEB容器的管理吗？
 
   - 我们自己new的Servlet对象是不受WEB容器管理的。
+
   - WEB容器创建的Servlet对象，这些Servlet对象都会被放到一个集合当中（HashMap），只有放到这个HashMap集合中的Servlet才能够被WEB容器管理，自己new的Servlet对象不会被WEB容器管理。（自己new的Servlet对象不在容器当中）
+
   - web容器底层应该有一个HashMap这样的集合，在这个集合当中存储了Servlet对象和请求路径之间的关系
-  - ![WEB容器中的Map集合](D:\course\01-Servlet\文档\WEB容器中的Map集合.png)
+
+    
 
 - 研究：服务器在启动的Servlet对象有没有被创建出来（默认情况下）？
 
@@ -674,8 +668,9 @@ public void service(ServletRequest request, ServletResponse response){
       - destroy方法也很少用。
       - 通常在destroy方法当中，进行资源的关闭。马上对象要被销毁了，还有什么没有关闭的，抓紧时间关闭资源。还有什么资源没保存的，抓紧时间保存一下。
 
+## 1.10 实现Servlet接口的一系列问题，适配器设计模式
 
-## GenericServlet
+### GenericServlet
 
 - 我们编写一个Servlet类直接实现Servlet接口有什么缺点？
 
@@ -737,7 +732,7 @@ public void service(ServletRequest request, ServletResponse response){
 
 
 
-## ServletConfig
+### ServletConfig
 
 - 什么是ServletConfig？
 
@@ -763,7 +758,7 @@ public void service(ServletRequest request, ServletResponse response){
 
   - 以上方法在Servlet类当中，都可以使用this去调用。因为GenericServlet实现了ServletConfig接口。
 
-## ServletContext
+### ServletContext
 
 - 一个Servlet对象对应一个ServletConfig。100个Servlet对象则对应100个ServletConfig对象。
 

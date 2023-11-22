@@ -1291,11 +1291,8 @@ public class ClientService {
           - id属性：bean的唯一标识,方便后期获取Bean！
           - class属性：组件类的全限定符！
           - 注意：要求当前组件类必须包含无参数构造函数！
-  5. 基于静态工厂方法实例化
-
-      > 除了使用构造函数实例化对象，还有一类是通过工厂模式实例化对象。接下来我们讲解如何定义使用静态工厂方法创建Bean的配置 ！
-
-      1. 准备组件类
+  
+      
 
 ```XML
 <bean id="clientService"
@@ -1309,7 +1306,7 @@ public class ClientService {
 
       > 接下来我们讲解下如何定义使用实例工厂方法创建Bean的配置 ！
 
-      1. 准备组建类
+      1. 准备组件类
 
 ```Java
 public class ClientServiceImpl {
@@ -5790,9 +5787,8 @@ INSERT INTO `t_emp`(emp_name,emp_salary) VALUES("andy",777.77);
 2. 项目搭建和准备
     1. 项目搭建
 
-        
     2. 依赖导入
-
+    
         pom.xml
 
 ```XML
