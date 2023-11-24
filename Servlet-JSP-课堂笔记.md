@@ -882,7 +882,7 @@ public void service(ServletRequest request, ServletResponse response){
     - NoSQL数据库。非关系型数据库。缓存数据库。
   - 向ServletContext应用域中存储数据，也等于是将数据存放到缓存cache当中了。
 
-## HTTP协议
+## 1.11 HTTP协议
 
 - 什么是协议？
 
@@ -892,7 +892,7 @@ public void service(ServletRequest request, ServletResponse response){
 
 - 什么是HTTP协议？
 
-  - HTTP协议：是W3C制定的一种超文本传输协议。（通信协议：发送消息的模板提前被制定好。）
+  - HTTP协议：是W3C制定的一种**超文本传输协议**。（通信协议：发送消息的模板提前被制定好。）
   - W3C：
     - 万维网联盟组织
     - 负责制定标准的：HTTP HTML4.0 HTML5 XML DOM等规范都是W3C制定的。
@@ -1138,7 +1138,7 @@ public void service(ServletRequest request, ServletResponse response){
   - value是什么？
     - 以form表单为例：form表单中input标签的value。
 
-## 模板方法设计模式
+## 1.12 模板方法设计模式
 
 - 什么是设计模式？
   - 某个问题的固定的解决方案。(可以被重复使用。)
@@ -1168,7 +1168,7 @@ public void service(ServletRequest request, ServletResponse response){
 
 
 
-## HttpServlet源码分析
+## 1.13 HttpServlet源码分析
 
 - HttpServlet类是专门为HTTP协议准备的。比GenericServlet更加适合HTTP协议下的开发。
 - HttpServlet在哪个包下？
@@ -1379,7 +1379,7 @@ public abstract class HttpServlet extends GenericServlet {
   - 第三步：将Servlet类配置到web.xml文件当中。
   - 第四步：准备前端的页面（form表单），form表单中指定请求路径即可。
 
-## 关于一个web站点的欢迎页面
+## 1.14 关于一个web站点的欢迎页面
 
 - 什么是一个web站点的欢迎页面？
 
