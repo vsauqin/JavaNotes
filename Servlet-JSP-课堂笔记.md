@@ -444,8 +444,6 @@ public void service(ServletRequest request, ServletResponse response){
 - Servlet是Java程序，所以在Servlet中完全可以编写JDBC代码连接数据库。
 - 在一个webapp中去连接数据库，需要将驱动jar包放到WEB-INF/lib目录下。（com.mysql.cj.jdbc.Driver 这个类就在驱动jar包当中。）
 
-## 
-
 ## 1.8 在集成开发环境当中开发Servlet程序
 
 - 集成开发工具很多，其中目前使用比较多的是：
@@ -636,7 +634,7 @@ public void service(ServletRequest request, ServletResponse response){
     - Servlet的无参数构造方法执行：标志着你出生了。
     - Servlet对象的init方法的执行：标志着你正在接受教育。
     - Servlet对象的service方法的执行：标志着你已经开始工作了，已经开始为人类提供服务了。
-    - Servlet对象的destroy方法的执行：标志着临终。有什么遗言，抓紧的。要不然，来不及了。
+    - Servlet对象的destroy方法的执行：标志着临终。有什么遗言，抓紧的。要不然，来不及了。(笑死了)
 
   - 关于Servlet类中方法的调用次数？
 
@@ -2066,7 +2064,7 @@ public abstract class HttpServlet extends GenericServlet {
     - 转发（一次请求）
       - 在浏览器地址栏上发送的请求是：http://localhost:8080/servlet10/a ，最终请求结束之后，浏览器地址栏上的地址还是这个。没变。
     - 重定向（两次请求）
-      - 在浏览器地址栏上发送的请求是：http://localhost:8080/servlet10/a ，最终在浏览器地址栏上显示的地址是：http://localhost:8080/servlet10/b
+      - 在浏览器地址栏上发送的请求是：http://localhost:8080/servlet10/a ，最终在浏览器地址栏上显示的地址是：http://localhost:8080/servlet10b
 
   - 转发和重定向的本质区别？
 
@@ -3019,6 +3017,24 @@ public abstract class HttpServlet extends GenericServlet {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ddf
 
 
 
