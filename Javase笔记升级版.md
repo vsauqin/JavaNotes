@@ -874,6 +874,249 @@ class Test05{
 0.3010299956639812
 ```
 
+## 3.2生成随机数
+
+有两种方法一种是Random类另一种是使用random方法
+
+Random 类位于 java.util 包中，该类常用的有如下两个构造方法。
+
+- Random()：该构造方法使用一个和当前系统时间对应的数字作为种子数，然后使用这个种子数构造 Random 对象。
+- Random(long seed)：使用单个 long 类型的参数创建一个新的随机数生成器。
+
+
+
+Random 类提供的所有方法生成的随机数字都是均匀分布的，也就是说区间内部的数字生成的概率是均等的，在表 1 中列出了 Random 类中常用的方法。
+ 
+
+| 方法                    | 说明                                                         |
+| ----------------------- | ------------------------------------------------------------ |
+| boolean nextBoolean()   | 生成一个随机的 boolean 值，生成 true 和 false 的值概率相等   |
+| double nextDouble()     | 生成一个随机的 double 值，数值介于 [0,1.0)，含 0 而不包含 1.0 |
+| int nextlnt()           | 生成一个随机的 int 值，该值介于 int 的区间，也就是 -231~231-1。如果 需要生成指定区间的 int 值，则需要进行一定的数学变换 |
+| int nextlnt(int n)      | 生成一个随机的 int 值，该值介于 [0,n)，包含 0 而不包含 n。如果想生成 指定区间的 int 值，也需要进行一定的数学变换 |
+| void setSeed(long seed) | 重新设置 Random 对象中的种子数。设置完种子数以后的 Random 对象 和相同种子数使用 new 关键字创建出的 Random 对象相同 |
+| long nextLong()         | 返回一个随机长整型数字                                       |
+| boolean nextBoolean()   | 返回一个随机布尔型值                                         |
+| float nextFloat()       | 返回一个随机浮点型数字                                       |
+| double nextDouble()     | 返回一个随机双精度值                                         |
+
+示例
+
+```java
+import java.util.Random;
+public class Test06 {
+    public static void main(String[] args) {
+        Random r = new Random();
+        double d1 = r.nextDouble(); // 生成[0,1.0]区间的小数
+        double d2 = r.nextDouble() * 7; // 生成[0,7.0]区间的小数
+        int i1 = r.nextInt(10); // 生成[0,10]区间的整数
+        int i2 = r.nextInt(18) - 3; // 生成[-3,15)区间的整数
+        long l1 = r.nextLong(); // 生成一个随机长整型值
+        boolean b1 = r.nextBoolean(); // 生成一个随机布尔型值
+        float f1 = r.nextFloat(); // 生成一个随机浮点型值
+        System.out.println("生成的[0,1.0]区间的小数是：" + d1);
+        System.out.println("生成的[0,7.0]区间的小数是：" + d2);
+        System.out.println("生成的[0,10]区间的整数是：" + i1);
+        System.out.println("生成的[-3,15]区间的整数是：" + i2);
+        System.out.println("生成一个随机长整型值：" + l1);
+        System.out.println("生成一个随机布尔型值：" + b1);
+        System.out.println("生成一个随机浮点型值：" + f1);
+        System.out.print("下期七星彩开奖号码预测：");
+        for (int i = 1; i < 8; i++) {
+            int num = r.nextInt(9); // 生成[0,9]区间的整数
+            System.out.print(num);
+        }
+    }
+}
+```
+
+本实例每次运行时结果都不相同，这就实现了随机产生数据的功能。该程序的运行结果如下：
+
+```java
+生成的[0,1.0]区间的小数是：0.8773165855918825
+生成的[0,7.0]区间的小数是：6.407083074782282
+生成的[0,10]区间的整数是：5
+生成的[-3,15]区间的整数是：4
+生成一个随机长整型值：-8462847591661221914
+生成一个随机布尔型值：false
+生成一个随机浮点型值：0.6397003
+下期七星彩开奖号码预测：0227168
+```
+
+#### 例 2
+
+Math 类的 random() 方法没有参数，它默认会返回大于等于 0.0、小于 1.0 的 double 类型随机数，即 0<=随机数<1.0。对 random() 方法返回的数字稍加处理，即可实现产生任意范围随机数的功能。
+
+下面使用 random() 方法实现随机生成一个 2~100 偶数的功能。具体代码如下：
+
+```java
+public class Test07 {
+    public static void main(String[] args) {
+        int min = 2; // 定义随机数的最小值
+        int max = 102; // 定义随机数的最大值
+        // 产生一个2~100的数
+        int s = (int) min + (int) (Math.random() * (max - min));
+        if (s % 2 == 0) {
+            // 如果是偶数就输出
+            System.out.println("随机数是：" + s);
+        } else {
+            // 如果是奇数就加1后输出
+            System.out.println("随机数是：" + (s + 1));
+        }
+    }
+}
+```
+
+## 3.3数字格式化
+
+DecimalFormat 是 NumberFormat 的一个子类，用于格式化十进制数字。DecimalFormat 类包含一个模式和一组符号，常用符号的说明如表 1 所示。
+
+
+
+| 符号 | 说明                                                         |
+| ---- | ------------------------------------------------------------ |
+| 0    | 显示数字，如果位数不够则补 0                                 |
+| #    | 显示数字，如果位数不够不发生变化                             |
+| .    | 小数分隔符                                                   |
+| -    | 减号                                                         |
+| ,    | 组分隔符                                                     |
+| E    | 分隔科学记数法中的尾数和小数                                 |
+| %    | 前缀或后缀，乘以 100 后作为百分比显示                        |
+| ?    | 乘以 1000 后作为千进制货币符显示。用货币符号代替。如果双写，用国际货币符号代替； 如果出现在一个模式中，用货币十进制分隔符代替十进制分隔符 |
+
+示例
+
+```java
+import java.text.DecimalFormat;
+import java.util.Scanner;
+public class Test08 {
+    public static void main(String[] args) {
+        // 实例化DecimalFormat类的对象，并指定格式
+        DecimalFormat df1 = new DecimalFormat("0.0");
+        DecimalFormat df2 = new DecimalFormat("#.#");
+        DecimalFormat df3 = new DecimalFormat("000.000");
+        DecimalFormat df4 = new DecimalFormat("###.###");
+        Scanner scan = new Scanner(System.in);
+        System.out.print("请输入一个float类型的数字：");
+        float f = scan.nextFloat();
+        // 对输入的数字应用格式，并输出结果
+        System.out.println("0.0 格式：" + df1.format(f));
+        System.out.println("#.# 格式：" + df2.format(f));
+        System.out.println("000.000 格式：" + df3.format(f));
+        System.out.println("###.### 格式：" + df4.format(f));
+    }
+}
+```
+
+结果
+
+```java
+请输入一个float类型的数字：5487.45697
+0.0 格式：5487.5
+#.# 格式：5487.5
+000.000 格式：5487.457
+###.### 格式：5487.457
+```
+
+```java
+请输入一个float类型的数字：5.0
+0.0 格式：5.0
+#.# 格式：5
+000.000 格式：005.000
+###.### 格式：5
+```
+
+## 3.4大数字运算
+
+ BigInteger 类是针对整型大数字的处理类，而 BigDecimal 类是针对大小数的处理类。
+
+### BigInteger 类
+
+如果要存储比 Integer 更大的数字，Integer 数据类型就无能为力了。因此，Java 中提供 BigInteger 类来处理更大的数字。
+
+BigInteger 类型的数字范围较 Integer 类型的数字范围要大得多。BigInteger 支持任意精度的整数，也就是说在运算中 BigInteger 类型可以准确地表示任何大小的整数值。
+
+除了基本的加、减、乘、除操作之外，BigInteger 类还封装了很多操作，像求绝对值、相反数、最大公约数以及判断是否为质数等。
+
+要使用 BigInteger 类，首先要创建一个 BigInteger 对象。BigInteger 类提供了很多种构造方法，其中最直接的一种是参数以字符串形式代表要处理的数字。这个方法语法格式如下：
+
+```
+BigInteger(String val)
+```
+
+这里的 val 是数字十进制的字符串。例如，要将数字 5 转换为 BigInteger 对象，语句如下：
+
+```
+BigInteger bi = new BigInteger("5")
+```
+
+注意：这里数字 5 的双引号是必需的，因为 BigInteger 类构造方法要求参数是字符串类型。
+
+创建 BigInteger 对象之后，便可以调用 BigInteger 类提供的方法进行各种数学运算操作，表 1 列出了 BigInteger 类的常用运算方法。
+
+| 方法名称                           | 说明                                                         |
+| ---------------------------------- | ------------------------------------------------------------ |
+| add(BigInteger val)                | 做加法运算                                                   |
+| subtract(BigInteger val)           | 做减法运算                                                   |
+| multiply(BigInteger val)           | 做乘法运算                                                   |
+| divide(BigInteger val)             | 做除法运算                                                   |
+| remainder(BigInteger val)          | 做取余数运算                                                 |
+| divideAndRemainder(BigInteger val) | 做除法运算，返回数组的第一个值为商，第二个值为余数           |
+| pow(int exponent)                  | 做参数的 exponent 次方运算                                   |
+| negate()                           | 取相反数                                                     |
+| shiftLeft(int n)                   | 将数字左移 n 位，如果 n 为负数，则做右移操作                 |
+| shiftRight(int n)                  | 将数字右移 n 位，如果 n 为负数，则做左移操作                 |
+| and(BigInteger val)                | 做与运算                                                     |
+| or(BigInteger val)                 | 做或运算                                                     |
+| compareTo(BigInteger val)          | 做数字的比较运算                                             |
+| equals(Object obj)                 | 当参数 obj 是 Biglnteger 类型的数字并且数值相等时返回 true, 其他返回 false |
+| min(BigInteger val)                | 返回较小的数值                                               |
+| max(BigInteger val)                | 返回较大的数值                                               |
+
+### BigDecimal类
+
+BigDecimal 常用的构造方法如下。
+
+- BigDecimal(double val)：实例化时将双精度型转换为 BigDecimal 类型。
+- BigDecimal(String val)：实例化时将字符串形式转换为 BigDecimal 类型。
+
+BigDecimal 类的方法可以用来做超大浮点数的运算，像加、减、乘和除等。在所有运算中，除法运算是最复杂的，因为在除不尽的情况下，末位小数的处理方式是需要考虑的。
+
+下面列出了 BigDecimal 类用于实现加、减、乘和除运算的方法。
+
+```java
+BigDecimal add(BigDecimal augend)    // 加法操作
+BigDecimal subtract(BigDecimal subtrahend)    // 减法操作
+BigDecimal multiply(BigDecimal multiplieand)    // 乘法操作
+BigDecimal divide(BigDecimal divisor,int scale,int roundingMode )    // 除法操作
+```
+
+
+
+divide()方法的三个参数表示除数，商的小数点的位数和近似值的处理模式
+
+
+
+| 模式名称                    | 说明                                                         |
+| --------------------------- | ------------------------------------------------------------ |
+| BigDecimal.ROUND_UP         | 商的最后一位如果大于 0，则向前进位，正负数都如此             |
+| BigDecimal.ROUND_DOWN       | 商的最后一位无论是什么数字都省略                             |
+| BigDecimal.ROUND_CEILING    | 商如果是正数，按照 ROUND_UP 模式处理；如果是负数，按照 ROUND_DOWN 模式处理 |
+| BigDecimal.ROUND_FLOOR      | 与 ROUND_CELING 模式相反，商如果是正数，按照 ROUND_DOWN 模式处理； 如果是负数，按照 ROUND_UP 模式处理 |
+| BigDecimal.ROUND_HALF_ DOWN | 对商进行五舍六入操作。如果商最后一位小于等于 5，则做舍弃操作，否则对最后 一位进行进位操作 |
+| BigDecimal.ROUND_HALF_UP    | 对商进行四舍五入操作。如果商最后一位小于 5，则做舍弃操作，否则对最后一位 进行进位操作 |
+| BigDecimal.ROUND_HALF_EVEN  | 如果商的倒数第二位是奇数，则按照 ROUND_HALF_UP 处理；如果是偶数，则按 照 ROUND_HALF_DOWN 处理 |
+
+## 3.5时间和日期处理
+
+Date类表示系统特定的时间戳，可以精确到毫秒。
+
+
+
+
+
+
+
 
 
 # 4.Java内置包装类
