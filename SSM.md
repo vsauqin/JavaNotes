@@ -8242,9 +8242,9 @@ public Object paramForm(@RequestParam("name") String name,
 ```
 2. 实体接收
 
-        Spring MVC 是 Spring 框架提供的 Web 框架，它允许开发者使用实体对象来接收 HTTP 请求中的参数。通过这种方式，可以在方法内部直接使用对象的属性来访问请求参数，而不需要每个参数都写一遍。下面是一个使用实体对象接收参数的示例：
-        
-        定义一个用于接收参数的实体类：
+    Spring MVC 是 Spring 框架提供的 Web 框架，它允许开发者使用实体对象来接收 HTTP 请求中的参数。通过这种方式，可以在方法内部直接使用对象的属性来访问请求参数，而不需要每个参数都写一遍。下面是一个使用实体对象接收参数的示例：
+
+    定义一个用于接收参数的实体类：
 
 ```Java
 public class User {
@@ -8278,7 +8278,7 @@ public class ParamController {
 
 使用postman传递参数测试：
 
-![](https://secure2.wostatic.cn/static/p9AtC4uV8sMvSkgcUKbGTa/image.png)
+
 
   #### 2.2.3 路径 参数接收
 
@@ -8309,9 +8309,9 @@ public String getUser(@PathVariable Long id,
 
   #### 2.2.4 json参数接收
 
-    前端传递 JSON 数据时，Spring MVC 框架可以使用 `@RequestBody` 注解来将 JSON 数据转换为 Java 对象。`@RequestBody` 注解表示当前方法参数的值应该从请求体中获取，并且需要指定 value 属性来指示请求体应该映射到哪个参数上。其使用方式和示例代码如下：
-    
-    1. 前端发送 JSON 数据的示例：（使用postman测试）
+前端传递 JSON 数据时，Spring MVC 框架可以使用 `@RequestBody` 注解来将 JSON 数据转换为 Java 对象。`@RequestBody` 注解表示当前方法参数的值应该从请求体中获取，并且需要指定 value 属性来指示请求体应该映射到哪个参数上。其使用方式和示例代码如下：
+
+1. 前端发送 JSON 数据的示例：（使用postman测试）
 
 ```JSON
 {
@@ -8320,7 +8320,7 @@ public String getUser(@PathVariable Long id,
   "gender": "男"
 }
 ```
-    2. 定义一个用于接收 JSON 数据的 Java 类，例如：
+2. 定义一个用于接收 JSON 数据的 Java 类，例如：
 
 ```Java
 public class Person {
@@ -8330,7 +8330,7 @@ public class Person {
   // getter 和 setter 略
 }
 ```
-    3. 在控制器中，使用 `@RequestBody` 注解来接收 JSON 数据，并将其转换为 Java 对象，例如：
+3. 在控制器中，使用 `@RequestBody` 注解来接收 JSON 数据，并将其转换为 Java 对象，例如：
 
 ```Java
 @PostMapping("/person")
@@ -8342,27 +8342,27 @@ public String addPerson(@RequestBody Person person) {
 }
 ```
 
-        在上述代码中，`@RequestBody` 注解将请求体中的 JSON 数据映射到 `Person` 类型的 `person` 参数上，并将其作为一个对象来传递给 `addPerson()` 方法进行处理。
-    4. 完善配置
+在上述代码中，`@RequestBody` 注解将请求体中的 JSON 数据映射到 `Person` 类型的 `person` 参数上，并将其作为一个对象来传递给 `addPerson()` 方法进行处理。
+4. 完善配置
+
+    测试：
+
+     
+
+    问题：
+
+      org.springframework.web.HttpMediaTypeNotSupportedException: Content-Type 'application/json;charset=UTF-8' is not supported]
+
     
-        测试：
-    
-          ![](https://secure2.wostatic.cn/static/jGHVNLJs2adytDeM5VG7Kk/image.png)
-    
-        问题：
-    
-          org.springframework.web.HttpMediaTypeNotSupportedException: Content-Type 'application/json;charset=UTF-8' is not supported]
-    
-          ![](https://secure2.wostatic.cn/static/tojUpG6VkVj5XG41zqA7XU/image.png)
-    
-        原因：
-    
-        - 不支持json数据类型处理
-        - 没有json类型处理的工具（jackson）
-    
-        解决：
-    
-        springmvc handlerAdpater配置json转化器,配置类需要明确：
+
+    原因：
+
+    - 不支持json数据类型处理
+    - 没有json类型处理的工具（jackson）
+
+    解决：
+
+    springmvc handlerAdpater配置json转化器,配置类需要明确：
 
 ```Java
 //TODO: SpringMVC对应组件的配置类 [声明SpringMVC需要的组件信息]
@@ -8391,22 +8391,19 @@ public class SpringMvcConfig implements WebMvcConfigurer {
     <version>2.15.0</version>
 </dependency>
 ```
-    5. @EnableWebMvc注解说明
-    
-        @EnableWebMvc注解效果等同于在 XML 配置中，可以使用 `<mvc:annotation-driven>` 元素！我们来解析`<mvc:annotation-driven>`对应的解析工作！
-    
-        让我们来查看下`<mvc:annotation-driven>`具体的动作！
-    
-        - 先查看`<mvc:annotation-driven>`标签最终对应解析的Java类
-    
-            ![](https://secure2.wostatic.cn/static/8WWABqUcDmjVia69uGVyNY/image.png)
-        - 查看解析类中具体的动作即可
-    
-            打开源码：org.springframework.web.servlet.config.MvcNamespaceHandler
-    
-            ![](https://secure2.wostatic.cn/static/pyTLTV8syHWz4hGCm25CFb/image.png)
-    
-            打开源码：org.springframework.web.servlet.config.AnnotationDrivenBeanDefinitionParser
+5. @EnableWebMvc注解说明
+
+    @EnableWebMvc注解效果等同于在 XML 配置中，可以使用 `<mvc:annotation-driven>` 元素！我们来解析`<mvc:annotation-driven>`对应的解析工作！
+
+    让我们来查看下`<mvc:annotation-driven>`具体的动作！
+
+    - 先查看`<mvc:annotation-driven>`标签最终对应解析的Java类
+
+        查看解析类中具体的动作即可
+        
+    打开源码：org.springframework.web.servlet.config.MvcNamespaceHandler
+        
+    打开源码：org.springframework.web.servlet.config.AnnotationDrivenBeanDefinitionParser
 
 ```Java
 class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
@@ -8548,19 +8545,17 @@ public String api(HttpSession session , HttpServletRequest request,
 
   #### 2.6.1 属性（共享）域作用回顾
 
-    在 JavaWeb 中，共享域指的是在 Servlet 中存储数据，以便在同一 Web 应用程序的多个组件中进行共享和访问。常见的共享域有四种：`ServletContext`、`HttpSession`、`HttpServletRequest`、`PageContext`。
-    
-    1. `ServletContext` 共享域：`ServletContext` 对象可以在整个 Web 应用程序中共享数据，是最大的共享域。一般可以用于保存整个 Web 应用程序的全局配置信息，以及所有用户都共享的数据。在 `ServletContext` 中保存的数据是线程安全的。
-    2. `HttpSession` 共享域：`HttpSession` 对象可以在同一用户发出的多个请求之间共享数据，但只能在同一个会话中使用。比如，可以将用户登录状态保存在 `HttpSession` 中，让用户在多个页面间保持登录状态。
-    3. `HttpServletRequest` 共享域：`HttpServletRequest` 对象可以在同一个请求的多个处理器方法之间共享数据。比如，可以将请求的参数和属性存储在 `HttpServletRequest` 中，让处理器方法之间可以访问这些数据。
-    4. `PageContext` 共享域：`PageContext` 对象是在 JSP 页面Servlet 创建时自动创建的。它可以在 JSP 的各个作用域中共享数据，包括`pageScope`、`requestScope`、`sessionScope`、`applicationScope` 等作用域。
-    
-    共享域的作用是提供了方便实用的方式在同一 Web 应用程序的多个组件之间传递数据，并且可以将数据保存在不同的共享域中，根据需要进行选择和使用。
-    
-    ![](https://secure2.wostatic.cn/static/wusZjB7KSU7gHUfXMpja5u/img010.png)
+在 JavaWeb 中，共享域指的是在 Servlet 中存储数据，以便在同一 Web 应用程序的多个组件中进行共享和访问。常见的共享域有四种：`ServletContext`、`HttpSession`、`HttpServletRequest`、`PageContext`。
+
+1. `ServletContext` 共享域：`ServletContext` 对象可以在整个 Web 应用程序中共享数据，是最大的共享域。一般可以用于保存整个 Web 应用程序的全局配置信息，以及所有用户都共享的数据。在 `ServletContext` 中保存的数据是线程安全的。
+2. `HttpSession` 共享域：`HttpSession` 对象可以在同一用户发出的多个请求之间共享数据，但只能在同一个会话中使用。比如，可以将用户登录状态保存在 `HttpSession` 中，让用户在多个页面间保持登录状态。
+3. `HttpServletRequest` 共享域：`HttpServletRequest` 对象可以在同一个请求的多个处理器方法之间共享数据。比如，可以将请求的参数和属性存储在 `HttpServletRequest` 中，让处理器方法之间可以访问这些数据。
+4. `PageContext` 共享域：`PageContext` 对象是在 JSP 页面Servlet 创建时自动创建的。它可以在 JSP 的各个作用域中共享数据，包括`pageScope`、`requestScope`、`sessionScope`、`applicationScope` 等作用域。
+
+共享域的作用是提供了方便实用的方式在同一 Web 应用程序的多个组件之间传递数据，并且可以将数据保存在不同的共享域中，根据需要进行选择和使用。
 
   #### 2.6.2 Request级别属性（共享）域
-    1. 使用 Model 类型的形参
+1. 使用 Model 类型的形参
 
 ```Java
 @RequestMapping("/attr/request/model")
@@ -8577,7 +8572,7 @@ public String testAttrRequestModel(
     return "target";
 }
 ```
-    2. 使用 ModelMap 类型的形参
+2. 使用 ModelMap 类型的形参
 
 ```Java
 @RequestMapping("/attr/request/model/map")
@@ -8594,7 +8589,7 @@ public String testAttrRequestModelMap(
     return "target";
 }
 ```
-    3. 使用 Map 类型的形参
+3. 使用 Map 类型的形参
 
 ```Java
 @RequestMapping("/attr/request/map")
@@ -8611,7 +8606,7 @@ public String testAttrRequestMap(
     return "target";
 }
 ```
-    4. 使用原生 request 对象
+4. 使用原生 request 对象
 
 ```Java
 @RequestMapping("/attr/request/original")
@@ -8626,7 +8621,7 @@ public String testAttrOriginalRequest(
     return "target";
 }
 ```
-    5. 使用 ModelAndView 对象
+5. 使用 ModelAndView 对象
 
 ```Java
 @RequestMapping("/attr/request/mav")
@@ -8670,4 +8665,355 @@ public String attrApplication() {
     
     return "target";
 }
+```
+
+## 三.SpringMvc响应数据
+
+### 3.1 handler方法分析
+
+  理解handler方法的作用和组成：
+
+```Java
+/**
+ * TODO: 一个controller的方法是控制层的一个处理器,我们称为handler
+ * TODO: handler需要使用@RequestMapping/@GetMapping系列,声明路径,在HandlerMapping中注册,供DS查找!
+ * TODO: handler作用总结:
+ *       1.接收请求参数(param,json,pathVariable,共享域等) 
+ *       2.调用业务逻辑 
+ *       3.响应前端数据(页面（不讲解模版页面跳转）,json,转发和重定向等)
+ * TODO: handler如何处理呢
+ *       1.接收参数: handler(形参列表: 主要的作用就是用来接收参数)
+ *       2.调用业务: { 方法体  可以向后调用业务方法 service.xx() }
+ *       3.响应数据: return 返回结果,可以快速响应前端数据
+ */
+@GetMapping
+public Object handler(简化请求参数接收){
+    调用业务方法
+    返回的结果 （页面跳转，返回数据（json））
+    return 简化响应前端数据;
+}
+```
+
+  总结： 请求数据接收，我们都是通过handler的形参列表
+
+
+
+
+
+
+
+
+
+
+
+               前端数据响应，我们都是通过handler的return关键字快速处理！
+    
+            springmvc简化了参数接收和响应！
+
+### 3.2 页面跳转控制
+
+  #### 3.2.1 快速返回模板视图
+1. 开发模式回顾
+
+    在 Web 开发中，有两种主要的开发模式：前后端分离和混合开发。
+
+    前后端分离模式：[重点]
+
+      指将前端的界面和后端的业务逻辑通过接口分离开发的一种方式。开发人员使用不同的技术栈和框架，前端开发人员主要负责页面的呈现和用户交互，后端开发人员主要负责业务逻辑和数据存储。前后端通信通过 API 接口完成，数据格式一般使用 JSON 或 XML。前后端分离模式可以提高开发效率，同时也有助于代码重用和维护。
+
+    混合开发模式：
+
+      指将前端和后端的代码集成在同一个项目中，共享相同的技术栈和框架。这种模式在小型项目中比较常见，可以减少学习成本和部署难度。但是，在大型项目中，这种模式会导致代码耦合性很高，维护和升级难度较大。
+
+      对于混合开发，我们就需要使用动态页面技术，动态展示Java的共享域数据！！
+2. jsp技术了解
+
+    JSP（JavaServer Pages）是一种动态网页开发技术，它是由 Sun 公司提出的一种基于 Java 技术的 Web 页面制作技术，可以在 HTML 文件中嵌入 Java 代码，使得生成动态内容的编写更加简单。
+
+    JSP 最主要的作用是生成动态页面。它允许将 Java 代码嵌入到 HTML 页面中，以便使用 Java 进行数据库查询、处理表单数据和生成 HTML 等动态内容。另外，JSP 还可以与 Servlet 结合使用，实现更加复杂的 Web 应用程序开发。
+
+    JSP 的主要特点包括：
+
+    1. 简单：JSP 通过将 Java 代码嵌入到 HTML 页面中，使得生成动态内容的编写更加简单。
+    2. 高效：JSP 首次运行时会被转换为 Servlet，然后编译为字节码，从而可以启用 Just-in-Time（JIT）编译器，实现更高效的运行。
+    3. 多样化：JSP 支持多种标准标签库，包括 JSTL（JavaServer Pages 标准标签库）、EL（表达式语言）等，可以帮助开发人员更加方便的处理常见的 Web 开发需求。
+
+    总之，JSP 是一种简单高效、多样化的动态网页开发技术，它可以方便地生成动态页面和与 Servlet 结合使用，是 Java Web 开发中常用的技术之一。
+3. 准备jsp页面和依赖
+
+    pom.xml依赖
+
+```XML
+<!-- jsp需要依赖! jstl-->
+<dependency>
+    <groupId>jakarta.servlet.jsp.jstl</groupId>
+    <artifactId>jakarta.servlet.jsp.jstl-api</artifactId>
+    <version>3.0.0</version>
+</dependency>
+```
+
+        jsp页面创建
+    
+        建议位置：/WEB-INF/下，避免外部直接访问！
+    
+        位置：/WEB-INF/views/home.jsp
+
+```Java
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+  <head>
+    <title>Title</title>
+  </head>
+  <body>
+        <!-- 可以获取共享域的数据,动态展示! jsp== 后台vue -->
+        ${msg}
+  </body>
+</html>
+
+```
+4. 快速响应模版页面
+    1. 配置jsp视图解析器
+
+
+​            
+
+```Java
+@EnableWebMvc  //json数据处理,必须使用此注解,因为他会加入json处理器
+@Configuration
+@ComponentScan(basePackages = "com.atguigu.controller") //TODO: 进行controller扫描
+
+//WebMvcConfigurer springMvc进行组件配置的规范,配置组件,提供各种方法! 前期可以实现
+public class SpringMvcConfig implements WebMvcConfigurer {
+
+    //配置jsp对应的视图解析器
+    @Override
+    public void configureViewResolvers(ViewResolverRegistry registry) {
+        //快速配置jsp模板语言对应的
+        registry.jsp("/WEB-INF/views/",".jsp");
+    }
+}
+```
+2. handler返回视图
+
+```Java
+/**
+ *  跳转到提交文件页面  /save/jump
+ *  
+ *  如果要返回jsp页面!
+ *     1.方法返回值改成字符串类型
+ *     2.返回逻辑视图名即可    
+ *         <property name="prefix" value="/WEB-INF/views/"/>
+ *            + 逻辑视图名 +
+ *         <property name="suffix" value=".jsp"/>
+ */
+@GetMapping("jump")
+public String jumpJsp(Model model){
+    System.out.println("FileController.jumpJsp");
+    model.addAttribute("msg","request data!!");
+    return "home";
+}
+```
+
+  #### 3.2.2 转发和重定向
+
+    在 Spring MVC 中，Handler 方法返回值来实现快速转发，可以使用 `redirect` 或者 `forward` 关键字来实现重定向。
+
+```Java
+@RequestMapping("/redirect-demo")
+public String redirectDemo() {
+    // 重定向到 /demo 路径 
+    return "redirect:/demo";
+}
+
+@RequestMapping("/forward-demo")
+public String forwardDemo() {
+    // 转发到 /demo 路径
+    return "forward:/demo";
+}
+
+//注意： 转发和重定向到项目下资源路径都是相同，都不需要添加项目根路径！填写项目下路径即可！
+```
+
+    总结：
+    
+    - 将方法的返回值，设置String类型
+    - 转发使用forward关键字，重定向使用redirect关键字
+    - 关键字: /路径
+    - 注意：如果是项目下的资源，转发和重定向都一样都是项目下路径！都不需要添加项目根路径！
+
+### 3.3 返回JSON数据（重点）
+
+  #### 3.3.1 前置准备
+
+    导入jackson依赖
+
+```XML
+<dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-databind</artifactId>
+    <version>2.15.0</version>
+</dependency>
+```
+
+    添加json数据转化器
+    
+    @EnableWebMvc 
+
+```Java
+//TODO: SpringMVC对应组件的配置类 [声明SpringMVC需要的组件信息]
+
+//TODO: 导入handlerMapping和handlerAdapter的三种方式
+ //1.自动导入handlerMapping和handlerAdapter [推荐]
+ //2.可以不添加,springmvc会检查是否配置handlerMapping和handlerAdapter,没有配置默认加载
+ //3.使用@Bean方式配置handlerMapper和handlerAdapter
+@EnableWebMvc  //json数据处理,必须使用此注解,因为他会加入json处理器
+@Configuration
+@ComponentScan(basePackages = "com.atguigu.controller") //TODO: 进行controller扫描
+
+//WebMvcConfigurer springMvc进行组件配置的规范,配置组件,提供各种方法! 前期可以实现
+public class SpringMvcConfig implements WebMvcConfigurer {
+
+
+}
+```
+
+  #### 3.3.2 @ResponseBody
+1. 方法上使用@ResponseBody
+
+    可以在方法上使用 `@ResponseBody`注解，用于将方法返回的对象序列化为 JSON 或 XML 格式的数据，并发送给客户端。在前后端分离的项目中使用！
+
+    测试方法：
+
+```Java
+@GetMapping("/accounts/{id}")
+@ResponseBody
+public Object handle() {
+  // ...
+  return obj;
+}
+```
+
+
+具体来说，`@ResponseBody` 注解可以用来标识方法或者方法返回值，表示方法的返回值是要直接返回给客户端的数据，而不是由视图解析器来解析并渲染生成响应体（viewResolver没用）。
+
+        测试方法：
+
+```Java
+@RequestMapping(value = "/user/detail", method = RequestMethod.POST)
+@ResponseBody
+public User getUser(@RequestBody User userParam) {
+    System.out.println("userParam = " + userParam);
+    User user = new User();
+    user.setAge(18);
+    user.setName("John");
+    //返回的对象,会使用jackson的序列化工具,转成json返回给前端!
+    return user;
+}
+```
+
+返回结果：
+
+2. 类上使用@ResponseBody
+
+    如果类中每个方法上都标记了 @ResponseBody 注解，那么这些注解就可以提取到类上。
+
+```Java
+@ResponseBody  //responseBody可以添加到类上,代表默认类中的所有方法都生效!
+@Controller
+@RequestMapping("param")
+public class ParamController {
+```
+
+  #### 3.3.3 @RestController
+
+    类上的 @ResponseBody 注解可以和 @Controller 注解合并为 @RestController 注解。所以使用了 @RestController 注解就相当于给类中的每个方法都加了 @ResponseBody 注解。
+    
+    RestController源码:
+
+```Java
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+@Controller
+@ResponseBody
+public @interface RestController {
+ 
+  /**
+   * The value may indicate a suggestion for a logical component name,
+   * to be turned into a Spring bean in case of an autodetected component.
+   * @return the suggested component name, if any (or empty String otherwise)
+   * @since 4.0.1
+   */
+  @AliasFor(annotation = Controller.class)
+  String value() default "";
+ 
+}
+```
+
+### 3.4 返回静态资源处理
+  1. **静态资源概念**
+
+      资源本身已经是可以直接拿到浏览器上使用的程度了，**不需要在服务器端做任何运算、处理**。典型的静态资源包括：
+
+      - 纯HTML文件
+      - 图片
+      - CSS文件
+      - JavaScript文件
+      - ……
+  2. **静态资源访问和问题解决**
+      - web应用加入静态资源
+
+          ![](https://secure2.wostatic.cn/static/2ADk35v3kBWvGQSwL99Z3S/image.png)
+      - 手动构建确保编译
+
+          ![](https://secure2.wostatic.cn/static/gBRmLxNhoWEd4o2eC2xamA/image.png)
+
+          ![](https://secure2.wostatic.cn/static/rKa2VeGDteC7Xk18LTZGWu/image.png)
+
+          ![](https://secure2.wostatic.cn/static/jmvurwN5HSB44eVFPaNJa4/image.png)
+      - 访问静态资源
+
+          ![](https://secure2.wostatic.cn/static/2Ux86Et6qs3TsDkEg1NQTn/image.png)
+      - 问题分析
+          - DispatcherServlet 的 url-pattern 配置的是“/”
+          - url-pattern 配置“/”表示整个 Web 应用范围内所有请求都由 SpringMVC 来处理
+          - 对 SpringMVC 来说，必须有对应的 @RequestMapping 才能找到处理请求的方法
+          - 现在 images/mi.jpg 请求没有对应的 @RequestMapping 所以返回 404
+      - 问题解决
+
+          在 SpringMVC 配置配置类：
+
+```Java
+@EnableWebMvc  //json数据处理,必须使用此注解,因为他会加入json处理器
+@Configuration
+@ComponentScan(basePackages = "com.atguigu.controller") //TODO: 进行controller扫描
+//WebMvcConfigurer springMvc进行组件配置的规范,配置组件,提供各种方法! 前期可以实现
+public class SpringMvcConfig implements WebMvcConfigurer {
+
+    //配置jsp对应的视图解析器
+    @Override
+    public void configureViewResolvers(ViewResolverRegistry registry) {
+        //快速配置jsp模板语言对应的
+        registry.jsp("/WEB-INF/views/",".jsp");
+    }
+    
+    //开启静态资源处理 <mvc:default-servlet-handler/>
+    @Override
+    public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
+        configurer.enable();
+    }
+}
+```
+
+          再次测试访问图片：
+    
+          ![](https://secure2.wostatic.cn/static/srYmS8iD3rXGdSx7a7wC6o/image.png)
+      - 新的问题：其他原本正常的handler请求访问不了了
+    
+          handler无法访问
+    
+          解决方案：
+
+```XML
+@EnableWebMvc  //json数据处理,必须使用此注解,因为他会加入json处理器
 ```
