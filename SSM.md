@@ -8401,6 +8401,7 @@ public class SpringMvcConfig implements WebMvcConfigurer {
 
         查看解析类中具体的动作即可
         
+    
     打开源码：org.springframework.web.servlet.config.MvcNamespaceHandler
         
     打开源码：org.springframework.web.servlet.config.AnnotationDrivenBeanDefinitionParser
@@ -8667,7 +8668,7 @@ public String attrApplication() {
 }
 ```
 
-## 三.SpringMvc响应数据
+# 三.SpringMvc响应数据
 
 ### 3.1 handler方法分析
 
@@ -9017,3 +9018,999 @@ public class SpringMvcConfig implements WebMvcConfigurer {
 ```XML
 @EnableWebMvc  //json数据处理,必须使用此注解,因为他会加入json处理器
 ```
+
+
+
+三.SpringMvc返回数据
+
+### 3.1 handler方法分析
+
+  理解handler方法的作用和组成：
+
+```Java
+/**
+ * TODO: 一个controller的方法是控制层的一个处理器,我们称为handler
+ * TODO: handler需要使用@RequestMapping/@GetMapping系列,声明路径,在HandlerMapping中注册,供DS查找!
+ * TODO: handler作用总结:
+ *       1.接收请求参数(param,json,pathVariable,共享域等) 
+ *       2.调用业务逻辑 
+ *       3.响应前端数据(页面（不讲解模版页面跳转）,json,转发和重定向等)
+ * TODO: handler如何处理呢
+ *       1.接收参数: handler(形参列表: 主要的作用就是用来接收参数)
+ *       2.调用业务: { 方法体  可以向后调用业务方法 service.xx() }
+ *       3.响应数据: return 返回结果,可以快速响应前端数据
+ */
+@GetMapping
+public Object handler(简化请求参数接收){
+    调用业务方法
+    返回的结果 （页面跳转，返回数据（json））
+    return 简化响应前端数据;
+}
+```
+
+  总结： 请求数据接收，我们都是通过handler的形参列表
+
+               前端数据响应，我们都是通过handler的return关键字快速处理！
+    
+            springmvc简化了参数接收和响应！
+
+### 3.2 页面跳转控制
+
+  #### 3.2.1 快速返回模板视图
+1. 开发模式回顾
+
+    在 Web 开发中，有两种主要的开发模式：前后端分离和混合开发。
+
+    前后端分离模式：[重点]
+
+      指将前端的界面和后端的业务逻辑通过接口分离开发的一种方式。开发人员使用不同的技术栈和框架，前端开发人员主要负责页面的呈现和用户交互，后端开发人员主要负责业务逻辑和数据存储。前后端通信通过 API 接口完成，数据格式一般使用 JSON 或 XML。前后端分离模式可以提高开发效率，同时也有助于代码重用和维护。
+
+    混合开发模式：
+
+      指将前端和后端的代码集成在同一个项目中，共享相同的技术栈和框架。这种模式在小型项目中比较常见，可以减少学习成本和部署难度。但是，在大型项目中，这种模式会导致代码耦合性很高，维护和升级难度较大。
+
+      对于混合开发，我们就需要使用动态页面技术，动态展示Java的共享域数据！！
+2. jsp技术了解
+
+    JSP（JavaServer Pages）是一种动态网页开发技术，它是由 Sun 公司提出的一种基于 Java 技术的 Web 页面制作技术，可以在 HTML 文件中嵌入 Java 代码，使得生成动态内容的编写更加简单。
+
+    JSP 最主要的作用是生成动态页面。它允许将 Java 代码嵌入到 HTML 页面中，以便使用 Java 进行数据库查询、处理表单数据和生成 HTML 等动态内容。另外，JSP 还可以与 Servlet 结合使用，实现更加复杂的 Web 应用程序开发。
+
+    JSP 的主要特点包括：
+
+    1. 简单：JSP 通过将 Java 代码嵌入到 HTML 页面中，使得生成动态内容的编写更加简单。
+    2. 高效：JSP 首次运行时会被转换为 Servlet，然后编译为字节码，从而可以启用 Just-in-Time（JIT）编译器，实现更高效的运行。
+    3. 多样化：JSP 支持多种标准标签库，包括 JSTL（JavaServer Pages 标准标签库）、EL（表达式语言）等，可以帮助开发人员更加方便的处理常见的 Web 开发需求。
+
+    总之，JSP 是一种简单高效、多样化的动态网页开发技术，它可以方便地生成动态页面和与 Servlet 结合使用，是 Java Web 开发中常用的技术之一。
+3. 准备jsp页面和依赖
+
+    pom.xml依赖
+
+```XML
+<!-- jsp需要依赖! jstl-->
+<dependency>
+    <groupId>jakarta.servlet.jsp.jstl</groupId>
+    <artifactId>jakarta.servlet.jsp.jstl-api</artifactId>
+    <version>3.0.0</version>
+</dependency>
+```
+
+jsp页面创建
+
+    建议位置：/WEB-INF/下，避免外部直接访问！
+    
+    位置：/WEB-INF/views/home.jsp
+
+```Java
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+  <head>
+    <title>Title</title>
+  </head>
+  <body>
+        <!-- 可以获取共享域的数据,动态展示! jsp== 后台vue -->
+        ${msg}
+  </body>
+</html>
+
+```
+4. 快速响应模版页面
+    1. 配置jsp视图解析器
+
+
+​            
+
+```Java
+@EnableWebMvc  //json数据处理,必须使用此注解,因为他会加入json处理器
+@Configuration
+@ComponentScan(basePackages = "com.atguigu.controller") //TODO: 进行controller扫描
+
+//WebMvcConfigurer springMvc进行组件配置的规范,配置组件,提供各种方法! 前期可以实现
+public class SpringMvcConfig implements WebMvcConfigurer {
+
+    //配置jsp对应的视图解析器
+    @Override
+    public void configureViewResolvers(ViewResolverRegistry registry) {
+        //快速配置jsp模板语言对应的
+        registry.jsp("/WEB-INF/views/",".jsp");
+    }
+}
+```
+2. handler返回视图
+
+```Java
+/**
+ *  跳转到提交文件页面  /save/jump
+ *  
+ *  如果要返回jsp页面!
+ *     1.方法返回值改成字符串类型
+ *     2.返回逻辑视图名即可    
+ *         <property name="prefix" value="/WEB-INF/views/"/>
+ *            + 逻辑视图名 +
+ *         <property name="suffix" value=".jsp"/>
+ */
+@GetMapping("jump")
+public String jumpJsp(Model model){
+    System.out.println("FileController.jumpJsp");
+    model.addAttribute("msg","request data!!");
+    return "home";
+}
+```
+
+  #### 3.2.2 转发和重定向
+
+在 Spring MVC 中，Handler 方法返回值来实现快速转发，可以使用 `redirect` 或者 `forward` 关键字来实现重定向。
+
+```Java
+@RequestMapping("/redirect-demo")
+public String redirectDemo() {
+    // 重定向到 /demo 路径 
+    return "redirect:/demo";
+}
+
+@RequestMapping("/forward-demo")
+public String forwardDemo() {
+    // 转发到 /demo 路径
+    return "forward:/demo";
+}
+
+//注意： 转发和重定向到项目下资源路径都是相同，都不需要添加项目根路径！填写项目下路径即可！
+```
+
+    总结：
+    
+    - 将方法的返回值，设置String类型
+    - 转发使用forward关键字，重定向使用redirect关键字
+    - 关键字: /路径
+    - 注意：如果是项目下的资源，转发和重定向都一样都是项目下路径！都不需要添加项目根路径！
+
+### 3.3 返回JSON数据（重点）
+
+  #### 3.3.1 前置准备
+
+    导入jackson依赖
+
+```XML
+<dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-databind</artifactId>
+    <version>2.15.0</version>
+</dependency>
+```
+
+    添加json数据转化器
+    
+    @EnableWebMvc 
+
+```Java
+//TODO: SpringMVC对应组件的配置类 [声明SpringMVC需要的组件信息]
+
+//TODO: 导入handlerMapping和handlerAdapter的三种方式
+ //1.自动导入handlerMapping和handlerAdapter [推荐]
+ //2.可以不添加,springmvc会检查是否配置handlerMapping和handlerAdapter,没有配置默认加载
+ //3.使用@Bean方式配置handlerMapper和handlerAdapter
+@EnableWebMvc  //json数据处理,必须使用此注解,因为他会加入json处理器
+@Configuration
+@ComponentScan(basePackages = "com.atguigu.controller") //TODO: 进行controller扫描
+
+//WebMvcConfigurer springMvc进行组件配置的规范,配置组件,提供各种方法! 前期可以实现
+public class SpringMvcConfig implements WebMvcConfigurer {
+
+
+}
+```
+
+  #### 3.3.2 @ResponseBody
+1. 方法上使用@ResponseBody
+
+    可以在方法上使用 `@ResponseBody`注解，用于将方法返回的对象序列化为 JSON 或 XML 格式的数据，并发送给客户端。在前后端分离的项目中使用！
+
+    测试方法：
+
+```Java
+@GetMapping("/accounts/{id}")
+@ResponseBody
+public Object handle() {
+  // ...
+  return obj;
+}
+```
+
+
+具体来说，`@ResponseBody` 注解可以用来标识方法或者方法返回值，表示方法的返回值是要直接返回给客户端的数据，而不是由视图解析器来解析并渲染生成响应体（viewResolver没用）。
+
+        测试方法：
+
+```Java
+@RequestMapping(value = "/user/detail", method = RequestMethod.POST)
+@ResponseBody
+public User getUser(@RequestBody User userParam) {
+    System.out.println("userParam = " + userParam);
+    User user = new User();
+    user.setAge(18);
+    user.setName("John");
+    //返回的对象,会使用jackson的序列化工具,转成json返回给前端!
+    return user;
+}
+```
+
+2. 类上使用@ResponseBody
+
+    如果类中每个方法上都标记了 @ResponseBody 注解，那么这些注解就可以提取到类上。
+
+```Java
+@ResponseBody  //responseBody可以添加到类上,代表默认类中的所有方法都生效!
+@Controller
+@RequestMapping("param")
+public class ParamController {
+```
+
+  #### 3.3.3 @RestController
+
+    类上的 @ResponseBody 注解可以和 @Controller 注解合并为 @RestController 注解。所以使用了 @RestController 注解就相当于给类中的每个方法都加了 @ResponseBody 注解。
+    
+    RestController源码:
+
+```Java
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+@Controller
+@ResponseBody
+public @interface RestController {
+ 
+  /**
+   * The value may indicate a suggestion for a logical component name,
+   * to be turned into a Spring bean in case of an autodetected component.
+   * @return the suggested component name, if any (or empty String otherwise)
+   * @since 4.0.1
+   */
+  @AliasFor(annotation = Controller.class)
+  String value() default "";
+ 
+}
+```
+
+### 3.4 返回静态资源处理
+  1. **静态资源概念**
+
+      资源本身已经是可以直接拿到浏览器上使用的程度了，**不需要在服务器端做任何运算、处理**。典型的静态资源包括：
+
+      - 纯HTML文件
+      - 图片
+      - CSS文件
+      - JavaScript文件
+      - ……
+  2. **静态资源访问和问题解决**
+      
+      - 问题分析
+          - DispatcherServlet 的 url-pattern 配置的是“/”
+          - url-pattern 配置“/”表示整个 Web 应用范围内所有请求都由 SpringMVC 来处理
+          - 对 SpringMVC 来说，必须有对应的 @RequestMapping 才能找到处理请求的方法
+          - 现在 images/mi.jpg 请求没有对应的 @RequestMapping 所以返回 404
+      - 问题解决
+      
+          在 SpringMVC 配置配置类：
+
+```Java
+@EnableWebMvc  //json数据处理,必须使用此注解,因为他会加入json处理器
+@Configuration
+@ComponentScan(basePackages = "com.atguigu.controller") //TODO: 进行controller扫描
+//WebMvcConfigurer springMvc进行组件配置的规范,配置组件,提供各种方法! 前期可以实现
+public class SpringMvcConfig implements WebMvcConfigurer {
+
+    //配置jsp对应的视图解析器
+    @Override
+    public void configureViewResolvers(ViewResolverRegistry registry) {
+        //快速配置jsp模板语言对应的
+        registry.jsp("/WEB-INF/views/",".jsp");
+    }
+    
+    //开启静态资源处理 <mvc:default-servlet-handler/>
+    @Override
+    public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
+        configurer.enable();
+    }
+}
+```
+
+ 新的问题：其他原本正常的handler请求访问不了了
+
+  - handler无法访问
+
+      解决方案：
+
+```XML
+@EnableWebMvc  //json数据处理,必须使用此注解,因为他会加入json处理器
+```
+
+# 四、RESTFul风格设计和实战
+
+  ### 4.1 RESTFul风格概述
+
+#### 4.1.1 RESTFul风格简介
+
+  RESTful（Representational State Transfer）是一种软件架构风格，用于设计网络应用程序和服务之间的通信。它是一种基于标准 HTTP 方法的简单和轻量级的通信协议，广泛应用于现代的Web服务开发。
+
+  通过遵循 RESTful 架构的设计原则，可以构建出易于理解、可扩展、松耦合和可重用的 Web 服务。RESTful API 的特点是简单、清晰，并且易于使用和理解，它们使用标准的 HTTP 方法和状态码进行通信，不需要额外的协议和中间件。
+
+  总而言之，RESTful 是一种基于 HTTP 和标准化的设计原则的软件架构风格，用于设计和实现可靠、可扩展和易于集成的 Web 服务和应用程序！
+
+  学习RESTful设计原则可以帮助我们更好去设计HTTP协议的API接口！！
+
+#### 4.1.2 RESTFul风格特点
+  1. 每一个URI代表1种资源（URI 是名词）；
+  2. 客户端使用GET、POST、PUT、DELETE 4个表示操作方式的动词对服务端资源进行操作：GET用来获取资源，POST用来新建资源（也可以用于更新资源），PUT用来更新资源，DELETE用来删除资源；
+  3. 资源的表现形式是XML或者**JSON**；
+  4. 客户端与服务端之间的交互在请求之间是无状态的，从客户端到服务端的每个请求都必须包含理解请求所必需的信息。
+
+#### 4.1.3 **RESTFul风格设计规范**
+  1. **HTTP协议请求方式要求**
+
+      REST 风格主张在项目设计、开发过程中，具体的操作符合**HTTP协议定义的请求方式的语义**。
+
+| 操作     | 请求方式 |
+| -------- | -------- |
+| 查询操作 | GET      |
+| 保存操作 | POST     |
+| 删除操作 | DELETE   |
+| 更新操作 | PUT      |
+
+2. **URL路径风格要求**
+
+      REST风格下每个资源都应该有一个唯一的标识符，例如一个 URI（统一资源标识符）或者一个 URL（统一资源定位符）。资源的标识符应该能明确地说明该资源的信息，同时也应该是可被理解和解释的！
+
+      使用URL+请求方式确定具体的动作，他也是一种标准的HTTP协议请求！
+
+| 操作 | 传统风格                | REST 风格                              |
+| ---- | ----------------------- | -------------------------------------- |
+| 保存 | /CRUD/saveEmp           | URL 地址：/CRUD/emp 请求方式：POST     |
+| 删除 | /CRUD/removeEmp?empId=2 | URL 地址：/CRUD/emp/2 请求方式：DELETE |
+| 更新 | /CRUD/updateEmp         | URL 地址：/CRUD/emp 请求方式：PUT      |
+| 查询 | /CRUD/editEmp?empId=2   | URL 地址：/CRUD/emp/2 请求方式：GET    |
+
+- 总结
+
+      根据接口的具体动作，选择具体的HTTP协议请求方式
+      
+      路径设计从原来携带动标识，改成名词，对应资源的唯一标识即可！
+
+#### 4.1.4 RESTFul风格好处
+  1. 含蓄，安全
+
+      使用问号键值对的方式给服务器传递数据太明显，容易被人利用来对系统进行破坏。使用 REST 风格携带数据不再需要明显的暴露数据的名称。
+  2. 风格统一
+
+      URL 地址整体格式统一，从前到后始终都使用斜杠划分各个单词，用简单一致的格式表达语义。
+  3. 无状态
+
+      在调用一个接口（访问、操作资源）的时候，可以不用考虑上下文，不用考虑当前状态，极大的降低了系统设计的复杂度。
+  4. 严谨，规范
+
+      严格按照 HTTP1.1 协议中定义的请求方式本身的语义进行操作。
+  5. 简洁，优雅
+
+      过去做增删改查操作需要设计4个不同的URL，现在一个就够了。
+
+| 操作 | 传统风格                | REST 风格                              |
+| ---- | ----------------------- | -------------------------------------- |
+| 保存 | /CRUD/saveEmp           | URL 地址：/CRUD/emp 请求方式：POST     |
+| 删除 | /CRUD/removeEmp?empId=2 | URL 地址：/CRUD/emp/2 请求方式：DELETE |
+| 更新 | /CRUD/updateEmp         | URL 地址：/CRUD/emp 请求方式：PUT      |
+| 查询 | /CRUD/editEmp?empId=2   | URL 地址：/CRUD/emp/2 请求方式：GET    |
+
+6. 丰富的语义
+
+      通过 URL 地址就可以知道资源之间的关系。它能够把一句话中的很多单词用斜杠连起来，反过来说就是可以在 URL 地址中用一句话来充分表达语义。
+
+      > [http://localhost:8080/shop](http://localhost:8080/shop) [http://localhost:8080/shop/product](http://localhost:8080/shop/product) [http://localhost:8080/shop/product/cellPhone](http://localhost:8080/shop/product/cellPhone) [http://localhost:8080/shop/product/cellPhone/iPhone](http://localhost:8080/shop/product/cellPhone/iPhone)
+
+  ### 4.2 RESTFul风格实战
+
+#### 4.2.1 需求分析
+  - 数据结构： User {id 唯一标识,name 用户名，age 用户年龄}
+  - 功能分析
+      - 用户数据分页展示功能（条件：page 页数 默认1，size 每页数量 默认 10）
+      - 保存用户功能
+      - 根据用户id查询用户详情功能
+      - 根据用户id更新用户数据功能
+      - 根据用户id删除用户数据功能
+      - 多条件模糊查询用户功能（条件：keyword 模糊关键字，page 页数 默认1，size 每页数量 默认 10）
+
+#### 4.2.2 RESTFul风格接口设计
+  1. **接口设计**
+
+|          |                  |                               |              |
+| -------- | ---------------- | ----------------------------- | ------------ |
+| 功能     | 接口和请求方式   | 请求参数                      | 返回值       |
+| 分页查询 | GET  /user       | page=1&size=10                | { 响应数据 } |
+| 用户添加 | POST /user       | { user 数据 }                 | {响应数据}   |
+| 用户详情 | GET /user/1      | 路径参数                      | {响应数据}   |
+| 用户更新 | PUT /user        | { user 更新数据}              | {响应数据}   |
+| 用户删除 | DELETE /user/1   | 路径参数                      | {响应数据}   |
+| 条件模糊 | GET /user/search | page=1&size=10&keywork=关键字 | {响应数据}   |
+
+2. **问题讨论**
+
+      为什么查询用户详情，就使用路径传递参数，多条件模糊查询，就使用请求参数传递？
+
+      误区：restful风格下，不是所有请求参数都是路径传递！可以使用其他方式传递！
+
+      在 RESTful API 的设计中，路径和请求参数和请求体都是用来向服务器传递信息的方式。
+
+      - 对于查询用户详情，使用路径传递参数是因为这是一个单一资源的查询，即查询一条用户记录。使用路径参数可以明确指定所请求的资源，便于服务器定位并返回对应的资源，也符合 RESTful 风格的要求。
+      - 而对于多条件模糊查询，使用请求参数传递参数是因为这是一个资源集合的查询，即查询多条用户记录。使用请求参数可以通过组合不同参数来限制查询结果，路径参数的组合和排列可能会很多，不如使用请求参数更加灵活和简洁。
+
+      此外，还有一些通用的原则可以遵循：
+
+      - 路径参数应该用于指定资源的唯一标识或者 ID，而请求参数应该用于指定查询条件或者操作参数。
+      - 请求参数应该限制在 10 个以内，过多的请求参数可能导致接口难以维护和使用。
+      - 对于敏感信息，最好使用 POST 和请求体来传递参数。
+
+#### 4.2.3 后台接口实现
+
+  准备用户实体类：
+
+```Java
+package com.atguigu.pojo;
+
+/**
+ * projectName: com.atguigu.pojo
+ * 用户实体类
+ */
+public class User {
+
+    private Integer id;
+    private String name;
+
+    private Integer age;
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Integer getAge() {
+        return age;
+    }
+
+    public void setAge(Integer age) {
+        this.age = age;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", age=" + age +
+                '}';
+    }
+}
+
+```
+
+      准备用户Controller:
+
+```Java
+/**
+ * projectName: com.atguigu.controller
+ *
+ * description: 用户模块的控制器
+ */
+@RequestMapping("user")
+@RestController
+public class UserController {
+
+    /**
+     * 模拟分页查询业务接口
+     */
+    @GetMapping
+    public Object queryPage(@RequestParam(name = "page",required = false,defaultValue = "1")int page,
+                            @RequestParam(name = "size",required = false,defaultValue = "10")int size){
+        System.out.println("page = " + page + ", size = " + size);
+        System.out.println("分页查询业务!");
+        return "{'status':'ok'}";
+    }
+
+
+    /**
+     * 模拟用户保存业务接口
+     */
+    @PostMapping
+    public Object saveUser(@RequestBody User user){
+        System.out.println("user = " + user);
+        System.out.println("用户保存业务!");
+        return "{'status':'ok'}";
+    }
+
+    /**
+     * 模拟用户详情业务接口
+     */
+    @PostMapping("/{id}")
+    public Object detailUser(@PathVariable Integer id){
+        System.out.println("id = " + id);
+        System.out.println("用户详情业务!");
+        return "{'status':'ok'}";
+    }
+
+
+    /**
+     * 模拟用户更新业务接口
+     */
+    @PutMapping
+    public Object updateUser(@RequestBody User user){
+        System.out.println("user = " + user);
+        System.out.println("用户更新业务!");
+        return "{'status':'ok'}";
+    }
+
+
+    /**
+     * 模拟条件分页查询业务接口
+     */
+    @GetMapping("search")
+    public Object queryPage(@RequestParam(name = "page",required = false,defaultValue = "1")int page,
+                            @RequestParam(name = "size",required = false,defaultValue = "10")int size,
+                            @RequestParam(name = "keyword",required= false)String keyword){
+        System.out.println("page = " + page + ", size = " + size + ", keyword = " + keyword);
+        System.out.println("条件分页查询业务!");
+        return "{'status':'ok'}";
+    }
+}
+```
+
+# 五、SpringMVC其他扩展
+
+  ### 5.1 全局异常处理机制
+
+#### 5.1.1 异常处理两种方式
+
+  开发过程中是不可避免地会出现各种异常情况的，例如网络连接异常、数据格式异常、空指针异常等等。异常的出现可能导致程序的运行出现问题，甚至直接导致程序崩溃。因此，在开发过程中，合理处理异常、避免异常产生、以及对异常进行有效的调试是非常重要的。
+
+  对于异常的处理，一般分为两种方式：
+
+  - 编程式异常处理：是指在代码中显式地编写处理异常的逻辑。它通常涉及到对异常类型的检测及其处理，例如使用 try-catch 块来捕获异常，然后在 catch 块中编写特定的处理代码，或者在 finally 块中执行一些清理操作。在编程式异常处理中，开发人员需要显式地进行异常处理，异常处理代码混杂在业务代码中，导致代码可读性较差。
+  - 声明式异常处理：则是将异常处理的逻辑从具体的业务逻辑中分离出来，通过配置等方式进行统一的管理和处理。在声明式异常处理中，开发人员只需要为方法或类标注相应的注解（如 `@Throws` 或 `@ExceptionHandler`），就可以处理特定类型的异常。相较于编程式异常处理，声明式异常处理可以使代码更加简洁、易于维护和扩展。
+
+  站在宏观角度来看待声明式事务处理：
+
+    整个项目从架构这个层面设计的异常处理的统一机制和规范。
+    
+    一个项目中会包含很多个模块，各个模块需要分工完成。如果张三负责的模块按照 A 方案处理异常，李四负责的模块按照 B 方案处理异常……各个模块处理异常的思路、代码、命名细节都不一样，那么就会让整个项目非常混乱。
+    
+    使用声明式异常处理，可以统一项目处理异常思路，项目更加清晰明了！
+
+#### 5.1.2 基于注解异常声明异常处理
+  1. 声明异常处理控制器类
+
+      异常处理控制类，统一定义异常处理handler方法！
+
+```Java
+/**
+ * projectName: com.atguigu.execptionhandler
+ * 
+ * description: 全局异常处理器,内部可以定义异常处理Handler!
+ */
+
+/**
+ * @RestControllerAdvice = @ControllerAdvice + @ResponseBody
+ * @ControllerAdvice 代表当前类的异常处理controller! 
+ */
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+  
+}
+```
+2. 声明异常处理hander方法
+
+      异常处理handler方法和普通的handler方法参数接收和响应都一致！
+
+      只不过异常处理handler方法要映射异常，发生对应的异常会调用！
+
+      普通的handler方法要使用@RequestMapping注解映射路径，发生对应的路径调用！
+
+```Java
+/**
+ * 异常处理handler 
+ * @ExceptionHandler(HttpMessageNotReadableException.class) 
+ * 该注解标记异常处理Handler,并且指定发生异常调用该方法!
+ * 
+ * 
+ * @param e 获取异常对象!
+ * @return 返回handler处理结果!
+ */
+@ExceptionHandler(HttpMessageNotReadableException.class)
+public Object handlerJsonDateException(HttpMessageNotReadableException e){
+    
+    return null;
+}
+
+/**
+ * 当发生空指针异常会触发此方法!
+ * @param e
+ * @return
+ */
+@ExceptionHandler(NullPointerException.class)
+public Object handlerNullException(NullPointerException e){
+
+    return null;
+}
+
+/**
+ * 所有异常都会触发此方法!但是如果有具体的异常处理Handler! 
+ * 具体异常处理Handler优先级更高!
+ * 例如: 发生NullPointerException异常!
+ *       会触发handlerNullException方法,不会触发handlerException方法!
+ * @param e
+ * @return
+ */
+@ExceptionHandler(Exception.class)
+public Object handlerException(Exception e){
+
+    return null;
+}
+```
+3. 配置文件扫描控制器类配置
+
+      确保异常处理控制类被扫描
+
+```Java
+ <!-- 扫描controller对应的包,将handler加入到ioc-->
+ @ComponentScan(basePackages = {"com.atguigu.controller",
+ "com.atguigu.exceptionhandler"})
+```
+
+  ### 5.2 拦截器使用
+
+#### 5.2.1 拦截器概念
+
+  拦截器和过滤器解决问题
+
+  - 生活中
+
+      为了提高乘车效率，在乘客进入站台前统一检票
+
+      
+  - 程序中
+
+      在程序中，使用拦截器在请求到达具体 handler 方法前，统一执行检测
+
+      
+
+  拦截器 Springmvc VS 过滤器 javaWeb：
+
+  - 相似点
+      - 拦截：必须先把请求拦住，才能执行后续操作
+      - 过滤：拦截器或过滤器存在的意义就是对请求进行统一处理
+      - 放行：对请求执行了必要操作后，放请求过去，让它访问原本想要访问的资源
+  - 不同点
+      - 工作平台不同
+          - 过滤器工作在 Servlet 容器中
+          - 拦截器工作在 SpringMVC 的基础上
+      - 拦截的范围
+          - 过滤器：能够拦截到的最大范围是整个 Web 应用
+          - 拦截器：能够拦截到的最大范围是整个 SpringMVC 负责的请求
+      - IOC 容器支持
+          - 过滤器：想得到 IOC 容器需要调用专门的工具方法，是间接的
+          - 拦截器：它自己就在 IOC 容器中，所以可以直接从 IOC 容器中装配组件，也就是可以直接得到 IOC 容器的支持
+
+  选择：
+
+    功能需要如果用 SpringMVC 的拦截器能够实现，就不使用过滤器。
+    
+    ![](https://secure-bigfile.wostatic.cn/static/prqG4dtu3rDWj7VwX4WgsW/image.png)
+
+#### 5.2.2 拦截器使用
+  1. 创建拦截器类
+
+```Java
+public class Process01Interceptor implements HandlerInterceptor {
+
+    // if( ! preHandler()){return;}
+    // 在处理请求的目标 handler 方法前执行
+    @Override
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        System.out.println("request = " + request + ", response = " + response + ", handler = " + handler);
+        System.out.println("Process01Interceptor.preHandle");
+         
+        // 返回true：放行
+        // 返回false：不放行
+        return true;
+    }
+ 
+    // 在目标 handler 方法之后，handler报错不执行!
+    @Override
+    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+        System.out.println("request = " + request + ", response = " + response + ", handler = " + handler + ", modelAndView = " + modelAndView);
+        System.out.println("Process01Interceptor.postHandle");
+    }
+ 
+    // 渲染视图之后执行(最后),一定执行!
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        System.out.println("request = " + request + ", response = " + response + ", handler = " + handler + ", ex = " + ex);
+        System.out.println("Process01Interceptor.afterCompletion");
+    }
+}
+```
+
+ 拦截器方法拦截位置：
+
+
+
+  2. 修改配置类添加拦截器
+
+```Java
+@EnableWebMvc  //json数据处理,必须使用此注解,因为他会加入json处理器
+@Configuration
+@ComponentScan(basePackages = {"com.atguigu.controller","com.atguigu.exceptionhandler"}) //TODO: 进行controller扫描
+//WebMvcConfigurer springMvc进行组件配置的规范,配置组件,提供各种方法! 前期可以实现
+public class SpringMvcConfig implements WebMvcConfigurer {
+
+    //配置jsp对应的视图解析器
+    @Override
+    public void configureViewResolvers(ViewResolverRegistry registry) {
+        //快速配置jsp模板语言对应的
+        registry.jsp("/WEB-INF/views/",".jsp");
+    }
+
+    //开启静态资源处理 <mvc:default-servlet-handler/>
+    @Override
+    public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
+        configurer.enable();
+    }
+
+    //添加拦截器
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) { 
+        //将拦截器添加到Springmvc环境,默认拦截所有Springmvc分发的请求
+        registry.addInterceptor(new Process01Interceptor());
+    }
+}
+
+
+```
+3. 配置详解
+      1. 默认拦截全部
+
+```Java
+@Override
+public void addInterceptors(InterceptorRegistry registry) {
+    //将拦截器添加到Springmvc环境,默认拦截所有Springmvc分发的请求
+    registry.addInterceptor(new Process01Interceptor());
+}
+
+```
+2. 精准配置
+
+```Java
+@Override
+public void addInterceptors(InterceptorRegistry registry) {
+    
+    //将拦截器添加到Springmvc环境,默认拦截所有Springmvc分发的请求
+    registry.addInterceptor(new Process01Interceptor());
+    
+    //精准匹配,设置拦截器处理指定请求 路径可以设置一个或者多个,为项目下路径即可
+    //addPathPatterns("/common/request/one") 添加拦截路径
+    //也支持 /* 和 /** 模糊路径。 * 任意一层字符串 ** 任意层 任意字符串
+    registry.addInterceptor(new Process01Interceptor()).addPathPatterns("/common/request/one","/common/request/tow");
+}
+
+```
+​      3. 排除配置
+
+```Java
+//添加拦截器
+@Override
+public void addInterceptors(InterceptorRegistry registry) {
+    
+    //将拦截器添加到Springmvc环境,默认拦截所有Springmvc分发的请求
+    registry.addInterceptor(new Process01Interceptor());
+    
+    //精准匹配,设置拦截器处理指定请求 路径可以设置一个或者多个,为项目下路径即可
+    //addPathPatterns("/common/request/one") 添加拦截路径
+    registry.addInterceptor(new Process01Interceptor()).addPathPatterns("/common/request/one","/common/request/tow");
+    
+    
+    //排除匹配,排除应该在匹配的范围内排除
+    //addPathPatterns("/common/request/one") 添加拦截路径
+    //excludePathPatterns("/common/request/tow"); 排除路径,排除应该在拦截的范围内
+    registry.addInterceptor(new Process01Interceptor())
+            .addPathPatterns("/common/request/one","/common/request/tow")
+            .excludePathPatterns("/common/request/tow");
+}
+```
+ 4. 多个拦截器执行顺序
+      1. preHandle() 方法：SpringMVC 会把所有拦截器收集到一起，然后按照配置顺序调用各个 preHandle() 方法。
+      2. postHandle() 方法：SpringMVC 会把所有拦截器收集到一起，然后按照配置相反的顺序调用各个 postHandle() 方法。
+      3. afterCompletion() 方法：SpringMVC 会把所有拦截器收集到一起，然后按照配置相反的顺序调用各个 afterCompletion() 方法。
+
+  ### 5.3 参数校验
+
+> 在 Web 应用三层架构体系中，表述层负责接收浏览器提交的数据，业务逻辑层负责数据的处理。为了能够让业务逻辑层基于正确的数据进行处理，我们需要在表述层对数据进行检查，将错误的数据隔绝在业务逻辑层之外。
+
+1. **校验概述**
+
+    JSR 303 是 Java 为 Bean 数据合法性校验提供的标准框架，它已经包含在 JavaEE 6.0 标准中。JSR 303 通过在 Bean 属性上标注类似于 @NotNull、@Max 等标准的注解指定校验规则，并通过标准的验证接口对Bean进行验证。
+
+| 注解                       | 规则                                           |
+| -------------------------- | ---------------------------------------------- |
+| @Null                      | 标注值必须为 null                              |
+| @NotNull                   | 标注值不可为 null                              |
+| @AssertTrue                | 标注值必须为 true                              |
+| @AssertFalse               | 标注值必须为 false                             |
+| @Min(value)                | 标注值必须大于或等于 value                     |
+| @Max(value)                | 标注值必须小于或等于 value                     |
+| @DecimalMin(value)         | 标注值必须大于或等于 value                     |
+| @DecimalMax(value)         | 标注值必须小于或等于 value                     |
+| @Size(max,min)             | 标注值大小必须在 max 和 min 限定的范围内       |
+| @Digits(integer,fratction) | 标注值值必须是一个数字，且必须在可接受的范围内 |
+| @Past                      | 标注值只能用于日期型，且必须是过去的日期       |
+| @Future                    | 标注值只能用于日期型，且必须是将来的日期       |
+| @Pattern(value)            | 标注值必须符合指定的正则表达式                 |
+
+JSR 303 只是一套标准，需要提供其实现才可以使用。Hibernate Validator 是 JSR 303 的一个参考实现，除支持所有标准的校验注解外，它还支持以下的扩展注解：
+
+| 注解      | 规则                               |
+| --------- | ---------------------------------- |
+| @Email    | 标注值必须是格式正确的 Email 地址  |
+| @Length   | 标注值字符串大小必须在指定的范围内 |
+| @NotEmpty | 标注值字符串不能是空字符串         |
+| @Range    | 标注值必须在指定的范围内           |
+
+Spring 4.0 版本已经拥有自己独立的数据校验框架，同时支持 JSR 303 标准的校验框架。Spring 在进行数据绑定时，可同时调用校验框架完成数据校验工作。在SpringMVC 中，可直接通过注解驱动 @EnableWebMvc 的方式进行数据校验。Spring 的 LocalValidatorFactoryBean 既实现了 Spring 的 Validator 接口，也实现了 JSR 303 的 Validator 接口。只要在Spring容器中定义了一个LocalValidatorFactoryBean，即可将其注入到需要数据校验的 Bean中。Spring本身并没有提供JSR 303的实现，所以必须将JSR 303的实现者的jar包放到类路径下。
+
+    配置 @EnableWebMvc后，SpringMVC 会默认装配好一个 LocalValidatorFactoryBean，通过在处理方法的入参上标注 @Validated 注解即可让 SpringMVC 在完成数据绑定后执行数据校验的工作。
+2. **操作演示**
+    - 导入依赖
+
+```XML
+<!-- 校验注解 -->
+<dependency>
+    <groupId>jakarta.platform</groupId>
+    <artifactId>jakarta.jakartaee-web-api</artifactId>
+    <version>9.1.0</version>
+    <scope>provided</scope>
+</dependency>
+        
+<!-- 校验注解实现-->        
+<!-- https://mvnrepository.com/artifact/org.hibernate.validator/hibernate-validator -->
+<dependency>
+    <groupId>org.hibernate.validator</groupId>
+    <artifactId>hibernate-validator</artifactId>
+    <version>8.0.0.Final</version>
+</dependency>
+<!-- https://mvnrepository.com/artifact/org.hibernate.validator/hibernate-validator-annotation-processor -->
+<dependency>
+    <groupId>org.hibernate.validator</groupId>
+    <artifactId>hibernate-validator-annotation-processor</artifactId>
+    <version>8.0.0.Final</version>
+</dependency>
+```
+        - 应用校验注解
+
+```Java
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Min;
+import org.hibernate.validator.constraints.Length;
+
+/**
+ * projectName: com.atguigu.pojo
+ */
+public class User {
+    //age   1 <=  age < = 150
+    @Min(10)
+    private int age;
+
+    //name 3 <= name.length <= 6
+    @Length(min = 3,max = 10)
+    private String name;
+
+    //email 邮箱格式
+    @Email
+    private String email;
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+}
+
+```
+        - handler标记和绑定错误收集
+
+```Java
+@RestController
+@RequestMapping("user")
+public class UserController {
+
+    /**
+     * @Validated 代表应用校验注解! 必须添加!
+     */
+    @PostMapping("save")
+    public Object save(@Validated @RequestBody User user,
+                       //在实体类参数和 BindingResult 之间不能有任何其他参数, BindingResult可以接受错误信息,避免信息抛出!
+                       BindingResult result){
+       //判断是否有信息绑定错误! 有可以自行处理!
+        if (result.hasErrors()){
+            System.out.println("错误");
+            String errorMsg = result.getFieldError().toString();
+            return errorMsg;
+        }
+        //没有,正常处理业务即可
+        System.out.println("正常");
+        return user;
+    }
+}
+```
+- 测试效果
+
+        ![](https://secure2.wostatic.cn/static/oXLwvcaMaLc4TggmPFNToV/image.png)
+3. **易混总结**
+
+    @NotNull、@NotEmpty、@NotBlank 都是用于在数据校验中检查字段值是否为空的注解，但是它们的用法和校验规则有所不同。
+
+    1. @NotNull  (包装类型不为null)
+
+        @NotNull 注解是 JSR 303 规范中定义的注解，当被标注的字段值为 null 时，会认为校验失败而抛出异常。该注解不能用于字符串类型的校验，若要对字符串进行校验，应该使用 @NotBlank 或 @NotEmpty 注解。
+    2. @NotEmpty (集合类型长度大于0)
+
+        @NotEmpty 注解同样是 JSR 303 规范中定义的注解，对于 CharSequence、Collection、Map 或者数组对象类型的属性进行校验，校验时会检查该属性是否为 Null 或者 size()==0，如果是的话就会校验失败。但是对于其他类型的属性，该注解无效。需要注意的是只校验空格前后的字符串，如果该字符串中间只有空格，不会被认为是空字符串，校验不会失败。
+    3. @NotBlank （字符串，不为null，切不为"  "字符串）
+
+        @NotBlank 注解是 Hibernate Validator 附加的注解，对于字符串类型的属性进行校验，校验时会检查该属性是否为 Null 或 “” 或者只包含空格，如果是的话就会校验失败。需要注意的是，@NotBlank 注解只能用于字符串类型的校验。
+
+    总之，这三种注解都是用于校验字段值是否为空的注解，但是其校验规则和用法有所不同。在进行数据校验时，需要根据具体情况选择合适的注解进行校验。
