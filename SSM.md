@@ -898,11 +898,11 @@ set REPOSITORY_PATH=D:\repository  改成你本地仓库地址即可！
 
 # 
 
-# 
+#  
 
 # Spring
 
-# 
+#  
 
 
 
@@ -5727,9 +5727,13 @@ public class TxTest {
 
 # 
 
-# 
+#  
+
+
 
 # Mybatis
+
+# 
 
 # 十四、Mybatis简介
 
@@ -7731,7 +7735,13 @@ public interface UserMapper {
 
 # 
 
-SpringMvc
+# 
+
+# 
+
+# SpringMvc
+
+# 
 
 # 一、SpringMVC简介和体验
 
@@ -9303,7 +9313,7 @@ public @interface RestController {
       - JavaScript文件
       - ……
   2. **静态资源访问和问题解决**
-      
+     
       - 问题分析
           - DispatcherServlet 的 url-pattern 配置的是“/”
           - url-pattern 配置“/”表示整个 Web 应用范围内所有请求都由 SpringMVC 来处理
@@ -9704,7 +9714,6 @@ public Object handlerException(Exception e){
 
       为了提高乘车效率，在乘客进入站台前统一检票
 
-      
   - 程序中
 
       在程序中，使用拦截器在请求到达具体 handler 方法前，统一执行检测
