@@ -10024,7 +10024,7 @@ public class UserController {
 
     总之，这三种注解都是用于校验字段值是否为空的注解，但是其校验规则和用法有所不同。在进行数据校验时，需要根据具体情况选择合适的注解进行校验。
 
-## 一、SSM整合理解
+# 一、SSM整合理解
 
   ### 1.1 什么是SSM整合？
 
@@ -10171,9 +10171,9 @@ public class MyWebAppInitializer extends AbstractAnnotationConfigDispatcherServl
 
  图解配置类和容器配置：
 
-  ![](https://secure2.wostatic.cn/static/wEKxog3yiwNGhcfNwg6Aug/image.png)
+  
 
-## 二、SSM整合配置实战
+# 二、SSM整合配置实战
 
   ### 2.1 依赖整合和添加
 1. 数据库准备
@@ -10483,7 +10483,7 @@ public class WebJavaConfig implements WebMvcConfigurer {
     public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
         configurer.enable(); 
     }
-}
+}                      
 
 ```
 
@@ -11030,7 +11030,7 @@ public interface EmployeeMapper {
 </mapper>
 ```
 
-## 三、《任务列表案例》前端程序搭建和运行
+# 三、《任务列表案例》前端程序搭建和运行
 
   ### 3.1 整合案例介绍和接口分析
 
@@ -11155,9 +11155,9 @@ public interface EmployeeMapper {
 
 
 ​              
-          2. 双击安装包进行安装，安装过程中遵循默认选项即可。安装完成后，可以在命令行终端输入 `node -v` 和 `npm -v` 查看 Node.js 和 npm 的版本号。
-      2. npm使用 （maven）
-    
+​          2. 双击安装包进行安装，安装过程中遵循默认选项即可。安装完成后，可以在命令行终端输入 `node -v` 和 `npm -v` 查看 Node.js 和 npm 的版本号。
+​      2. npm使用 （maven）
+​    
           > NPM全称Node Package Manager，是Node.js包管理工具，是全球最大的模块生态系统，里面所有的模块都是开源免费的；也是Node.js的包管理工具，相当于后端的Maven 。
     
           1. 配置阿里镜像
@@ -11200,10 +11200,10 @@ npm install //安装依赖
 npm run dev //运行测试
 ```
 
-## 四、《任务列表案例》后端程序实现和测试
+# 四、《任务列表案例》后端程序实现和测试
 
   ### 4.1  准备工作
-    1. 准备数据库脚本
+1. 准备数据库脚本
 
 ```SQL
 CREATE TABLE schedule (
@@ -11237,9 +11237,9 @@ VALUES
     ('学习Azure', false);
 
 ```
-    2. 准备pojo
-    
-        包：com.atguigu.pojo
+2. 准备pojo
+
+    包：com.atguigu.pojo
 
 ```Java
 /**
@@ -11256,9 +11256,9 @@ public class Schedule {
 }
 
 ```
-    3. 准备 R
-    
-        包：com.atguigu.utils
+3. 准备 R
+
+    包：com.atguigu.utils
 
 ```Java
 **
@@ -11315,9 +11315,9 @@ public class R {
     }
 }
 ```
-    4. 准备 PageBean
-    
-        包：com.atguigu.utils
+4. 准备 PageBean
+
+    包：com.atguigu.utils
 
 ```Java
 @Data
