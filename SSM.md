@@ -11139,28 +11139,28 @@ public interface EmployeeMapper {
 
   ### 3.2 前端工程导入
 
-    #### 3.2.1 前端环境搭建
-    
-      >  Node.js 是前端程序运行的服务器，类似Java程序运行的服务器Tomcat                                 Npm 是前端依赖包管理工具，类似maven依赖管理工具软件
-    
-      1. node安装
-    
-          课程node版本：16.16.0
-    
-          https://nodejs.org/download/release/v16.16.0/
-    
-          **node安装和测试：**
-    
-          1. 打开官网 [https://nodejs.org/en/](https://nodejs.org/en/) 下载对应操作系统的 LTS 版本。（16.16.0）
+#### 3.2.1 前端环境搭建
+
+  >  Node.js 是前端程序运行的服务器，类似Java程序运行的服务器Tomcat                                 Npm 是前端依赖包管理工具，类似maven依赖管理工具软件
+
+  1. node安装
+
+      课程node版本：16.16.0
+
+      https://nodejs.org/download/release/v16.16.0/
+
+      **node安装和测试：**
+
+      1. 打开官网 [https://nodejs.org/en/](https://nodejs.org/en/) 下载对应操作系统的 LTS 版本。（16.16.0）
 
 
 ​              
 ​          2. 双击安装包进行安装，安装过程中遵循默认选项即可。安装完成后，可以在命令行终端输入 `node -v` 和 `npm -v` 查看 Node.js 和 npm 的版本号。
 ​      2. npm使用 （maven）
 ​    
-          > NPM全称Node Package Manager，是Node.js包管理工具，是全球最大的模块生态系统，里面所有的模块都是开源免费的；也是Node.js的包管理工具，相当于后端的Maven 。
-    
-          1. 配置阿里镜像
+​          > NPM全称Node Package Manager，是Node.js包管理工具，是全球最大的模块生态系统，里面所有的模块都是开源免费的；也是Node.js的包管理工具，相当于后端的Maven 。
+​    
+​          1. 配置阿里镜像
 
 ```Java
 npm config set registry https://registry.npmjs.org/
@@ -11333,8 +11333,8 @@ public class PageBean<T> {
 ```
 
   ### 4.2 功能实现
-    1. 分页查询
-        1. controller
+1. 分页查询
+    1. controller
 
 ```Java
 /*
