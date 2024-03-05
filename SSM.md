@@ -14,11 +14,11 @@ SSM
 
   ### 1.1 Maven介绍
 
-    https://maven.apache.org/what-is-maven.html
-    
-    Maven 是一款为 Java 项目构建管理、依赖管理的工具（**软件**），使用 Maven 可以自动化构建、测试、打包和发布项目，大大提高了开发效率和质量。
-    
-    总结：Maven就是一个软件，掌握软件安装、配置、以及基本功能**（项目构建、依赖管理）**使用就是本课程的主要目标！
+https://maven.apache.org/what-is-maven.html
+
+Maven 是一款为 Java 项目构建管理、依赖管理的工具（**软件**），使用 Maven 可以自动化构建、测试、打包和发布项目，大大提高了开发效率和质量。
+
+总结：Maven就是一个软件，掌握软件安装、配置、以及基本功能**（项目构建、依赖管理）**使用就是本课程的主要目标！
 
   ### 1.2 Maven主要作用理解
 1. 场景概念
@@ -82,7 +82,7 @@ mvn -v
 <!-- conf/settings.xml 55行 -->
 <localRepository>D:\repository</localRepository>
 ```
-        2. 配置国内阿里镜像
+2. 配置国内阿里镜像
 
 ```XML
 <!--在mirrors节点(标签)下添加中央仓库镜像 160行附近-->
@@ -93,7 +93,7 @@ mvn -v
     <mirrorOf>central</mirrorOf>
 </mirror>
 ```
-        3. 配置jdk17版本项目构建
+3. 配置jdk17版本项目构建
 
 ```XML
 <!--在profiles节点(标签)下添加jdk编译版本 268行附近-->
@@ -169,21 +169,19 @@ Maven 中的 GAVP 是指 GroupId、ArtifactId、Version、Packaging 等四个属
 
   ### 2.2 Idea构建Maven JavaSE工程
 
-    注意：此处省略了version，直接给了一个默认值<version>1.0-SNAPSHOT</version>
-    
-    自己后期可以在项目中随意修改！
-    
-    ![](https://secure2.wostatic.cn/static/oDo2HDrVXHoKqfqRdqLKuV/image.png)
+注意：此处省略了version，直接给了一个默认值<version>1.0-SNAPSHOT</version>
+
+自己后期可以在项目中随意修改！
 
   ### 2.3 Idea构建Maven JavaEE工程
-    1. 手动创建
-        1. 创建一个javasemaven工程
-        2. 手动添加web项目结构文件
-    
-            注意：结构和命名固定
-        3. 修改pom.xml文件打包方式
-    
-            修改位置：项目下/pom.xml
+1. 手动创建
+    1. 创建一个javasemaven工程
+    2. 手动添加web项目结构文件
+
+        注意：结构和命名固定
+    3. 修改pom.xml文件打包方式
+
+        修改位置：项目下/pom.xml
 
 ```XML
 <groupId>com.atguigu</groupId>
@@ -192,14 +190,15 @@ Maven 中的 GAVP 是指 GroupId、ArtifactId、Version、Packaging 等四个属
 <!-- 新增一列打包方式packaging -->
 <packaging>war</packaging>
 ```
-        4. 刷新和校验
-            项目的webapp文件夹出现小蓝点，代表成功！！
-    2. 插件方式创建
-        1. 安装插件JBLJavaToWeb
-    
-            file / settings / plugins / marketplace
-        2. 创建一个javasemaven工程
-        3. 右键、使用插件快速补全web项目
+4. 刷新和校验
+    项目的webapp文件夹出现小蓝点，代表成功！！
+
+2. 插件方式创建
+    1. 安装插件JBLJavaToWeb
+
+        file / settings / plugins / marketplace
+    2. 创建一个javasemaven工程
+    3. 右键、使用插件快速补全web项目
 
   ### 2.4 Maven工程项目结构说明
 
@@ -244,13 +243,13 @@ Maven 中的 GAVP 是指 GroupId、ArtifactId、Version、Packaging 等四个属
 
   ### 3.1 依赖管理和配置
 
-    Maven 依赖管理是 Maven 软件中最重要的功能之一。Maven 的依赖管理能够帮助开发人员自动解决软件包依赖问题，使得开发人员能够轻松地将其他开发人员开发的模块或第三方框架集成到自己的应用程序或模块中，避免出现版本冲突和依赖缺失等问题。
-    
-    我们通过定义 POM 文件，Maven 能够自动解析项目的依赖关系，并通过 Maven **仓库自动**下载和管理依赖，从而避免了手动下载和管理依赖的繁琐工作和可能引发的版本冲突问题。
-    
-    重点: 编写pom.xml文件!
-    
-    maven项目信息属性配置和读取：
+Maven 依赖管理是 Maven 软件中最重要的功能之一。Maven 的依赖管理能够帮助开发人员自动解决软件包依赖问题，使得开发人员能够轻松地将其他开发人员开发的模块或第三方框架集成到自己的应用程序或模块中，避免出现版本冲突和依赖缺失等问题。
+
+我们通过定义 POM 文件，Maven 能够自动解析项目的依赖关系，并通过 Maven **仓库自动**下载和管理依赖，从而避免了手动下载和管理依赖的繁琐工作和可能引发的版本冲突问题。
+
+重点: 编写pom.xml文件!
+
+maven项目信息属性配置和读取：
 
 ```XML
 <!-- 模型版本 -->
@@ -407,14 +406,19 @@ pom声明：
 </dependency>
 ```
 
-        文件：
-    
-        ![](https://secure2.wostatic.cn/static/6mSDgf4nkaRLAu16dqSJk7/image.png)
-    
-        脚本使用：
+```
+@echo off
+rem 这里写你的仓库路径
+set REPOSITORY_PATH=D:\repository
+rem 正在搜索...
+for /f "delims=" %%i in ('dir /b /s "%REPOSITORY_PATH%\*lastUpdated*"') do (
+    del /s /q %%i
+)
+rem 搜索完毕
+pause
+```
 
-
-​        
+**把上面的一段代码改成.bat文件运行即可清除本地错误文件**
 
 ```XML
 使用记事本打开
@@ -587,7 +591,7 @@ set REPOSITORY_PATH=D:\repository  改成你本地仓库地址即可！
   </dependencies>
 </dependencyManagement>
 ```
-        - 子工程引用版本
+- 子工程引用版本
 
 ```XML
 <!-- 子工程引用父工程中的依赖信息时，可以把版本号去掉。  -->
@@ -1021,11 +1025,11 @@ Spring具体的组件管理动作包含：
 注意：组件是映射到应用程序中所有可重用组件的Java对象，应该是可复用的功能对象！
 
 - 组件一定是对象
-- 对象不一定是组件
+- 对象不一定是组件 ：**真尼玛抽象操了**
 
 综上所述，Spring 充当一个组件容器，创建、管理、存储组件，减少了我们的编码压力，让我们更加专注进行业务编写！
 
-### 3.1.2 组件交给Spring管理优势**!
+### 3.1.2 组件交给Spring管理优势!
 
 1. 降低了组件之间的耦合性：Spring IoC容器通过依赖注入机制，将组件之间的依赖关系削弱，减少了程序组件之间的耦合性，使得组件更加松散地耦合。
 2. 提高了代码的可重用性和可维护性：将组件的实例化过程、依赖关系的管理等功能交给Spring IoC容器处理，使得组件代码更加模块化、可重用、更易于维护。
@@ -1043,7 +1047,9 @@ Spring具体的组件管理动作包含：
 
   ![](http://heavy_code_industry.gitee.io/code_heavy_industry/assets/img/img002.6e874877.png)
 
-> 普通容器只能用来存储，没有更多功能。
+> 普通容器只能用来存储，没有更多功能。*
+
+
 
   程序中的普通容器
 
@@ -1520,11 +1526,9 @@ public class SimpleMovieLister {
 
   **总结：**
 
-```java
 依赖注入（DI）包含引用类型和基本数据类型，同时注入的方式也有多种！主流的注入方式为setter方法注入和构造函数注入，两种注入语法都需要掌握！
 
 需要特别注意：引用其他bean，使用ref属性。直接注入基本类型值，使用value属性。
-```
 
 
 
@@ -2248,7 +2252,7 @@ public class CommonComponent {
 
 ```
 
-              Controller组件
+Controller组件
 
 ```Java
 /**
@@ -2261,7 +2265,7 @@ public class XxxController {
 
 ```
 
-              Service组件
+Service组件
 
 ```Java
 /**
@@ -2274,7 +2278,7 @@ public class XxxService {
 
 ```
 
-              Dao组件
+Dao组件
 
 ```Java
 /**
@@ -2302,9 +2306,10 @@ public class XxxDao {
 
 通过查看源码我们得知，@Controller、@Service、@Repository这三个注解只是在@Component注解的基础上起了三个新的名字。
 
-      对于Spring使用IOC容器管理这些组件来说没有区别，也就是语法层面没有区别。所以@Controller、@Service、@Repository这三个注解只是给开发人员看的，让我们能够便于分辨组件的作用。
-    
-      注意：虽然它们本质上一样，但是为了代码的可读性、程序结构严谨！我们肯定不能随便胡乱标记。
+*对于Spring使用IOC容器管理这些组件来说没有区别，也就是语法层面没有区别。所以@Controller、@Service、@Repository这三个注解只是给开发人员看的，让我们能够便于分辨组件的作用。*
+
+  *注意：虽然它们本质上一样，但是为了代码的可读性、程序结构严谨！我们肯定不能随便胡乱标记。*
+
   2. 使用注解标记
 
       普通组件
@@ -2321,7 +2326,7 @@ public class CommonComponent {
 
 ```
 
-              Controller组件
+ Controller组件
 
 ```Java
 /**
@@ -2335,7 +2340,7 @@ public class XxxController {
 
 ```
 
-              Service组件
+Service组件
 
 ```Java
 /**
@@ -2349,7 +2354,7 @@ public class XxxService {
 
 ```
 
-              Dao组件
+Dao组件
 
 ```Java
 /**
@@ -2382,7 +2387,7 @@ public class XxxDao {
 </beans>
 ```
 
-          情况2：指定排除组件
+情况2：指定排除组件
 
 ```XML
 <!-- 情况三：指定不扫描的组件 -->
@@ -2395,7 +2400,7 @@ public class XxxDao {
 </context:component-scan>
 ```
 
-          情况3：指定扫描组件
+情况3：指定扫描组件
 
 ```XML
 <!-- 情况四：仅扫描指定的组件 -->
@@ -2487,7 +2492,7 @@ public class BeanTwo {
 | request | 请求范围内有效的实例 | 每次请求       | 否     |
 | session | 会话范围内有效的实例 | 每次会话       | 否     |
 
-          3. 作用域配置
+3. 作用域配置
 
 ```Java
 @Scope(scopeName = ConfigurableBeanFactory.SCOPE_SINGLETON) //单例,默认值
@@ -2525,7 +2530,7 @@ public class SoldierController {
 
 }
 ```
-          - SoldierService中声明方法
+- SoldierService中声明方法
 
 ```Java
 @Service("smallDog")
@@ -2538,7 +2543,7 @@ public class SoldierService {
     }
 }
 ```
-          - SoldierDao中声明方法
+- SoldierDao中声明方法
 
 ```Java
 @Repository
@@ -2574,7 +2579,7 @@ public class SoldierController {
     
 }
 ```
-          4. 给Service装配Dao
+4. 给Service装配Dao
 
 ```Java
 @Service("smallDog")
@@ -2608,7 +2613,7 @@ public class SoldierService {
     }
 }
 ```
-              2. 构造器
+2. 构造器
 
 ```Java
 @Controller(value = "tianDog")
@@ -2622,7 +2627,7 @@ public class SoldierController {
     }
     ……
 ```
-              3. setXxx()方法
+3. setXxx()方法
 
 ```Java
 @Controller(value = "tianDog")
@@ -2723,7 +2728,7 @@ public class SoldierController {
     <version>2.1.1</version>
 </dependency>
 ```
-          - @Resource使用
+- @Resource使用
 
 ```Java
 @Controller
