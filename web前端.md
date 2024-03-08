@@ -55,12 +55,13 @@
 
   - 定义列表： 
 
-  - <dl>
+  - < dl>
 
+    
     ​    <dt></dt>
-
+    
     ​    <dd></dd>
-
+    
       </dl>
 
 - 表格标签：<table border=""><tr><td></td></tr></table>
@@ -184,7 +185,7 @@ nihao这几个字母就会变成红色
 
 所有标签统一样式
 
-## 2.盒子
+## 2.字体属性
 
 格式：
 
@@ -203,3 +204,72 @@ nihao这几个字母就会变成红色
 < div class="green">原神启动< / div>
 
 会出现一个长一百宽一百的绿色格子
+
+- font-size:文字尺寸
+- font-weight:控制字体粗细
+- font-style:控制字体是否倾斜，两种属性值
+  - normal：不倾斜
+  - italic：倾斜
+- 复合属性格式：
+
+font: font-style  font-weight  font-size/line-height  font-family
+
+各个属性之间使用空格隔开，并且顺序不能颠倒
+
+有些属性可以省略，但是font-size和font-family不能省略
+
+## 3.CSS文本属性
+
+### 3.1对齐文本
+
+- text-align:用于设置元素内文本内容的水平对齐方式
+  - center：居中对齐
+  - right：右对齐
+  - 默认是左对齐
+
+### 3.2装饰文本
+
+- text-decoration:属性规定添加到文本的修饰，可以给文本添加下划线，删除线，上划线等
+- 属性值
+  - none：默认没有装饰线
+  - underline：下划线，链接a自带下划线
+  - overline：上划线，几乎不用
+  - line-through：删除线，几乎不用
+
+### 3.3文本缩进
+
+- text-indent:属性用于指定文本第一行的缩进，通常是指段落首行缩进
+- 语法格式：div{ text-indent:20px; }
+- em单位：是一个相对单位，是当前像素font-size一个文字的大小，如果是2em就是当前两个文字大小缩进
+
+### 3.4行间距
+
+- text-height:设置行间的距离，可以控制行与行之间的距离
+- line-height:设置行间距，两种写法
+  - 数字+px
+  - 数字（当前标签font-size 的倍数）
+
+## 4.CSS引入方式
+
+### 4.1内部样式表
+
+内部样式(内嵌样式表) 时写道html页面内部，时将所有的css代码抽取出来，单独放到一个<style>标签中
+
+理论上可以放在任何地方但是一般放在<head>标签里
+
+### 4.2行内样式表
+
+- 在元素标签内部的style属性设定CSS样式，适用于修改简单的样式
+- 语法格式：< div style="color: red; font-size: 12px;">谢钦学css</div>
+- 只能控制当前标签
+
+
+
+### 4.3外部样式表（使用最多）
+
+单独写入css文件中，再引入
+
+**使用步骤两部**
+
+1. 新建一个css文件，在这个文件里不用使用<style>文件，直接写样式即可
+2. 使用<link>标签引入css文件：< link rel="stylesheet" href="文件路径">
