@@ -1,12 +1,10 @@
-SSM
-
-[快速掌握：全新SSM+Spring Boot+MyBatis-Plus实战精讲 (wolai.com)](https://www.wolai.com/v5Kuct5ZtPeVBk4NBUGBWF)
-
-
+---
 
 ---
 
-# 
+SSM
+
+[快速掌握：全新SSM+Spring Boot+MyBatis-Plus实战精讲 (wolai.com)](https://www.wolai.com/v5Kuct5ZtPeVBk4NBUGBWF)
 
 # Maven
 
@@ -950,7 +948,13 @@ set REPOSITORY_PATH=D:\repository  改成你本地仓库地址即可！
 3. 版本变更和兼容性问题：框架的版本发布和迭代通常会导致代码库的大规模变更，进而导致应用程序出现兼容性问题和漏洞。当框架变更时，需要考虑框架是否向下兼容，以及如何进行适当的测试、迁移和升级。
 4. 架构风险：框架涉及到很多抽象和概念，如果开发者没有足够的理解和掌握其架构，可能会导致系统出现设计和架构缺陷，从而影响系统的健康性和安全性。
 
-站在文件结构的角度理解框架，可以将框架总结：**框架 = jar包+配置文件**
+站在文件结构的角度理解框架，可以将框架总结：
+
+
+
+
+
+**框架 = jar包+配置文件**
 
 
 
@@ -1038,34 +1042,6 @@ Spring具体的组件管理动作包含：
 
 
 ## 3.2Spring IoC**容器和容器实现**
-
-### **3.2.1 普通和复杂容器**
-
-**普通容器**
-
-  生活中的普通容器
-
-  ![](http://heavy_code_industry.gitee.io/code_heavy_industry/assets/img/img002.6e874877.png)
-
-> 普通容器只能用来存储，没有更多功能。*
-
-
-
-  程序中的普通容器
-
-  - 数组
-  - 集合：List
-  - 集合：Set
-
-**复杂容器**
-
-  生活中的复杂容器
-
-  ![](http://heavy_code_industry.gitee.io/code_heavy_industry/assets/img/img003.6f9c041c.png)
-
-> 政府管理我们的一生，生老病死都和政府有关。
-
-  程序中的复杂容器
 
   Servlet 容器能够管理 Servlet(init,service,destroy)、Filter、Listener 这样的组件的一生，所以它是一个复杂容器。
 
@@ -5994,9 +5970,10 @@ public class MyBatisTest {
 
 说明：
 
-    - SqlSession：代表Java程序和数据库之间的会话。（HttpSession是Java程序和浏览器之间的会话）
-    - SqlSessionFactory：是“生产”SqlSession的“工厂”。
-    - 工厂模式：如果创建某一个对象，使用的过程基本固定，那么我们就可以把创建这个对象的相关代码封装到一个“工厂类”中，以后都使用这个工厂类来“生产”我们需要的对象。
+- SqlSession：代表Java程序和数据库之间的会话。（HttpSession是Java程序和浏览器之间的会话）
+- SqlSessionFactory：是“生产”SqlSession的“工厂”。
+- 工厂模式：如果创建某一个对象，使用的过程基本固定，那么我们就可以把创建这个对象的相关代码封装到一个“工厂类”中，以后都使用这个工厂类来“生产”我们需要的对象。
+
 6. SqlSession和HttpSession区别
     - HttpSession：工作在Web服务器上，属于表述层。
         - 代表浏览器和Web服务器之间的会话。
@@ -7742,11 +7719,15 @@ public interface UserMapper {
 
 # 
 
-# 
+#  
+
+
 
 # SpringMvc
 
-# 
+#  
+
+
 
 # 一、SpringMVC简介和体验
 
@@ -11539,7 +11520,21 @@ void update(Schedule schedule);
 ```
 
   ### 4.3 前后联调
-    1. 后台项目根路径设计
-    
-        ![](https://secure2.wostatic.cn/static/54wi7bwJfuF1Dc5Z6vLbPq/image.png)
-    2. 启动测试即可
+1. 后台项目根路径设计
+
+    ![]()
+
+2. 启动测试即可
+
+#  
+
+
+
+# SpringBoot
+
+#  
+
+## 一，SpringBoot和新特性
+
+### 1.快速入门
+
