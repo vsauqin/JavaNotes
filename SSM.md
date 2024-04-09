@@ -7624,7 +7624,7 @@ public void testTeacherRelationshipToMulti() {
 
 #### 5.3.2 逆向工程
 
-      MyBatis 的逆向工程是一种自动化生成持久层代码和映射文件的工具，它可以根据数据库表结构和设置的参数生成对应的实体类、Mapper.xml 文件、Mapper 接口等代码文件，简化了开发者手动生成的过程。逆向工程使开发者可以快速地构建起 DAO 层，并快速上手进行业务开发。
+MyBatis 的逆向工程是一种自动化生成持久层代码和映射文件的工具，它可以根据数据库表结构和设置的参数生成对应的实体类、Mapper.xml 文件、Mapper 接口等代码文件，简化了开发者手动生成的过程。逆向工程使开发者可以快速地构建起 DAO 层，并快速上手进行业务开发。
 
    MyBatis 的逆向工程有两种方式：通过 MyBatis Generator 插件实现和通过 Maven 插件实现。无论是哪种方式，逆向工程一般需要指定一些配置参数，例如数据库连接 URL、用户名、密码、要生成的表名、生成的文件路径等等。
    总的来说，MyBatis 的逆向工程为程序员提供了一种方便快捷的方式，能够快速地生成持久层代码和映射文件，是半自动 ORM 思维像全自动发展的过程，提高程序员的开发效率。
@@ -8245,13 +8245,13 @@ public class ParamController {
 
   #### 2.2.3 路径 参数接收
 
-    路径传递参数是一种在 URL 路径中传递参数的方式。在 RESTful 的 Web 应用程序中，经常使用路径传递参数来表示资源的唯一标识符或更复杂的表示方式。而 Spring MVC 框架提供了 `@PathVariable` 注解来处理路径传递参数。
-    
-    `@PathVariable` 注解允许将 URL 中的占位符映射到控制器方法中的参数。
-    
-    例如，如果我们想将 `/user/{id}` 路径下的 `{id}` 映射到控制器方法的一个参数中，则可以使用 `@PathVariable` 注解来实现。
-    
-    下面是一个使用 `@PathVariable` 注解处理路径传递参数的示例：
+路径传递参数是一种在 URL 路径中传递参数的方式。在 RESTful 的 Web 应用程序中，经常使用路径传递参数来表示资源的唯一标识符或更复杂的表示方式。而 Spring MVC 框架提供了 `@PathVariable` 注解来处理路径传递参数。
+
+`@PathVariable` 注解允许将 URL 中的占位符映射到控制器方法中的参数。
+
+例如，如果我们想将 `/user/{id}` 路径下的 `{id}` 映射到控制器方法的一个参数中，则可以使用 `@PathVariable` 注解来实现。
+
+下面是一个使用 `@PathVariable` 注解处理路径传递参数的示例：
 
 ```Java
  /**
@@ -8670,9 +8670,9 @@ public Object handler(简化请求参数接收){
 
 
 
-               前端数据响应，我们都是通过handler的return关键字快速处理！
-    
-            springmvc简化了参数接收和响应！
+ 前端数据响应，我们都是通过handler的return关键字快速处理！
+
+        springmvc简化了参数接收和响应！
 
 ### 3.2 页面跳转控制
 
@@ -8890,9 +8890,9 @@ public class ParamController {
 
   #### 3.3.3 @RestController
 
-    类上的 @ResponseBody 注解可以和 @Controller 注解合并为 @RestController 注解。所以使用了 @RestController 注解就相当于给类中的每个方法都加了 @ResponseBody 注解。
-    
-    RestController源码:
+类上的 @ResponseBody 注解可以和 @Controller 注解合并为 @RestController 注解。所以使用了 @RestController 注解就相当于给类中的每个方法都加了 @ResponseBody 注解。
+
+RestController源码:
 
 ```Java
 @Target(ElementType.TYPE)
@@ -8925,24 +8925,6 @@ public @interface RestController {
       - JavaScript文件
       - ……
   2. **静态资源访问和问题解决**
-      - web应用加入静态资源
-
-          ![](https://secure2.wostatic.cn/static/2ADk35v3kBWvGQSwL99Z3S/image.png)
-      - 手动构建确保编译
-
-          ![](https://secure2.wostatic.cn/static/gBRmLxNhoWEd4o2eC2xamA/image.png)
-
-          ![](https://secure2.wostatic.cn/static/rKa2VeGDteC7Xk18LTZGWu/image.png)
-
-          ![](https://secure2.wostatic.cn/static/jmvurwN5HSB44eVFPaNJa4/image.png)
-      - 访问静态资源
-
-          ![](https://secure2.wostatic.cn/static/2Ux86Et6qs3TsDkEg1NQTn/image.png)
-      - 问题分析
-          - DispatcherServlet 的 url-pattern 配置的是“/”
-          - url-pattern 配置“/”表示整个 Web 应用范围内所有请求都由 SpringMVC 来处理
-          - 对 SpringMVC 来说，必须有对应的 @RequestMapping 才能找到处理请求的方法
-          - 现在 images/mi.jpg 请求没有对应的 @RequestMapping 所以返回 404
       - 问题解决
 
           在 SpringMVC 配置配置类：
@@ -8969,14 +8951,11 @@ public class SpringMvcConfig implements WebMvcConfigurer {
 }
 ```
 
-          再次测试访问图片：
-    
-          ![](https://secure2.wostatic.cn/static/srYmS8iD3rXGdSx7a7wC6o/image.png)
-      - 新的问题：其他原本正常的handler请求访问不了了
-    
-          handler无法访问
-    
-          解决方案：
+  - 新的问题：其他原本正常的handler请求访问不了了
+
+      handler无法访问
+
+      解决方案：
 
 ```XML
 @EnableWebMvc  //json数据处理,必须使用此注解,因为他会加入json处理器
