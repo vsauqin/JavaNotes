@@ -12847,3 +12847,73 @@ public class LogAdvice {
     
     注意： -D 参数必须要在jar之前！否者不生效！
 
+
+
+
+
+
+
+
+
+
+
+# Redis
+
+## 五种常用的数据类型
+
+1. 字符串String
+2. 哈希hash
+3. 列表list
+4. 集合set
+5. 有序集合sorted set
+
+## 字符串常用操作命令
+
+1. SET key value		设置指定的key值
+2. GET key   获取指定的key值
+3. SETEX key seconds value   设置指定的key值，并将key的过期时间设为seconds秒
+4. SETNX key value   只有在key不存在时设置key的值
+
+## 哈希常用操作命令
+
+1. HSET key field value   将哈希表key中的字段field的值设置为value
+2. HSET key field   获取存储在哈希表中的指定字段的值
+3. HDEL key field   删除存储在哈希表中的指定字段
+4. HKEYS key   获取哈希表中的所有字段
+5. HVALS key   获取哈希表中的所有的值
+
+
+
+## 列表常用操作命令
+
+1. LPUSH key value1[value2]   将一个或多个值插入列表头部
+2. LRANGE key start stop   获取列表指定范围内的元素
+3. RPOP key   移除并获取列表的最后一个元素
+4. LLEN key   获取列表长度
+
+
+
+## 集合操作命令
+
+1. SADD key member1[member2]   向集合添加一个或多个元素
+2. SMEMBERS key   返回集合所有成员
+3. SCARD key   获取集合的成员数
+4. SINTER key1[key2]   返回给定所有集合的交集
+5. SUNION key1[key2]   返回给定集合的并集
+6. SREM key member1[member2]   删除集合中一个或多个成员
+
+
+
+## 有序集合操作命令
+
+1. ZADD key score1 member1[score2 member2]   向有序集合添加一个或多个成员
+2. ZRANGE key start stop [WITHSCORES]   通过索引区间返回有序集合中指定区间的成员
+3. ZINXCRBY key increment member 有序集合中对治党成员的分数加上增量increment
+4. ZREM key member [member...]   移除有序集合中一个或多个成员
+
+## 通用命令
+
+1. KEYS pattern   查找所有符合给定模式（pattern）的key
+2. EXIST key   检查给定key是否存在
+3. TYPE key   返回key所存储的值的类型
+4. DEL key   给命令用于在key存在时删除key
